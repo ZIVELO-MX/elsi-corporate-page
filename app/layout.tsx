@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/sonner";
+
+export const metadata: Metadata = {
+  title: "ELSI | Educación y soluciones ambientales",
+  description: "Environment Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="es">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+      </head>
+      <body>
+        <Header />
+        {children}
+        <Footer />
+        <Toaster />
+      </body>
+    </html>
+  );
+}

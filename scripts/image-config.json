@@ -1,0 +1,35 @@
+{
+  "source_dir": "raw_images",
+  "output_dir": "public/images",
+  "quality": 82,
+  "slots": [
+    {
+      "id": "story",
+      "source": "Gallery ELSI/large-community-gathering-02.jpeg",
+      "width": 800,
+      "height": 600,
+      "label": "Nuestra historia"
+    },
+    {
+      "id": "course-1",
+      "source": "Gallery ELSI/medium-outreach-01.jpeg",
+      "width": 900,
+      "height": 600,
+      "label": "Fundamentos de educación ambiental"
+    },
+    {
+      "id": "course-2",
+      "source": "Gallery ELSI/large-industrial-visit-01.jpeg",
+      "width": 900,
+      "height": 600,
+      "label": "Cumplimiento ambiental para empresas"
+    },
+    {
+      "id": "course-3",
+      "source": "Gallery ELSI/large-academic-event-01.jpeg",
+      "width": 900,
+      "height": 600,
+      "label": "Liderazgo ambiental universitario"
+    }
+  ]
+}

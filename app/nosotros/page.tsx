@@ -1,0 +1,88 @@
+import Link from "next/link";
+import { SafeImage } from "@/components/safe-image";
+import { siteImages } from "@/lib/image-assets";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function NosotrosPage() {
+  return (
+    <main>
+      <div className="shell page-header">
+        <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Quiénes somos</span>
+        <h1>De una iniciativa estudiantil a un instituto con proyección internacional</h1>
+        <p>ELSI nace de Bee Blue, un movimiento universitario que demostró que la educación ambiental puede transformar comunidades enteras.</p>
+      </div>
+
+      <section style={{ padding: "0 0 56px" }}>
+        <div className="shell">
+          <div className="timeline-lg">
+            {[
+              { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil" },
+              { num: "UG", style: "outlined", label: "Universidad de Guanajuato", desc: "El movimiento crece en la comunidad universitaria" },
+              { num: "+1k", style: "outlined", label: "Miles de estudiantes", desc: "Conferencias, talleres y congresos" },
+              { num: "ELSI", style: "filled", label: "Nace ELSI", desc: "El movimiento se profesionaliza" },
+              { num: "B2B", style: "outlined", label: "Consultoría y capacitación", desc: "Soluciones para empresas e instituciones" },
+              { num: "MX", style: "outlined", label: "Impacto nacional", desc: "Referente en educación ambiental" },
+            ].map((item) => (
+              <div key={item.label} className="timeline-lg-item">
+                <div className={`timeline-lg-num ${item.style}`}>{item.num}</div>
+                <strong>{item.label}</strong>
+                <span>{item.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ background: "#EFEDE4", padding: "56px 0" }}>
+        <div className="shell">
+          <div className="mvv-grid">
+            {[
+              { title: "Misión", text: "Compartir conocimiento desde los valores éticos y pedagógicos que requiere esta labor, siempre apegados a nuestra responsabilidad como seres humanos de cuidar nuestro planeta." },
+              { title: "Visión", text: "Ser la institución líder en consultoría ambiental a nivel internacional, reconocida por transformar la gestión de los recursos naturales mediante la innovación educativa y soluciones sostenibles que garanticen el bienestar del planeta." },
+              { title: "Valores", text: "Compromiso, innovación, cercanía, integridad y pasión por el impacto real." },
+            ].map((item) => (
+              <Card key={item.title} style={{ boxShadow: "none", border: "none", background: "transparent", borderTop: "3px solid var(--primary)", borderRadius: 0, paddingTop: 20 }}>
+                <CardContent style={{ padding: 0 }}>
+                  <strong style={{ fontSize: 19, fontFamily: "'Sora',sans-serif" }}>{item.title}</strong>
+                  <p style={{ margin: "10px 0 0", fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{item.text}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "64px 0" }}>
+        <div className="shell">
+          <span style={{ display: "block", marginBottom: 28, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Nuestro equipo</span>
+          <div className="team-grid">
+            {[
+              { name: "Emmanuel Pimentel Cerrillos", role: "Asesor ELSI", stat: "+50 talleres impartidos" },
+              { name: "Aldo Espinoza Tapia", role: "Asesor ELSI", stat: "Especialista en cumplimiento ambiental" },
+            ].map((person) => (
+              <Card key={person.name} className="team-card" style={{ boxShadow: "none" }}>
+                <CardContent className="team-card-content" style={{ padding: 24 }}>
+                  <div className="team-avatar">
+                    <SafeImage src={siteImages.team.src} alt={siteImages.team.alt} width={160} height={160} />
+                  </div>
+                  <div>
+                    <div className="team-name">{person.name}</div>
+                    <div className="team-role">{person.role}</div>
+                    <div className="team-stat">{person.stat}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "64px 0", textAlign: "center" }}>
+        <Button asChild size="lg" style={{ background: "var(--primary)", color: "#fff" }}>
+          <Link href="/cursos">Explora nuestros cursos</Link>
+        </Button>
+      </section>
+    </main>
+  );
+}

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "c1",
+    "slug": "fundamentos-de-educacion-ambiental",
+    "title": "Fundamentos de Educación Ambiental",
+    "category": "Sostenibilidad",
+    "cat": "sost",
+    "catLabel": "Sostenibilidad",
+    "duration": "6 módulos",
+    "modules": 6,
+    "status": "Publicado",
+    "students": 184,
+    "price": 0,
+    "description": "Bases de la educación y concientización ambiental: cómo diseñar mensajes y actividades que realmente cambian comportamientos.",
+    "moduleList": [
+      "Por qué la mayoría de las campañas ambientales fallan",
+      "Diseña un mensaje que sí cambie comportamientos",
+      "Planea un taller que la gente termine",
+      "Comunica el impacto para que se entienda en 10 segundos",
+      "Mide si tu programa realmente funcionó",
+      "Presenta tu proyecto final y recibe retroalimentación"
+    ]
+  },
+  {
+    "id": "c2",
+    "slug": "cumplimiento-ambiental-para-empresas",
+    "title": "Cumplimiento Ambiental para Empresas",
+    "category": "Normatividad",
+    "cat": "norm",
+    "catLabel": "Normatividad",
+    "duration": "8 módulos",
+    "modules": 8,
+    "status": "Publicado",
+    "students": 126,
+    "price": 0,
+    "description": "Marco legal ambiental aplicable a la industria y cómo construir un plan de cumplimiento sólido.",
+    "moduleList": [
+      "Ubica qué normas aplican a tu empresa",
+      "Haz tu propia auditoría interna en un día",
+      "Reduce riesgo en el manejo de residuos",
+      "Controla emisiones y descargas de agua",
+      "Anticipa riesgos antes de la sanción",
+      "Construye tu plan de acción paso a paso",
+      "Arma reportes que un auditor apruebe a la primera",
+      "Prepárate para tu certificación"
+    ]
+  },
+  {
+    "id": "c3",
+    "slug": "liderazgo-ambiental-universitario",
+    "title": "Liderazgo Ambiental Universitario",
+    "category": "Habilidades ambientales",
+    "cat": "hab",
+    "catLabel": "Habilidades ambientales",
+    "duration": "4 módulos",
+    "modules": 4,
+    "status": "Publicado",
+    "students": 92,
+    "price": 0,
+    "description": "Programa gratuito para estudiantes que quieren liderar iniciativas ambientales en su comunidad universitaria.",
+    "moduleList": [
+      "Diagnostica el problema real de tu comunidad",
+      "Diseña una campaña que la gente sí note",
+      "Arma un equipo que termine lo que empieza",
+      "Presenta tu proyecto y consigue apoyo"
+    ]
+  },
+  {
+    "id": "c4",
+    "slug": "gestion-de-residuos-industriales",
+    "title": "Gestión de Residuos Industriales",
+    "category": "Sostenibilidad",
+    "cat": "sost",
+    "catLabel": "Sostenibilidad",
+    "duration": "5 módulos",
+    "modules": 5,
+    "status": "Borrador",
+    "students": 0,
+    "price": 0,
+    "description": "Estrategias prácticas para reducir, reciclar y gestionar residuos en procesos industriales.",
+    "moduleList": [
+      "Diagnostica dónde se genera más residuo",
+      "Reduce residuo desde el origen",
+      "Diseña tu logística inversa",
+      "Define los indicadores que sí importan",
+      "Aplica un caso de éxito real a tu planta"
+    ]
+  },
+  {
+    "id": "c5",
+    "slug": "impacto-ambiental-y-permisos",
+    "title": "Impacto Ambiental y Permisos",
+    "category": "Normatividad",
+    "cat": "norm",
+    "catLabel": "Normatividad",
+    "duration": "6 módulos",
+    "modules": 6,
+    "status": "Borrador",
+    "students": 0,
+    "price": 0,
+    "description": "Todo lo que una organización necesita saber para tramitar y mantener sus permisos ambientales.",
+    "moduleList": [
+      "Identifica qué permisos necesitas",
+      "Redacta tu manifiesto de impacto",
+      "Evita los errores más comunes en trámites",
+      "Planea tus renovaciones a tiempo",
+      "Anticipa los riesgos que retrasan un permiso",
+      "Verifica tu expediente con un checklist final"
+    ]
+  },
+  {
+    "id": "c6",
+    "slug": "comunicacion-de-sostenibilidad",
+    "title": "Comunicación de Sostenibilidad",
+    "category": "Habilidades ambientales",
+    "cat": "hab",
+    "catLabel": "Habilidades ambientales",
+    "duration": "4 módulos",
+    "modules": 4,
+    "status": "Borrador",
+    "students": 0,
+    "price": 0,
+    "description": "Cómo comunicar los esfuerzos de sostenibilidad de tu organización de forma clara y creíble.",
+    "moduleList": [
+      "Cuenta tu historia de sostenibilidad sin sonar falso",
+      "Escribe un reporte que la gente lea completo",
+      "Diseña campañas para redes que generen confianza",
+      "Evita las señales de greenwashing en tu comunicación"
+    ]
+  }
+]
