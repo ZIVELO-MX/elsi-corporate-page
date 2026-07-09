@@ -48,10 +48,10 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                 <strong style={{ fontFamily: "'Sora',sans-serif", fontSize: 30, color: "var(--primary)", display: "block", marginBottom: 6 }}>{money(course.price)}</strong>
                 <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{course.modules} módulos · programa propuesto</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 22 }}>
-                  <Button asChild style={{ width: "100%", background: "var(--primary)" }}>
+                  <Button asChild variant="primary" style={{ width: "100%" }}>
                     <Link href={`/contacto?curso=${course.slug}`}>Solicitar información</Link>
                   </Button>
-                  <Button asChild variant="outline" style={{ width: "100%", borderColor: "var(--primary)", color: "var(--primary)" }}>
+                  <Button asChild variant="outline" style={{ width: "100%" }}>
                     <Link href="/cursos">Volver al catálogo</Link>
                   </Button>
                 </div>

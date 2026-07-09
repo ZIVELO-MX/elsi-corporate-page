@@ -18,7 +18,7 @@ export default function Header() {
         </nav>
         <div className="header-actions">
           <Link href="/contacto" className="header-contact-link">Contacto</Link>
-          <Button asChild className="header-primary">
+          <Button asChild variant="primary" className="header-primary">
             <Link href="/cursos">Explorar cursos</Link>
           </Button>
         </div>

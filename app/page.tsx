@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
 import Link from "next/link";
 import { getAllCourses, money } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
@@ -13,6 +14,14 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  type CarouselApi,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const allCourses = getAllCourses();
 const featuredCourses = allCourses.slice(0, 3);
@@ -49,6 +58,37 @@ const servicios = [
 export default function Home() {
   const [testIdx, setTestIdx] = useState(0);
   const [ctaSent, setCtaSent] = useState(false);
+  const [servicesApi, setServicesApi] = useState<CarouselApi>();
+  const [serviceIndex, setServiceIndex] = useState(1);
+  const [serviceCount, setServiceCount] = useState(servicios.length);
+  const servicesPlugins = useMemo(
+    () => [
+      Autoplay({
+        delay: 4200,
+        stopOnInteraction: true,
+        stopOnMouseEnter: true,
+      }),
+    ],
+    []
+  );
+
+  useEffect(() => {
+    if (!servicesApi) return;
+
+    const updateServiceIndex = () => {
+      setServiceCount(servicesApi.scrollSnapList().length);
+      setServiceIndex(servicesApi.selectedScrollSnap() + 1);
+    };
+
+    updateServiceIndex();
+    servicesApi.on("select", updateServiceIndex);
+    servicesApi.on("reInit", updateServiceIndex);
+
+    return () => {
+      servicesApi.off("select", updateServiceIndex);
+      servicesApi.off("reInit", updateServiceIndex);
+    };
+  }, [servicesApi]);
 
   return (
     <main>
@@ -70,8 +110,12 @@ export default function Home() {
             <h1>Impulsamos una cultura ambiental que transforma personas, instituciones e industrias.</h1>
             <p>En ELSI desarrollamos programas de capacitación, consultoría y educación ambiental para organizaciones, instituciones educativas y jóvenes que buscan generar un impacto positivo.</p>
             <div className="hero-actions">
-              <Link href="/cursos" className="hero-btn-primary">Conoce nuestros cursos</Link>
-              <Link href="/contacto" className="hero-btn-secondary">Solicita información</Link>
+              <Button asChild variant="inverse" size="lg">
+                <Link href="/cursos">Conoce nuestros cursos</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="hero-action-secondary">
+                <Link href="/contacto">Solicita información</Link>
+              </Button>
             </div>
             <div className="hero-stat">
               <div className="hero-avatars">
@@ -162,19 +206,39 @@ export default function Home() {
       {/* ===== SERVICIOS GALERIA ===== */}
       <section className="servicios-galeria">
         <div className="shell">
-          <span className="section-kicker">¿Qué hacemos?</span>
-          <h2 className="section-title">Soluciones para cada tipo de organización</h2>
-          <div className="servicios-scroll">
-            {servicios.map((svc) => (
-              <Card key={svc.title} className="servicio-card">
-                <CardHeader>
-                  <div className="service-mark">{svc.icon}</div>
-                  <CardTitle className="service-title">{svc.title}</CardTitle>
-                  <CardDescription className="service-copy">{svc.text}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+          <div className="section-heading-row">
+            <div>
+              <span className="section-kicker">¿Qué hacemos?</span>
+              <h2 className="section-title">Soluciones para cada tipo de organización</h2>
+            </div>
+            <div className="service-carousel-meta" aria-live="polite">
+              Servicio {serviceIndex} de {serviceCount}
+            </div>
           </div>
+          <Carousel
+            setApi={setServicesApi}
+            opts={{ align: "start", loop: true }}
+            plugins={servicesPlugins}
+            className="service-carousel"
+          >
+            <CarouselContent className="-ml-4">
+              {servicios.map((svc) => (
+                <CarouselItem key={svc.title} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Card className="servicio-card">
+                    <CardHeader>
+                      <div className="service-mark">{svc.icon}</div>
+                      <CardTitle className="service-title">{svc.title}</CardTitle>
+                      <CardDescription className="service-copy">{svc.text}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="service-carousel-controls">
+              <CarouselPrevious className="service-carousel-button" />
+              <CarouselNext className="service-carousel-button" />
+            </div>
+          </Carousel>
         </div>
       </section>
 
@@ -187,7 +251,7 @@ export default function Home() {
               <h2 className="section-title" style={{ margin: 0 }}>Cursos destacados</h2>
               <p className="section-lede">Catálogo propuesto para presentar la oferta y capturar interés antes de activar compra o inscripción automática.</p>
             </div>
-            <Button asChild variant="link" style={{ color: "var(--primary)", padding: 0 }}>
+            <Button asChild variant="link">
               <Link href="/cursos">Ver catálogo completo →</Link>
             </Button>
           </div>
@@ -330,7 +394,7 @@ export default function Home() {
               <Textarea id="cta-mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} required />
             </Field>
             {ctaSent && <div className="cta-sent" role="status">Solicitud recibida. Te contactaremos pronto.</div>}
-            <Button type="submit" size="lg" style={{ background: "#fff", color: "var(--primary)", fontWeight: 800, fontSize: 14.5, padding: "15px 30px" }}>
+            <Button type="submit" size="lg" variant="inverse">
               Enviar solicitud
             </Button>
           </form>

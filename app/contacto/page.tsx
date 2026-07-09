@@ -50,7 +50,7 @@ function ContactoContent() {
               <Textarea id="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} defaultValue={courseMessage} required />
             </Field>
             {sent && <div className="contact-sent" role="status">Solicitud registrada en modo demo. Te responderemos pronto cuando el flujo esté conectado.</div>}
-            <Button type="submit" disabled={sent} style={{ background: "var(--primary)", width: "100%" }}>{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>
+            <Button type="submit" disabled={sent} variant="primary" style={{ width: "100%" }}>{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>
           </form>
         </div>
       </section>

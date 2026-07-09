@@ -109,7 +109,7 @@ export default function NosotrosPage() {
           <h2>Conoce la oferta formativa de ELSI</h2>
           <p>El siguiente paso natural después de la historia es explorar los cursos propuestos o solicitar orientación para elegir un programa.</p>
           <div className="about-cta-actions">
-            <Button asChild size="lg" style={{ background: "var(--primary)", color: "#fff" }}>
+            <Button asChild size="lg" variant="primary">
               <Link href="/cursos">Explora nuestros cursos</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
