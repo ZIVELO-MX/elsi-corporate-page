@@ -4,11 +4,28 @@ import { siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+const timelineItems = [
+  { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil enfocada en educación y concientización ambiental.", status: "Validar año exacto" },
+  { num: "UG", style: "outlined", label: "Universidad de Guanajuato", desc: "El movimiento crece dentro de la comunidad universitaria.", status: "Validar hitos por campus" },
+  { num: "+2.2k", style: "outlined", label: "Miles de estudiantes", desc: "Conferencias, talleres, cursos, congresos, eventos y dinámicas.", status: "Dato publicado" },
+  { num: "ELSI", style: "filled", label: "Nace ELSI", desc: "La iniciativa se profesionaliza como instituto de aprendizaje y soluciones.", status: "Validar fecha" },
+  { num: "B2B", style: "outlined", label: "Consultoría y capacitación", desc: "La oferta se extiende a empresas, instituciones y comunidades.", status: "Validar casos" },
+  { num: "2026", style: "outlined", label: "Nueva web corporativa", desc: "Migración hacia una experiencia clara para cursos y contacto.", status: "En progreso" },
+];
+
+const researchItems = [
+  "Años e hitos reales de Bee Blue y transición a ELSI.",
+  "Logo vectorial, colores oficiales y usos permitidos de marca.",
+  "Fotografías en alta resolución de talleres, eventos y equipo.",
+  "Catálogo real de cursos, nombres, módulos, precios y disponibilidad.",
+  "Confirmación de cifras adicionales antes de publicarlas como logros.",
+];
+
 export default function NosotrosPage() {
   return (
     <main>
-      <div className="shell page-header">
-        <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Quiénes somos</span>
+      <div className="shell page-header about-header reveal">
+        <span className="section-kicker">Quiénes somos</span>
         <h1>De una iniciativa estudiantil a un instituto con proyección internacional</h1>
         <p>ELSI nace de Bee Blue, un movimiento universitario que demostró que la educación ambiental puede transformar comunidades enteras.</p>
       </div>
@@ -16,21 +33,30 @@ export default function NosotrosPage() {
       <section style={{ padding: "0 0 56px" }}>
         <div className="shell">
           <div className="timeline-lg">
-            {[
-              { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil" },
-              { num: "UG", style: "outlined", label: "Universidad de Guanajuato", desc: "El movimiento crece en la comunidad universitaria" },
-              { num: "+1k", style: "outlined", label: "Miles de estudiantes", desc: "Conferencias, talleres y congresos" },
-              { num: "ELSI", style: "filled", label: "Nace ELSI", desc: "El movimiento se profesionaliza" },
-              { num: "B2B", style: "outlined", label: "Consultoría y capacitación", desc: "Soluciones para empresas e instituciones" },
-              { num: "MX", style: "outlined", label: "Impacto nacional", desc: "Referente en educación ambiental" },
-            ].map((item) => (
+            {timelineItems.map((item) => (
               <div key={item.label} className="timeline-lg-item">
                 <div className={`timeline-lg-num ${item.style}`}>{item.num}</div>
                 <strong>{item.label}</strong>
                 <span>{item.desc}</span>
+                <small>{item.status}</small>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="about-research">
+        <div className="shell about-research-grid">
+          <div>
+            <span className="section-kicker">Por investigar</span>
+            <h2 className="section-title">La historia debe crecer con evidencia, no con relleno.</h2>
+            <p className="section-lede">Estos puntos deben validarse antes de cerrar la versión aprobada de la web corporativa. Mientras tanto, la narrativa se mantiene clara y marcada como propuesta cuando corresponde.</p>
+          </div>
+          <ul className="research-list">
+            {researchItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -79,9 +105,18 @@ export default function NosotrosPage() {
       </section>
 
       <section style={{ padding: "64px 0", textAlign: "center" }}>
-        <Button asChild size="lg" style={{ background: "var(--primary)", color: "#fff" }}>
-          <Link href="/cursos">Explora nuestros cursos</Link>
-        </Button>
+        <div className="shell about-cta">
+          <h2>Conoce la oferta formativa de ELSI</h2>
+          <p>El siguiente paso natural después de la historia es explorar los cursos propuestos o solicitar orientación para elegir un programa.</p>
+          <div className="about-cta-actions">
+            <Button asChild size="lg" style={{ background: "var(--primary)", color: "#fff" }}>
+              <Link href="/cursos">Explora nuestros cursos</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/contacto">Solicitar información</Link>
+            </Button>
+          </div>
+        </div>
       </section>
     </main>
   );
