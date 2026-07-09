@@ -184,6 +184,19 @@ button, a, input, textarea {
 .feature-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex: none; }
 .feature-item span { font-size: 12.5px; font-weight: 700; color: #3a3f39; line-height: 1.35; }
 
+/* ---- SECTION BASICS ---- */
+.section-heading-row { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: 40px; align-items: end; margin-bottom: 30px; }
+
+/* ---- STATS ---- */
+.stats-band { padding: 34px 0 68px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.stat-card { border-color: color-mix(in oklab, var(--border), var(--accent) 10%); box-shadow: none !important; background: rgba(255,254,250,.76) !important; transition: transform var(--motion-med) ease, box-shadow var(--motion-med) ease, border-color var(--motion-med) ease; }
+.stat-card:hover { transform: translateY(-3px); border-color: color-mix(in oklab, var(--accent), white 48%); box-shadow: var(--shadow-card) !important; }
+.stat-card-header { gap: 8px !important; }
+.stat-number { font-family: 'Sora',sans-serif; font-size: clamp(2rem, 1.58rem + 1.25vw, 2.7rem); font-weight: 800; line-height: 1; color: var(--primary); font-variant-numeric: tabular-nums; }
+.stat-label { color: var(--text) !important; font-size: .9rem !important; line-height: 1.45 !important; }
+.stat-note { color: var(--text-light); font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+
 /* ---- HERO BUTTON VARIANTS ---- */
 .hero-btn-primary { background: #fff; color: var(--primary); padding: 15px 28px; border-radius: 8px; font-size: 14.5px; font-weight: 800; cursor: pointer; border: none; font-family: 'Manrope', sans-serif; display: inline-flex; align-items: center; gap: 8px; }
 .hero-btn-primary>*{ color: var(--primary) !important; }
@@ -206,10 +219,12 @@ button, a, input, textarea {
 /* ---- HISTORIA RESUMIDA ---- */
 .historia-resumida { background: #EFEDE4; padding: 64px 0; }
 .timeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.timeline-step { display: flex; flex-direction: column; gap: 10px; }
-.timeline-num { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+.timeline-step { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 170px; padding: 22px; border: 1px solid rgba(43,45,98,.12); border-radius: 8px; background: rgba(255,254,250,.6); transition: transform var(--motion-med) ease, background-color var(--motion-med) ease, border-color var(--motion-med) ease; }
+.timeline-step:hover { transform: translateY(-4px); background: var(--paper); border-color: color-mix(in oklab, var(--primary), white 55%); }
+.timeline-num { min-width: 42px; width: fit-content; height: 36px; padding-inline: 10px; border-radius: 999px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; letter-spacing: .04em; }
 .timeline-step strong { font-size: 14.5px; }
 .timeline-step span { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.story-link { margin-top: 28px !important; color: var(--primary) !important; padding: 0 !important; font-weight: 900 !important; }
 
 /* ---- TIMELINE LG ---- */
 .timeline-lg { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
@@ -224,7 +239,11 @@ button, a, input, textarea {
 .servicios-galeria { padding: 64px 0; overflow: hidden; }
 .servicios-scroll { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 12px; }
 .servicios-scroll::-webkit-scrollbar { display: none; }
-.servicio-card { scroll-snap-align: start; min-width: 320px; flex: 1; }
+.servicio-card { scroll-snap-align: start; min-width: 320px; flex: 1; border: 1px solid var(--border) !important; box-shadow: none !important; transition: transform var(--motion-med) ease, box-shadow var(--motion-med) ease, border-color var(--motion-med) ease; }
+.servicio-card:hover { transform: translateY(-4px); border-color: color-mix(in oklab, var(--accent), white 48%) !important; box-shadow: var(--shadow-card) !important; }
+.service-mark { width: 42px; height: 42px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 900; }
+.service-title { font-size: 1rem !important; line-height: 1.3 !important; }
+.service-copy { font-size: .86rem !important; line-height: 1.55 !important; }
 
 /* ---- CURSOS ---- */
 .cursos-seccion { background: #EFEDE4; padding: 72px 0; }
@@ -256,6 +275,7 @@ button, a, input, textarea {
 
 /* ---- TESTIMONIALES ---- */
 .testimonios { background: #EFEDE4; padding: 64px 0; }
+.testimonial-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 36px; text-align: center; max-width: 900px; margin: 0 auto; box-shadow: var(--shadow-card); }
 
 /* ---- CTA ---- */
 .cta-section { background: var(--primary); color: #fff; padding: 80px 0; text-align: center; }
@@ -332,6 +352,8 @@ button, a, input, textarea {
 @media (max-width: 1024px) {
   .hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .hero-image { height: 280px; }
+  .section-heading-row { grid-template-columns: 1fr; gap: 14px; align-items: start; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .timeline-grid { grid-template-columns: repeat(2, 1fr); }
   .timeline-lg { grid-template-columns: repeat(3, 1fr); }
   .cursos-grid, .cursos-catalogo-grid { grid-template-columns: repeat(2, 1fr); }
@@ -370,6 +392,7 @@ button, a, input, textarea {
   .feature-grid { grid-template-columns: 1fr; }
   .feature-item { border-right: none !important; border-bottom: 1px solid var(--border); }
   .feature-item:last-child { border-bottom: none; }
+  .stats-grid { grid-template-columns: 1fr; }
   .timeline-grid { grid-template-columns: 1fr; }
   .timeline-lg { grid-template-columns: 1fr; }
 }

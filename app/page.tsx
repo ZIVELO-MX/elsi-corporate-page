@@ -23,6 +23,20 @@ const TESTIMONIALS = [
   { quote: '"En 6 semanas pasamos de no tener plan de cumplimiento a documentar el 100% de nuestros procesos ambientales críticos."', name: 'Nombre Apellido', role: 'Coordinador Ambiental · Institución pública' },
 ];
 
+const HOME_STATS = [
+  { num: "+2,200", label: "estudiantes universitarios alcanzados", note: "dato real del sitio actual" },
+  { num: "+100", label: "espacios formativos realizados", note: "dato real del sitio actual" },
+  { num: "3", label: "líneas de servicio", note: "capacitación, soluciones y universidades" },
+  { num: "2026", label: "nuevo sitio corporativo", note: "migración en proceso" },
+];
+
+const STORY_PREVIEW = [
+  { num: "2019", label: "Bee Blue", desc: "Iniciativa estudiantil enfocada en educación ambiental." },
+  { num: "UG", label: "Comunidad universitaria", desc: "Conferencias, talleres y eventos en Guanajuato." },
+  { num: "+2.2k", label: "Alcance formativo", desc: "Miles de estudiantes impactados con experiencias ambientales." },
+  { num: "ELSI", label: "Instituto", desc: "La iniciativa evoluciona hacia capacitación y soluciones ambientales." },
+];
+
 const servicios = [
   { icon: "C", title: "Capacitación Ambiental", text: "Programas de formación práctica y medible para equipos." },
   { icon: "C", title: "Consultoría Ambiental", text: "Diagnóstico, cumplimiento normativo y sostenibilidad." },
@@ -51,13 +65,13 @@ export default function Home() {
         />
         <div className="hero-overlay" />
         <div className="shell hero-grid">
-          <div>
+          <div className="reveal">
             <p className="hero-eyebrow">Instituto de educación y soluciones ambientales</p>
             <h1>Impulsamos una cultura ambiental que transforma personas, instituciones e industrias.</h1>
-            <p>En ELSI desarrollamos programas de capacitación, consultoría y educación ambiental para organizaciones, instituciones educativas y jóvenes que buscan generar un impacto positivo en el mundo.</p>
+            <p>En ELSI desarrollamos programas de capacitación, consultoría y educación ambiental para organizaciones, instituciones educativas y jóvenes que buscan generar un impacto positivo.</p>
             <div className="hero-actions">
               <Link href="/cursos" className="hero-btn-primary">Conoce nuestros cursos</Link>
-              <Link href="/nosotros" className="hero-btn-secondary">Nuestra historia</Link>
+              <Link href="/contacto" className="hero-btn-secondary">Solicita información</Link>
             </div>
             <div className="hero-stat">
               <div className="hero-avatars">
@@ -71,7 +85,7 @@ export default function Home() {
       </section>
 
       {/* ===== PARTNERS ===== */}
-      <section className="partners">
+      <section className="partners reveal" data-delay="1">
         <div className="shell">
           <p className="partners-label">Organizaciones que han confiado en ELSI</p>
           <div className="partners-grid">
@@ -83,7 +97,7 @@ export default function Home() {
       </section>
 
       {/* ===== FEATURE STRIP ===== */}
-      <section className="feature-strip">
+      <section className="feature-strip reveal" data-delay="2">
         <div className="shell">
           <div className="feature-grid">
             {[
@@ -104,19 +118,15 @@ export default function Home() {
       </section>
 
       {/* ===== STATS ===== */}
-      <section style={{ padding: "32px 0 64px" }}>
+      <section className="stats-band reveal">
         <div className="shell">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 22 }}>
-            {[
-              { num: "+2,200", label: "estudiantes universitarios alcanzados" },
-              { num: "+100", label: "espacios formativos realizados" },
-              { num: "+50", label: "organizaciones atendidas" },
-              { num: "+6", label: "años de experiencia" },
-            ].map((stat) => (
-              <Card key={stat.num} style={{ boxShadow: "none" }}>
-                <CardHeader>
-                  <span style={{ fontFamily: "'Sora',sans-serif", fontSize: 38, fontWeight: 800, color: "var(--primary)" }}>{stat.num}</span>
-                  <CardDescription style={{ fontSize: 13.5 }}>{stat.label}</CardDescription>
+          <div className="stats-grid">
+            {HOME_STATS.map((stat) => (
+              <Card key={stat.num} className="stat-card">
+                <CardHeader className="stat-card-header">
+                  <span className="stat-number">{stat.num}</span>
+                  <CardDescription className="stat-label">{stat.label}</CardDescription>
+                  <span className="stat-note">{stat.note}</span>
                 </CardHeader>
               </Card>
             ))}
@@ -127,15 +137,15 @@ export default function Home() {
       {/* ===== HISTORIA RESUMIDA ===== */}
       <section className="historia-resumida">
         <div className="shell">
-          <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Nuestra historia</span>
-          <h2 className="section-title">De Bee Blue a un instituto con impacto nacional</h2>
+          <div className="section-heading-row">
+            <div>
+              <span className="section-kicker">Nuestra historia</span>
+              <h2 className="section-title">De Bee Blue a una plataforma de aprendizaje ambiental</h2>
+            </div>
+            <p className="section-lede">Home solo muestra los hitos esenciales. La línea completa vive en Nosotros para que la narrativa pueda crecer sin saturar la conversión principal.</p>
+          </div>
           <div className="timeline-grid">
-            {[
-              { num: "1", label: "Bee Blue", desc: "Nace la iniciativa estudiantil en la Universidad de Guanajuato" },
-              { num: "2", label: "Miles de estudiantes", desc: "Conferencias, talleres y congresos ambientales" },
-              { num: "3", label: "Nace ELSI", desc: "El movimiento se profesionaliza como instituto" },
-              { num: "4", label: "Impacto nacional", desc: "Consultoría y capacitación para empresas e instituciones" },
-            ].map((step) => (
+            {STORY_PREVIEW.map((step) => (
               <div key={step.num} className="timeline-step">
                 <div className="timeline-num">{step.num}</div>
                 <strong>{step.label}</strong>
@@ -143,8 +153,8 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <Button asChild variant="link" style={{ marginTop: 28, color: "var(--primary)", padding: 0 }}>
-            <Link href="/nosotros">Conoce nuestra historia completa →</Link>
+          <Button asChild variant="link" className="story-link">
+            <Link href="/nosotros">Seguir viendo en Nosotros →</Link>
           </Button>
         </div>
       </section>
@@ -152,20 +162,19 @@ export default function Home() {
       {/* ===== SERVICIOS GALERIA ===== */}
       <section className="servicios-galeria">
         <div className="shell">
-          <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>¿Qué hacemos?</span>
+          <span className="section-kicker">¿Qué hacemos?</span>
           <h2 className="section-title">Soluciones para cada tipo de organización</h2>
           <div className="servicios-scroll">
             {servicios.map((svc) => (
-              <Card key={svc.title} className="servicio-card" style={{ boxShadow: "none", border: "1px solid var(--border)" }}>
+              <Card key={svc.title} className="servicio-card">
                 <CardHeader>
-                  <div style={{ width: 40, height: 40, borderRadius: 9, background: "var(--primary-light)", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>{svc.icon}</div>
-                  <CardTitle style={{ fontSize: 16 }}>{svc.title}</CardTitle>
-                  <CardDescription style={{ fontSize: 13.5, lineHeight: 1.5 }}>{svc.text}</CardDescription>
+                  <div className="service-mark">{svc.icon}</div>
+                  <CardTitle className="service-title">{svc.title}</CardTitle>
+                  <CardDescription className="service-copy">{svc.text}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
           </div>
-          <p style={{ textAlign: "center", fontSize: 12.5, color: "var(--text-muted)", marginTop: 16, letterSpacing: ".08em" }}>Próximamente: navegación por slider →</p>
         </div>
       </section>
 
@@ -174,8 +183,9 @@ export default function Home() {
         <div className="shell">
           <div className="cursos-header">
             <div>
-              <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Aprende a tu ritmo</span>
+              <span className="section-kicker">Aprende a tu ritmo</span>
               <h2 className="section-title" style={{ margin: 0 }}>Cursos destacados</h2>
+              <p className="section-lede">Catálogo propuesto para presentar la oferta y capturar interés antes de activar compra o inscripción automática.</p>
             </div>
             <Button asChild variant="link" style={{ color: "var(--primary)", padding: 0 }}>
               <Link href="/cursos">Ver catálogo completo →</Link>
@@ -216,7 +226,7 @@ export default function Home() {
       {/* ===== POR QUÉ ELEGIR ELSI ===== */}
       <section style={{ padding: "64px 0" }}>
         <div className="shell">
-          <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>¿Por qué elegir ELSI?</span>
+          <span className="section-kicker">¿Por qué elegir ELSI?</span>
           <h2 className="section-title">Un aliado estratégico, no solo un proveedor</h2>
           <div className="beneficios-grid">
             {[
@@ -239,7 +249,7 @@ export default function Home() {
       {/* ===== TESTIMONIALES ===== */}
       <section className="testimonios">
         <div className="shell">
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: 36, textAlign: "center", maxWidth: 900, margin: "0 auto" }}>
+          <div className="testimonial-card">
             <div className="portrait-thumb" style={{ margin: "0 auto 16px" }}>
               <SafeImage src={siteImages.testimonial.src} alt={siteImages.testimonial.alt} width={160} height={160} />
             </div>
@@ -270,7 +280,7 @@ export default function Home() {
       {/* ===== FAQ ===== */}
       <section style={{ padding: "64px 0" }}>
         <div className="shell" style={{ maxWidth: 820, margin: "0 auto" }}>
-          <span style={{ display: "block", marginBottom: 8, textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Preguntas frecuentes</span>
+          <span className="section-kicker" style={{ textAlign: "center" }}>Preguntas frecuentes</span>
           <h2 style={{ textAlign: "center", fontFamily: "'Sora',sans-serif", fontSize: 26, fontWeight: 700, margin: "0 0 28px" }}>Resolvemos tus dudas</h2>
           <Accordion type="single" collapsible>
             <AccordionItem value="0">
@@ -297,8 +307,8 @@ export default function Home() {
       <section className="cta-section">
         <div className="shell cta-grid">
           <div className="cta-copy">
-            <h2>Construyamos juntos un futuro más sostenible.</h2>
-            <p>Comparte tus datos y te contactaremos para entender qué tipo de capacitación o consultoría ambiental necesita tu organización.</p>
+            <h2>Encuentra el curso o programa ambiental adecuado.</h2>
+            <p>Comparte tus datos y te contactaremos para orientar la ruta de aprendizaje, capacitación o consultoría más útil para tu organización.</p>
           </div>
           <form
             className="cta-form"
