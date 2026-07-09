@@ -1,16 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 
 export default function AdminPage() {
-  const [ready] = useState(true);
-
   return (
     <main>
       <section style={{ padding: "4rem 2rem", maxWidth: "40rem", margin: "0 auto", textAlign: "center" }}>
@@ -22,7 +16,7 @@ export default function AdminPage() {
           El panel de administración estará disponible próximamente. Por ahora el contenido del sitio es estático y se edita directamente en el código.
         </p>
         <Button asChild>
-          <a href="/">Volver al inicio</a>
+          <Link href="/">Volver al inicio</Link>
         </Button>
       </section>
     </main>

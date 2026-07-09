@@ -20,15 +20,15 @@
     "react": "latest",
     "react-dom": "latest",
     "sonner": "latest",
-    "tailwind-merge": "latest"
-    ,"tw-animate-css": "latest"
+    "tailwind-merge": "latest",
+    "tw-animate-css": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "eslint": "latest",
+    "eslint": "^9.39.4",
     "eslint-config-next": "latest",
     "tailwindcss": "latest",
     "typescript": "latest"

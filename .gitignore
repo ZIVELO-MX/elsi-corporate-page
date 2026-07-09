@@ -4,6 +4,7 @@ out
 .env*
 !.env.example
 *.log
+tsconfig.tsbuildinfo
 .DS_Store
 raw_images/
 public/images/
