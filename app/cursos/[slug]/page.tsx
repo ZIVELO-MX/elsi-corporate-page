@@ -46,12 +46,16 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             <Card className="curso-sidebar" style={{ boxShadow: "none" }}>
               <CardContent style={{ padding: 28 }}>
                 <strong style={{ fontFamily: "'Sora',sans-serif", fontSize: 30, color: "var(--primary)", display: "block", marginBottom: 6 }}>{money(course.price)}</strong>
-                <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{course.modules} módulos · certificado incluido</span>
+                <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{course.modules} módulos · programa propuesto</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 22 }}>
-                  <Button variant="outline" style={{ width: "100%", borderColor: "var(--primary)", color: "var(--primary)" }}>Agregar al carrito</Button>
-                  <Button style={{ width: "100%", background: "var(--primary)" }}>Comprar ahora</Button>
+                  <Button asChild style={{ width: "100%", background: "var(--primary)" }}>
+                    <Link href={`/contacto?curso=${course.slug}`}>Solicitar información</Link>
+                  </Button>
+                  <Button asChild variant="outline" style={{ width: "100%", borderColor: "var(--primary)", color: "var(--primary)" }}>
+                    <Link href="/cursos">Volver al catálogo</Link>
+                  </Button>
                 </div>
-                <p style={{ margin: "16px 0 0", fontSize: 11.5, color: "var(--text-light)", lineHeight: 1.5 }}>Necesitas una cuenta ELSI para inscribirte y ver tu progreso.</p>
+                <p style={{ margin: "16px 0 0", fontSize: 11.5, color: "var(--text-light)", lineHeight: 1.5 }}>La inscripción automatizada y el checkout no forman parte de esta fase corporativa.</p>
               </CardContent>
             </Card>
           </div>

@@ -18,8 +18,9 @@ export default function CursosPage() {
   return (
     <main>
       <div className="shell page-header" style={{ paddingBottom: 0 }}>
-        <span style={{ display: "block", marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Aprende a tu ritmo</span>
+        <span className="section-kicker">Catálogo propuesto</span>
         <h1>Catálogo de cursos</h1>
+        <p>Explora la oferta formativa propuesta para la nueva web corporativa. La inscripción y compra automatizada quedan fuera de esta fase.</p>
       </div>
 
       <section style={{ padding: "28px 0 72px" }}>
@@ -46,9 +47,9 @@ export default function CursosPage() {
           </div>
           <div className="cursos-catalogo-grid">
             {visible.map((course) => (
-              <Link key={course.id} href={`/cursos/${course.slug}`}>
-                <Card style={{ boxShadow: "none", cursor: "pointer", overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
-                  <div style={{ height: 110, background: "#F1EFE7", overflow: "hidden" }}>
+              <Link key={course.id} href={`/cursos/${course.slug}`} className="catalog-course-link">
+                <Card className="catalog-course-card">
+                  <div className="catalog-course-media">
                     <SafeImage
                       src={courseImages[course.slug].src}
                       alt={courseImages[course.slug].alt}
@@ -58,13 +59,16 @@ export default function CursosPage() {
                     />
                   </div>
                   <CardHeader>
-                    <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".07em" }}>{course.catLabel}</Badge>
+                    <div className="catalog-course-meta">
+                      <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".07em" }}>{course.catLabel}</Badge>
+                      <span>{course.status === "Publicado" ? "Propuesta" : "Por validar"}</span>
+                    </div>
                     <CardTitle style={{ fontSize: 14, lineHeight: 1.3 }}>{course.title}</CardTitle>
                     <CardDescription style={{ fontSize: 11.5 }}>{course.modules} módulos</CardDescription>
                   </CardHeader>
                   <CardContent style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 14.5, color: "var(--primary)" }}>{money(course.price)}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--primary)", borderBottom: "1.5px solid var(--primary)" }}>Ver curso</span>
+                    <span className="catalog-course-cta">Ver curso</span>
                   </CardContent>
                 </Card>
               </Link>
