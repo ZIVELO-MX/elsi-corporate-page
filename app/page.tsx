@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import Link from "next/link";
 import { getAllCourses, money } from "@/lib/courses";
@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -58,9 +57,6 @@ const servicios = [
 export default function Home() {
   const [testIdx, setTestIdx] = useState(0);
   const [ctaSent, setCtaSent] = useState(false);
-  const [servicesApi, setServicesApi] = useState<CarouselApi>();
-  const [serviceIndex, setServiceIndex] = useState(1);
-  const [serviceCount, setServiceCount] = useState(servicios.length);
   const servicesPlugins = useMemo(
     () => [
       Autoplay({
@@ -71,24 +67,6 @@ export default function Home() {
     ],
     []
   );
-
-  useEffect(() => {
-    if (!servicesApi) return;
-
-    const updateServiceIndex = () => {
-      setServiceCount(servicesApi.scrollSnapList().length);
-      setServiceIndex(servicesApi.selectedScrollSnap() + 1);
-    };
-
-    updateServiceIndex();
-    servicesApi.on("select", updateServiceIndex);
-    servicesApi.on("reInit", updateServiceIndex);
-
-    return () => {
-      servicesApi.off("select", updateServiceIndex);
-      servicesApi.off("reInit", updateServiceIndex);
-    };
-  }, [servicesApi]);
 
   return (
     <main>
@@ -211,12 +189,8 @@ export default function Home() {
               <span className="section-kicker">¿Qué hacemos?</span>
               <h2 className="section-title">Soluciones para cada tipo de organización</h2>
             </div>
-            <div className="service-carousel-meta" aria-live="polite">
-              Servicio {serviceIndex} de {serviceCount}
-            </div>
           </div>
           <Carousel
-            setApi={setServicesApi}
             opts={{ align: "start", loop: true }}
             plugins={servicesPlugins}
             className="service-carousel"
