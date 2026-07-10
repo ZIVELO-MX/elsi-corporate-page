@@ -1,46 +1,54 @@
 # Roadmap ELSI Corporativo
 
-## 1. Auditoria visual y contenido
+## 1. Página corporativa — COMPLETADA (ELS-0001)
 
-- Revisar consistencia de tono corporativo, jerarquia visual y mensajes clave.
-- Validar contraste, legibilidad, estados de foco y navegacion por teclado.
-- Corregir sistema de botones: definir con claridad que variante es primaria, secundaria, outline e inverse.
-- Corregir contraste de botones donde el fondo y la letra no se distinguen correctamente.
-- Revisar especificamente el boton del header: actualmente se percibe con fondo azul oscuro y texto negro.
-- Revisar especificamente el boton primario del hero: actualmente se percibe con fondo blanco y texto blanco.
-- Confirmar que el boton primario real sea el de mayor jerarquia visual, no el secundario.
-- Sustituir placeholders por imagenes libres o assets propios optimizados.
-- Dar visto bueno a cada seccion antes de avanzar a ajustes finales.
+Migración y mejora de la página corporativa: header, footer, home, cursos, soluciones, nosotros, contacto, aviso de privacidad. Incluye auditoría visual, sistema de botones, carrusel de servicios, logos reales y tema claro del footer.
 
-## 2. Home
+## 2. Autenticación — EN PROGRESO (ELS-0002)
 
-- Revisar hero, propuesta de valor, beneficios, cursos destacados, testimonios, FAQ y CTA.
-- Ajustar botones del hero: mantener el secundario si funciona visualmente, pero corregir el primario para que tenga contraste claro.
-- Revisar el CTA del formulario: actualmente se percibe bien, pero debe confirmarse si su variante visual corresponde a primario o secundario.
-- Confirmar que el CTA use el mismo patron de formulario que Contacto.
-- Verificar que Cursos destacados tenga buena jerarquia, imagenes correctas y CTA claro.
-- Quitar el texto del carrusel "Servicio 1 de 6".
-- Corregir botones del carrusel de servicios: deben tener hover visible y funcionar claramente como controles.
-- Dar visto bueno seccion por seccion: Hero, Confianza, Beneficios, Cursos, Testimonios, FAQ y CTA.
+- [ ] Permitir registro de usuarios.
+- [ ] Permitir inicio de sesión.
+- [ ] Incluir acceso con Google.
+- [ ] Diferenciar usuarios y administradores.
+- [ ] Crear un login funcional y visualmente cuidado.
+- [ ] Permitir cerrar sesión.
 
-## 3. Paginas internas
+## 3. Perfil de usuario (ELS-0003)
 
-- Revisar Nosotros, Soluciones, Cursos, Detalle de curso, Contacto y Aviso de privacidad.
-- Alinear estilos compartidos: encabezados, cards, formularios, botones, badges e imagenes.
-- Confirmar que cada pagina mantenga una experiencia responsive correcta.
-- Dar visto bueno a cada pagina antes de considerarla lista.
+Pendiente — depende de ELS-0002.
 
-## 4. Accesibilidad y performance
+## 4. Panel de administración (ELS-0004)
 
-- Validar contraste AA en texto, botones, badges y fondos.
-- Validar contraste AA de todos los botones en estado normal, hover, active, focus y disabled.
-- Revisar navegacion por teclado y foco visible en controles interactivos.
-- Confirmar dimensiones, carga diferida y prioridad de imagenes segun posicion.
-- Ejecutar build y revisar rutas principales.
+Pendiente — depende de ELS-0002 y ELS-0003.
 
-## 5. Cierre
+## 5. Operación manual (ELS-0005)
 
-- Hacer una revision final en escritorio y movil.
-- Resolver observaciones pendientes del visto bueno por seccion.
-- Eliminar el acceso temporal por `?sections=1` / `?sections=0` antes de entregar el producto; las etiquetas de seccion deben quedar disponibles solo para builds/dev runs especificos como `dev:sections` mientras esten en fase de revision.
-- Preparar commit inicial con el estado aprobado del sitio.
+Pendiente — depende de ELS-0003 y ELS-0004.
+
+## 6. Mejora de perfil (ELS-0006)
+
+Pendiente.
+
+## 7. Comunicación (ELS-0007)
+
+Pendiente.
+
+## 8. Experiencia visual (ELS-0008)
+
+Pendiente — incluye items movidos de ELS-0001.
+
+## 9. Gestión de usuarios (ELS-0009)
+
+Pendiente.
+
+## 10. Administración de contenido (ELS-0010)
+
+Pendiente — depende de ELS-0001.
+
+## 11. Analítica (ELS-0011)
+
+Pendiente.
+
+## 12. Investigaciones abiertas (ELS-0012 a ELS-0015)
+
+Pendientes.
