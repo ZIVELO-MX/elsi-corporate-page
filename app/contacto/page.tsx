@@ -16,14 +16,14 @@ function ContactoContent() {
 
   return (
     <main>
-      <section style={{ padding: "72px 0 96px" }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "start", padding: "0 48px" }}>
+      <section className="contact-section" data-section-label="Contacto / Formulario">
+        <div className="contact-grid">
           <div>
             <span className="section-kicker">Contacto</span>
-            <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: 32, fontWeight: 700, margin: "0 0 16px" }}>
+            <h1 className="contact-title">
               Escríbenos y compártenos qué necesitas aprender o resolver
             </h1>
-            <p style={{ margin: "0 0 32px", fontSize: 15, color: "var(--text-muted)", lineHeight: 1.6, maxWidth: 460 }}>
+            <p className="contact-lede">
               Este formulario simula el flujo de contacto de la fase corporativa. Sirve para validar el mensaje, la intención del usuario y los campos mínimos antes de conectar un backend.
             </p>
             <div className="contact-info">
@@ -34,7 +34,7 @@ function ContactoContent() {
             </div>
           </div>
           <form
-            style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: 32, display: "flex", flexDirection: "column", gap: 16 }}
+            className="contact-form"
             onSubmit={(e) => { e.preventDefault(); setSent(true); }}
           >
             <Field>
@@ -50,7 +50,7 @@ function ContactoContent() {
               <Textarea id="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} defaultValue={courseMessage} required />
             </Field>
             {sent && <div className="contact-sent" role="status">Solicitud registrada en modo demo. Te responderemos pronto cuando el flujo esté conectado.</div>}
-            <Button type="submit" disabled={sent} variant="primary" style={{ width: "100%" }}>{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>
+            <Button type="submit" disabled={sent} variant="primary" className="contact-submit">{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>
           </form>
         </div>
       </section>
