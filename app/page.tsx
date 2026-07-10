@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Autoplay from "embla-carousel-autoplay";
+import { useState } from "react";
 import Link from "next/link";
 import { getAllCourses, money } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
@@ -9,6 +8,7 @@ import { courseImages, siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/avatar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,27 @@ const TESTIMONIALS = [
   { quote: '"Certificamos a nuestro equipo de 40 personas en 3 semanas y redujimos 30% las no conformidades ambientales en la primera auditoría siguiente."', name: 'Nombre Apellido', role: 'Gerente de Operaciones · Empresa manufacturera' },
   { quote: '"Más de 300 estudiantes se inscribieron al taller en 48 horas. ELSI entendió exactamente cómo hablarle a nuestra comunidad universitaria."', name: 'Nombre Apellido', role: 'Directora Académica · Universidad' },
   { quote: '"En 6 semanas pasamos de no tener plan de cumplimiento a documentar el 100% de nuestros procesos ambientales críticos."', name: 'Nombre Apellido', role: 'Coordinador Ambiental · Institución pública' },
+];
+
+const HERO_AVATARS = [
+  {
+    src: "https://live.staticflickr.com/3833/9658307900_fc780e6826_b.jpg",
+    alt: "Estudiante participante en una sesion formativa",
+    fallback: "EC",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658307900",
+  },
+  {
+    src: "https://live.staticflickr.com/7443/9658311952_ff4c562d68_b.jpg",
+    alt: "Participante de programa educativo ambiental",
+    fallback: "UG",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658311952",
+  },
+  {
+    src: "https://live.staticflickr.com/7452/9658302076_5d93bc242a_b.jpg",
+    alt: "Estudiante en actividad de capacitacion",
+    fallback: "EL",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658302076",
+  },
 ];
 
 const HOME_STATS = [
@@ -55,23 +76,12 @@ const servicios = [
 ];
 
 export default function Home() {
-  const [testIdx, setTestIdx] = useState(0);
   const [ctaSent, setCtaSent] = useState(false);
-  const servicesPlugins = useMemo(
-    () => [
-      Autoplay({
-        delay: 4200,
-        stopOnInteraction: true,
-        stopOnMouseEnter: true,
-      }),
-    ],
-    []
-  );
 
   return (
     <main>
       {/* ===== HERO ===== */}
-      <section className="hero">
+      <section className="hero" data-section-label="Home / Hero">
         <SafeImage
           src="/hero-bg.jpg"
           alt="Participantes en una actividad de educacion ambiental"
@@ -96,9 +106,15 @@ export default function Home() {
               </Button>
             </div>
             <div className="hero-stat">
-              <div className="hero-avatars">
-                {[1, 2, 3].map((i) => <div key={i} className="hero-avatar" />)}
-              </div>
+              <AvatarGroup className="hero-avatar-group" aria-label="Participantes formados por ELSI">
+                {HERO_AVATARS.map((avatar) => (
+                  <Avatar key={avatar.src} size="lg" className="hero-avatar-item">
+                    <AvatarImage src={avatar.src} alt={avatar.alt} title={avatar.attribution} />
+                    <AvatarFallback>{avatar.fallback}</AvatarFallback>
+                  </Avatar>
+                ))}
+                <AvatarGroupCount className="hero-avatar-count">+2k</AvatarGroupCount>
+              </AvatarGroup>
               <span className="hero-stat-text"><strong>+2,200 estudiantes</strong> ya se han formado con nosotros desde 2019.</span>
             </div>
           </div>
@@ -107,7 +123,7 @@ export default function Home() {
       </section>
 
       {/* ===== PARTNERS ===== */}
-      <section className="partners reveal" data-delay="1">
+      <section className="partners reveal" data-delay="1" data-section-label="Home / Confianza">
         <div className="shell">
           <p className="partners-label">Organizaciones que han confiado en ELSI</p>
           <div className="partners-grid">
@@ -119,7 +135,7 @@ export default function Home() {
       </section>
 
       {/* ===== FEATURE STRIP ===== */}
-      <section className="feature-strip reveal" data-delay="2">
+      <section className="feature-strip reveal" data-delay="2" data-section-label="Home / Beneficios rápidos">
         <div className="shell">
           <div className="feature-grid">
             {[
@@ -140,7 +156,7 @@ export default function Home() {
       </section>
 
       {/* ===== STATS ===== */}
-      <section className="stats-band reveal">
+      <section className="stats-band reveal" data-section-label="Home / Estadísticas">
         <div className="shell">
           <div className="stats-grid">
             {HOME_STATS.map((stat) => (
@@ -157,7 +173,7 @@ export default function Home() {
       </section>
 
       {/* ===== HISTORIA RESUMIDA ===== */}
-      <section className="historia-resumida">
+      <section className="historia-resumida" data-section-label="Home / Historia resumida">
         <div className="shell">
           <div className="section-heading-row">
             <div>
@@ -182,7 +198,7 @@ export default function Home() {
       </section>
 
       {/* ===== SERVICIOS GALERIA ===== */}
-      <section className="servicios-galeria">
+      <section className="servicios-galeria" data-section-label="Home / Servicios carrusel">
         <div className="shell">
           <div className="section-heading-row">
             <div>
@@ -192,7 +208,6 @@ export default function Home() {
           </div>
           <Carousel
             opts={{ align: "start", loop: true }}
-            plugins={servicesPlugins}
             className="service-carousel"
           >
             <CarouselContent className="-ml-4">
@@ -208,16 +223,14 @@ export default function Home() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="service-carousel-controls">
-              <CarouselPrevious className="service-carousel-button" />
-              <CarouselNext className="service-carousel-button" />
-            </div>
+            <CarouselPrevious className="service-carousel-button" />
+            <CarouselNext className="service-carousel-button" />
           </Carousel>
         </div>
       </section>
 
       {/* ===== CURSOS DESTACADOS ===== */}
-      <section className="cursos-seccion">
+      <section className="cursos-seccion" data-section-label="Home / Cursos destacados">
         <div className="shell">
           <div className="cursos-header">
             <div>
@@ -262,7 +275,7 @@ export default function Home() {
       </section>
 
       {/* ===== POR QUÉ ELEGIR ELSI ===== */}
-      <section style={{ padding: "64px 0" }}>
+      <section data-section-label="Home / Por qué elegir ELSI" style={{ padding: "64px 0" }}>
         <div className="shell">
           <span className="section-kicker">¿Por qué elegir ELSI?</span>
           <h2 className="section-title">Un aliado estratégico, no solo un proveedor</h2>
@@ -274,8 +287,9 @@ export default function Home() {
               { strong: "Programas personalizados", p: "Cada organización recibe una solución a su medida." },
               { strong: "Impacto medible", p: "Indicadores claros antes, durante y después." },
               { strong: "Innovación constante", p: "Contenidos actualizados a normativa y tendencias." },
-            ].map((ben) => (
+            ].map((ben, i) => (
               <div key={ben.strong} className="beneficio-card">
+                <span className="beneficio-index">0{i + 1}</span>
                 <strong>{ben.strong}</strong>
                 <p>{ben.p}</p>
               </div>
@@ -285,38 +299,36 @@ export default function Home() {
       </section>
 
       {/* ===== TESTIMONIALES ===== */}
-      <section className="testimonios">
+      <section className="testimonios" data-section-label="Home / Testimonios">
         <div className="shell">
-          <div className="testimonial-card">
-            <div className="portrait-thumb" style={{ margin: "0 auto 16px" }}>
-              <SafeImage src={siteImages.testimonial.src} alt={siteImages.testimonial.alt} width={160} height={160} />
-            </div>
-            <div style={{ display: "flex", gap: 3, justifyContent: "center", marginBottom: 18, color: "var(--primary)" }}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <svg key={i} width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+          <Carousel opts={{ align: "center", loop: true }} className="testimonial-carousel">
+            <CarouselContent>
+              {TESTIMONIALS.map((testimonial) => (
+                <CarouselItem key={testimonial.role}>
+                  <div className="testimonial-card">
+                    <div className="portrait-thumb testimonial-portrait">
+                      <SafeImage src={siteImages.testimonial.src} alt={siteImages.testimonial.alt} width={160} height={160} />
+                    </div>
+                    <div className="testimonial-stars" aria-hidden="true">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                      ))}
+                    </div>
+                    <p>{testimonial.quote}</p>
+                    <div className="testimonial-name">{testimonial.name}</div>
+                    <div className="testimonial-role">{testimonial.role}</div>
+                  </div>
+                </CarouselItem>
               ))}
-            </div>
-            <p style={{ margin: "0 0 18px", fontSize: 16, lineHeight: 1.6, color: "#3a3f39" }}>{TESTIMONIALS[testIdx].quote}</p>
-            <div style={{ fontSize: 14 }}>{TESTIMONIALS[testIdx].name}</div>
-            <div style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{TESTIMONIALS[testIdx].role}</div>
-          </div>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 20 }}>
-            {[0, 1, 2].map((i) => (
-              <button
-                key={i}
-                type="button"
-                className="testimonial-dot"
-                aria-label={`Ver testimonio ${i + 1}`}
-                aria-current={testIdx === i ? "true" : undefined}
-                onClick={() => setTestIdx(i)}
-              />
-            ))}
-          </div>
+            </CarouselContent>
+            <CarouselPrevious className="testimonial-carousel-button" />
+            <CarouselNext className="testimonial-carousel-button" />
+          </Carousel>
         </div>
       </section>
 
       {/* ===== FAQ ===== */}
-      <section style={{ padding: "64px 0" }}>
+      <section data-section-label="Home / FAQ" style={{ padding: "64px 0" }}>
         <div className="shell" style={{ maxWidth: 820, margin: "0 auto" }}>
           <span className="section-kicker" style={{ textAlign: "center" }}>Preguntas frecuentes</span>
           <h2 style={{ textAlign: "center", fontFamily: "'Sora',sans-serif", fontSize: 26, fontWeight: 700, margin: "0 0 28px" }}>Resolvemos tus dudas</h2>
@@ -342,7 +354,7 @@ export default function Home() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="cta-section">
+      <section className="cta-section" data-section-label="Home / CTA formulario">
         <div className="shell cta-grid">
           <div className="cta-copy">
             <h2>Encuentra el curso o programa ambiental adecuado.</h2>

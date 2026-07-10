@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:sections": "NEXT_PUBLIC_SECTION_LABELS=1 next dev",
     "build": "next build",
+    "build:sections": "NEXT_PUBLIC_SECTION_LABELS=1 next build",
     "start": "next start",
     "lint": "eslint ."
   },
@@ -13,7 +15,6 @@
     "@radix-ui/react-slot": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
-    "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "latest",
     "next": "latest",
