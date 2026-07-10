@@ -7,28 +7,13 @@ export function SectionLabelToggle() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get("sections");
-    const storedMode = window.sessionStorage.getItem("section-labels");
-    const enabled =
-      mode === "1" ||
-      mode === "true" ||
-      (mode === null && storedMode === "true") ||
-      document.body.dataset.sectionLabels === "true";
-
-    if (mode === "1" || mode === "true") {
-      window.sessionStorage.setItem("section-labels", "true");
-    }
-
-    if (mode === "0" || mode === "false") {
-      window.sessionStorage.removeItem("section-labels");
-    }
+    const enabled = document.body.dataset.sectionLabels === "true";
 
     document.querySelectorAll(".section-feedback-pill").forEach((node) => {
       node.remove();
     });
 
-    if (enabled && mode !== "0" && mode !== "false") {
+    if (enabled) {
       document.body.dataset.sectionLabels = "true";
 
       document.querySelectorAll<HTMLElement>("section[data-section-label]").forEach((section) => {
