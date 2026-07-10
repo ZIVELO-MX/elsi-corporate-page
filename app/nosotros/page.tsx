@@ -21,6 +21,21 @@ const researchItems = [
   "Confirmación de cifras adicionales antes de publicarlas como logros.",
 ];
 
+const teamMembers = [
+  {
+    name: "Emmanuel Pimentel Cerrillos",
+    role: "Asesor ELSI",
+    stat: "+50 talleres impartidos",
+    email: "e.pimentelcerrillos@ugto.mx",
+  },
+  {
+    name: "Aldo Espinoza Tapia",
+    role: "Asesor ELSI",
+    stat: "Especialista en cumplimiento ambiental",
+    email: "a.espinozatapia@ugto.mx",
+  },
+];
+
 export default function NosotrosPage() {
   return (
     <main>
@@ -30,7 +45,7 @@ export default function NosotrosPage() {
         <p>ELSI nace de Bee Blue, un movimiento universitario que demostró que la educación ambiental puede transformar comunidades enteras.</p>
       </div>
 
-      <section style={{ padding: "0 0 56px" }}>
+      <section className="about-timeline-section" data-section-label="Nosotros / Línea de tiempo">
         <div className="shell">
           <div className="timeline-lg">
             {timelineItems.map((item) => (
@@ -45,7 +60,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="about-research">
+      <section className="about-research" data-section-label="Nosotros / Por investigar">
         <div className="shell about-research-grid">
           <div>
             <span className="section-kicker">Por investigar</span>
@@ -60,7 +75,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section style={{ background: "#EFEDE4", padding: "56px 0" }}>
+      <section data-section-label="Nosotros / Misión visión valores" style={{ background: "#EFEDE4", padding: "56px 0" }}>
         <div className="shell">
           <div className="mvv-grid">
             {[
@@ -79,14 +94,11 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section style={{ padding: "64px 0" }}>
+      <section data-section-label="Nosotros / Equipo" style={{ padding: "64px 0" }}>
         <div className="shell">
           <span style={{ display: "block", marginBottom: 28, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Nuestro equipo</span>
           <div className="team-grid">
-            {[
-              { name: "Emmanuel Pimentel Cerrillos", role: "Asesor ELSI", stat: "+50 talleres impartidos" },
-              { name: "Aldo Espinoza Tapia", role: "Asesor ELSI", stat: "Especialista en cumplimiento ambiental" },
-            ].map((person) => (
+            {teamMembers.map((person) => (
               <Card key={person.name} className="team-card" style={{ boxShadow: "none" }}>
                 <CardContent className="team-card-content" style={{ padding: 24 }}>
                   <div className="team-avatar">
@@ -96,6 +108,7 @@ export default function NosotrosPage() {
                     <div className="team-name">{person.name}</div>
                     <div className="team-role">{person.role}</div>
                     <div className="team-stat">{person.stat}</div>
+                    <a className="team-email" href={`mailto:${person.email}`}>{person.email}</a>
                   </div>
                 </CardContent>
               </Card>
@@ -104,7 +117,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section style={{ padding: "64px 0", textAlign: "center" }}>
+      <section data-section-label="Nosotros / CTA cursos" style={{ padding: "64px 0", textAlign: "center" }}>
         <div className="shell about-cta">
           <h2>Conoce la oferta formativa de ELSI</h2>
           <p>El siguiente paso natural después de la historia es explorar los cursos propuestos o solicitar orientación para elegir un programa.</p>
