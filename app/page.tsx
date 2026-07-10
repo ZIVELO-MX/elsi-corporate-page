@@ -33,19 +33,19 @@ const TESTIMONIALS = [
 
 const HERO_AVATARS = [
   {
-    src: "https://live.staticflickr.com/3833/9658307900_fc780e6826_b.jpg",
+    src: "https://upload.wikimedia.org/wikipedia/en/d/dc/Pocket_Mortys.png",
     alt: "Estudiante participante en una sesion formativa",
     fallback: "EC",
     attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658307900",
   },
   {
-    src: "https://live.staticflickr.com/7443/9658311952_ff4c562d68_b.jpg",
+    src: "https://i.pinimg.com/736x/5f/af/6e/5faf6ef038c6185eb6c67e4bfccce4ee.jpg",
     alt: "Participante de programa educativo ambiental",
     fallback: "UG",
     attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658311952",
   },
   {
-    src: "https://live.staticflickr.com/7452/9658302076_5d93bc242a_b.jpg",
+    src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9-Y5l2RCU9deuPoFZ9ZsVbXsUINjGtE1V0jrW--SECAeBliTMxdG2vwRO&s=10",
     alt: "Estudiante en actividad de capacitacion",
     fallback: "EL",
     attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658302076",

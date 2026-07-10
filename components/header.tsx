@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/safe-image";
 
 export default function Header() {
   return (
     <header className="site-header">
       <div className="header-inner">
         <Link href="/" className="logo-block" aria-label="ELSI, inicio">
-          <span className="logo-text">ELSI</span>
-          <span className="logo-sub">Academy</span>
+          <SafeImage src="/logos/elsi-wordmark.png" alt="ELSI" className="header-logo-img" width={123} height={70} />
         </Link>
         <nav className="header-nav" aria-label="Navegación principal">
           <Link href="/">Inicio</Link>

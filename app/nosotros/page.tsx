@@ -27,12 +27,14 @@ const teamMembers = [
     role: "Asesor ELSI",
     stat: "+50 talleres impartidos",
     email: "e.pimentelcerrillos@ugto.mx",
+    avatar: "https://elsyacademy.me/wp-content/uploads/2026/04/IMG_2639-1024x573.jpeg",
   },
   {
     name: "Aldo Espinoza Tapia",
     role: "Asesor ELSI",
     stat: "Especialista en cumplimiento ambiental",
     email: "a.espinozatapia@ugto.mx",
+    avatar: "https://elsyacademy.me/wp-content/uploads/2026/04/5c69e245-42eb-4179-ac5c-6b6c9716e0ec.jpeg",
   },
 ];
 
@@ -102,7 +104,7 @@ export default function NosotrosPage() {
               <Card key={person.name} className="team-card" style={{ boxShadow: "none" }}>
                 <CardContent className="team-card-content" style={{ padding: 24 }}>
                   <div className="team-avatar">
-                    <SafeImage src={siteImages.team.src} alt={siteImages.team.alt} width={160} height={160} />
+                    <SafeImage src={person.avatar} alt={siteImages.team.alt} width={160} height={160} />
                   </div>
                   <div>
                     <div className="team-name">{person.name}</div>
@@ -117,7 +119,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section data-section-label="Nosotros / CTA cursos" style={{ padding: "64px 0", textAlign: "center" }}>
+      <section data-section-label="Nosotros / CTA cursos" style={{ background: "#EFEDE4", padding: "64px 0", textAlign: "center" }}>
         <div className="shell about-cta">
           <h2>Conoce la oferta formativa de ELSI</h2>
           <p>El siguiente paso natural después de la historia es explorar los cursos propuestos o solicitar orientación para elegir un programa.</p>

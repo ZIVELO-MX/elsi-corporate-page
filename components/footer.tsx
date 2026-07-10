@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SafeImage } from "@/components/safe-image";
 
 export default function Footer() {
   return (
@@ -6,8 +7,13 @@ export default function Footer() {
       <div className="shell">
         <div className="footer-grid">
           <div className="footer-brand">
-            <span className="logo-text">ELSI</span>
-            <p>Environment Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.</p>
+            <SafeImage
+              src="/logos/elsi-horizontal-logo.png"
+              alt="ELSI — Environmental Learning & Solutions Institute"
+              width={180}
+              height={101}
+              className="block h-auto w-[190px] object-contain"
+            />
           </div>
           <div className="footer-col">
             <strong>Instituto</strong>

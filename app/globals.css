@@ -202,9 +202,8 @@ body[data-section-labels="true"] .section-feedback-pill {
 /* ---- HEADER ---- */
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,254,250,.92); border-bottom: 1px solid rgba(36,40,34,.1); box-shadow: var(--shadow-sm); backdrop-filter: blur(16px); }
 .header-inner { max-width: 1360px; margin: 0 auto; display: flex; align-items: center; gap: 40px; padding: 0 48px; height: var(--header-height); }
-.logo-block { cursor: pointer; display: flex; flex-direction: column; line-height: 1; flex: none; }
-.logo-text { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 21px; color: var(--primary); letter-spacing: -.01em; }
-.logo-sub { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-light); margin-top: 3px; }
+.logo-block { cursor: pointer; display: flex; align-items: center; flex: none; }
+.header-logo-img { display: block; height: 28px; width: auto; }
 .header-nav { display: flex; gap: 24px; font-size: 13.5px; font-weight: 800; color: #3a3f39; }
 .header-nav a { position: relative; display: inline-flex; align-items: center; min-height: 38px; padding: 0 2px; }
 .header-nav a::after { content: ""; position: absolute; inset-inline: 0; bottom: 4px; height: 2px; border-radius: 99px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform var(--motion-med) ease; }
@@ -612,15 +611,15 @@ body[data-section-labels="true"] .section-feedback-pill {
 .breadcrumb a { font-weight: 700; color: var(--primary); }
 
 /* ---- FOOTER ---- */
-.site-footer { background: var(--footer-bg); color: #fff; padding: 56px 0 28px; }
-.footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 32px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.site-footer { background: #F7F6F2; color: #1D1D1B; padding: 56px 0 28px; border-top: 1px solid #E5E7E2; }
+.footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 32px; padding-bottom: 32px; border-bottom: 1px solid #E5E7E2; }
 .footer-brand { display: flex; flex-direction: column; gap: 10px; }
-.footer-brand .logo-text { color: #fff; }
-.footer-brand p { margin: 0; font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,.6); max-width: 240px; }
-.footer-col { display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: rgba(255,255,255,.75); }
-.footer-col strong { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.45); }
-.footer-col a, .footer-col span { cursor: pointer; }
-.footer-bottom { display: flex; justify-content: space-between; padding-top: 20px; font-size: 12px; color: rgba(255,255,255,.4); }
+
+.footer-brand p { margin: 0; font-size: 12.5px; line-height: 1.6; color: #6B706B; max-width: 240px; }
+.footer-col { display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #1D1D1B; }
+.footer-col strong { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: #6B706B; }
+.footer-col a, .footer-col span { cursor: pointer; color: #1D1D1B; }
+.footer-bottom { display: flex; justify-content: space-between; padding-top: 20px; font-size: 12px; color: #6B706B; border-top: 1px solid #E5E7E2; }
 
 /* ---- PHOTO SLOT ---- */
 .photo-slot { overflow: hidden; background: #F1EFE7; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
@@ -659,7 +658,7 @@ body[data-section-labels="true"] .section-feedback-pill {
 .catalog-course-link:focus-visible { outline-offset: 5px; }
 .catalog-course-card { height: 100%; display: flex; flex-direction: column; overflow: hidden; padding-top: 0 !important; box-shadow: none !important; cursor: pointer; transition: transform var(--motion-med) ease, box-shadow var(--motion-med) ease, border-color var(--motion-med) ease; }
 .catalog-course-link:hover .catalog-course-card { transform: translateY(-4px); border-color: color-mix(in oklab, var(--primary), white 55%); box-shadow: var(--shadow-card-hover) !important; }
-.catalog-course-media { flex: none; inline-size: 100%; aspect-ratio: 4 / 2; background: #F1EFE7; overflow: hidden; }
+.catalog-course-media { flex: none; inline-size: 100%; aspect-ratio: 3 / 2; background: #F1EFE7; overflow: hidden; }
 .catalog-course-media img, .catalog-course-media .image-fallback { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transform: scale(1.06); transition: transform .35s ease; }
 .catalog-course-link:hover .catalog-course-media img { transform: scale(1.1); }
 .catalog-course-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
