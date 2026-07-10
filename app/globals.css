@@ -196,12 +196,36 @@ button, a, input, textarea {
 .stat-label { color: var(--text) !important; font-size: .9rem !important; line-height: 1.45 !important; }
 .stat-note { color: var(--text-light); font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 
+.hero-action-primary {
+  border-color: #fff !important;
+  background: #fff !important;
+  color: var(--primary) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.22) !important;
+}
+.hero-action-primary:hover {
+  border-color: var(--primary-light) !important;
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+.hero-action-primary:focus-visible {
+  border-color: #fff !important;
+  background: #fff !important;
+  color: var(--primary) !important;
+}
 .hero-action-secondary {
   border-color: rgba(255,255,255,.7) !important;
+  background: transparent !important;
   color: #fff !important;
+  box-shadow: none !important;
 }
 .hero-action-secondary:hover {
   background: rgba(255,255,255,.12) !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+.hero-action-secondary:focus-visible {
+  background: transparent !important;
+  border-color: #fff !important;
   color: #fff !important;
 }
 
@@ -336,6 +360,7 @@ button, a, input, textarea {
 .cta-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 48px; align-items: center; text-align: left; }
 .cta-copy h2, .cta-copy p { margin-left: 0; margin-right: 0; }
 .cta-form { background: #fff; color: var(--text); border-radius: 8px; padding: 28px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 22px 60px rgba(0,0,0,.18); }
+.cta-submit { width: 100%; }
 .cta-sent { background: var(--primary-light); color: var(--primary); border-radius: 8px; padding: 12px 14px; font-size: 13.5px; font-weight: 800; }
 
 /* ---- CURSO DETALLE ---- */

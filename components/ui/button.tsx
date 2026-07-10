@@ -10,20 +10,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-button-primary bg-button-primary text-button-primary-foreground shadow-sm hover:-translate-y-0.5 hover:bg-button-primary/95 hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
         primary:
-          "border border-button-primary bg-button-primary text-button-primary-foreground shadow-sm hover:-translate-y-0.5 hover:bg-button-primary/95 hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-primary bg-transparent text-primary shadow-xs hover:-translate-y-0.5 hover:bg-primary-light hover:text-primary hover:shadow-sm dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-[var(--primary)] bg-transparent text-[var(--primary)] shadow-xs hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:shadow-sm dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "border border-secondary bg-secondary text-secondary-foreground hover:-translate-y-0.5 hover:border-primary/30 hover:bg-primary-light hover:text-primary",
+          "border border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:-translate-y-0.5 hover:border-[var(--primary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)]",
         inverse:
-          "border border-white bg-white text-primary shadow-sm hover:-translate-y-0.5 hover:bg-primary-light hover:text-primary hover:shadow-md",
+          "border border-white bg-white text-[var(--primary)] shadow-sm hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:shadow-md",
         ghost:
-          "text-foreground hover:bg-primary-light hover:text-primary dark:hover:bg-accent/50",
-        link: "h-auto rounded-none px-0 py-0 text-primary underline-offset-4 hover:text-accent hover:underline",
+          "text-foreground hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:hover:bg-accent/50",
+        link: "h-auto rounded-none px-0 py-0 text-[var(--primary)] underline-offset-4 hover:text-[var(--accent)] hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

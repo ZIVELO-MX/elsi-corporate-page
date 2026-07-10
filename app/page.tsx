@@ -88,7 +88,7 @@ export default function Home() {
             <h1>Impulsamos una cultura ambiental que transforma personas, instituciones e industrias.</h1>
             <p>En ELSI desarrollamos programas de capacitación, consultoría y educación ambiental para organizaciones, instituciones educativas y jóvenes que buscan generar un impacto positivo.</p>
             <div className="hero-actions">
-              <Button asChild variant="inverse" size="lg">
+              <Button asChild variant="inverse" size="lg" className="hero-action-primary">
                 <Link href="/cursos">Conoce nuestros cursos</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="hero-action-secondary">
@@ -368,7 +368,7 @@ export default function Home() {
               <Textarea id="cta-mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} required />
             </Field>
             {ctaSent && <div className="cta-sent" role="status">Solicitud recibida. Te contactaremos pronto.</div>}
-            <Button type="submit" size="lg" variant="inverse">
+            <Button type="submit" size="lg" variant="primary" className="cta-submit">
               Enviar solicitud
             </Button>
           </form>
