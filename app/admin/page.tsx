@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 export default function AdminPage() {
   return (
     <main>
-      <section style={{ padding: "4rem 2rem", maxWidth: "40rem", margin: "0 auto", textAlign: "center" }}>
+      <section data-section-label="Admin / Estado" style={{ padding: "4rem 2rem", maxWidth: "40rem", margin: "0 auto", textAlign: "center" }}>
         <Badge style={{ marginBottom: "1rem" }}>Panel local</Badge>
         <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "2rem", fontWeight: 700, margin: "0 0 1rem" }}>
           Administración ELSI

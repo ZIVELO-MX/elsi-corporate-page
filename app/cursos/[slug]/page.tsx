@@ -20,7 +20,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
 
   return (
     <main>
-      <section style={{ padding: "56px 0" }}>
+      <section data-section-label="Detalle curso / Contenido" style={{ padding: "56px 0" }}>
         <div className="shell">
           <div className="breadcrumb">
             <Link href="/cursos">Cursos</Link> / {course.title}

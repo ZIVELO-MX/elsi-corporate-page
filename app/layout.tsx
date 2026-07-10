@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { SectionLabelToggle } from "@/components/section-label-toggle";
 
 export const metadata: Metadata = {
   title: "ELSI | Educación y soluciones ambientales",
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const sectionLabelsEnabled = process.env.NEXT_PUBLIC_SECTION_LABELS === "1";
+
   return (
     <html lang="es">
       <head>
@@ -17,7 +20,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body data-section-labels={sectionLabelsEnabled ? "true" : undefined}>
+        <SectionLabelToggle />
         <Header />
         {children}
         <Footer />

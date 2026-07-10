@@ -23,7 +23,7 @@ export default function CursosPage() {
         <p>Explora la oferta formativa propuesta para la nueva web corporativa. La inscripción y compra automatizada quedan fuera de esta fase.</p>
       </div>
 
-      <section style={{ padding: "28px 0 72px" }}>
+      <section data-section-label="Cursos / Catálogo" style={{ padding: "28px 0 72px" }}>
         <div className="shell">
           <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
             {[

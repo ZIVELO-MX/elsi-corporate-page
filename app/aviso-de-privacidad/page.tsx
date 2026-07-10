@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function AvisoPrivacidadPage() {
   return (
     <main>
-      <section className="shell" style={{ padding: "72px 0 96px" }}>
+      <section className="shell" data-section-label="Legal / Aviso de privacidad" style={{ padding: "72px 0 96px" }}>
         <Link href="/" className="text-link" style={{ marginBottom: "2rem", display: "inline-block" }}>← Volver al inicio</Link>
         <div className="privacy-content">
           <span className="eyebrow">Legal</span>
