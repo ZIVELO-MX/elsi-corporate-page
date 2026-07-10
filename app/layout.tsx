@@ -4,6 +4,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { SectionLabelToggle } from "@/components/section-label-toggle";
+import { AuthProvider } from "@/components/auth-context";
 
 export const metadata: Metadata = {
   title: "ELSI | Educación y soluciones ambientales",
@@ -22,8 +23,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body data-section-labels={sectionLabelsEnabled ? "true" : undefined}>
         <SectionLabelToggle />
-        <Header />
-        {children}
+        <AuthProvider>
+          <Header />
+          {children}
+        </AuthProvider>
         <Footer />
         <Toaster />
       </body>

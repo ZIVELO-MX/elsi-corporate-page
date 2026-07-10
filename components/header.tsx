@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/safe-image";
+import { useAuth } from "@/components/auth-context";
 
 export default function Header() {
+  const { user, logout } = useAuth();
+
   return (
     <header className="site-header">
       <div className="header-inner">
@@ -17,7 +22,16 @@ export default function Header() {
           <Link href="/contacto">Contacto</Link>
         </nav>
         <div className="header-actions">
-          <Link href="/contacto" className="header-contact-link">Contacto</Link>
+          {user ? (
+            <>
+              <Link href="/profile" className="header-contact-link">{user.name}</Link>
+              <button type="button" onClick={logout} className="header-contact-link" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13.5px", fontWeight: 800, color: "var(--accent)" }}>
+                Salir
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="header-contact-link">Iniciar sesión</Link>
+          )}
           <Button asChild variant="primary" className="header-primary">
             <Link href="/cursos">Explorar cursos</Link>
           </Button>
