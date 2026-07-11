@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !password) {
       setError("Completa todos los campos");
       return;
     }
@@ -24,7 +25,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone, password }),
       });
       if (!res.ok) throw new Error("Error al registrarse");
       router.push("/login");
@@ -55,6 +56,11 @@ export default function RegisterPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="email" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Correo electrónico</label>
           <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <label htmlFor="phone" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Teléfono</label>
+          <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>

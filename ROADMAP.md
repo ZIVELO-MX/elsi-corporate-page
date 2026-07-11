@@ -8,15 +8,15 @@ Migración y mejora de la página corporativa: header, footer, home, cursos, sol
 
 Login/logout funcional con mock. Registro de usuarios movido a ELS-0003, Google OAuth a ELS-0006, diferenciación de roles a ELS-0004.
 
-## 3. Perfil de usuario — EN PROGRESO (ELS-0003)
+## 3. Perfil de usuario — COMPLETADA (ELS-0003)
 
 - [x] Permitir registro de usuarios.
-- [ ] Mostrar información básica del usuario.
-- [ ] Mostrar los cursos asociados.
-- [ ] Mostrar el estado de acceso de cada curso.
-- [ ] Incluir el enlace externo para entrar al curso.
-- [ ] Mostrar un estado vacío cuando no tenga cursos.
-- [ ] Permitir cerrar sesión desde el perfil.
+- [x] Mostrar información básica del usuario.
+- [x] Mostrar los cursos asociados.
+- [x] Mostrar el estado de acceso de cada curso.
+- [x] Incluir el enlace externo para entrar al curso.
+- [x] Mostrar un estado vacío cuando no tenga cursos.
+- [x] Permitir cerrar sesión desde el perfil.
 
 ## 4. Panel de administración (ELS-0004)
 
@@ -36,7 +36,7 @@ Pendiente.
 
 ## 8. Experiencia visual (ELS-0008)
 
-Pendiente — incluye items movidos de ELS-0001.
+- [x] Avatar con foto en header, clickeable a perfil
 
 ## 9. Gestión de usuarios (ELS-0009)
 

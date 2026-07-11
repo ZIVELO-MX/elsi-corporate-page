@@ -7,13 +7,14 @@ export type User = {
   email: string;
   name: string;
   role: "user" | "admin";
+  avatarUrl?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -34,18 +35,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error("Credenciales inválidas");
       const data = await res.json();
       setUser(data.user);
+      return data.user;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
+  const register = useCallback(async (name: string, email: string, phone: string, password: string) => {
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone, password }),
       });
       if (!res.ok) throw new Error("Error al registrarse");
     } finally {

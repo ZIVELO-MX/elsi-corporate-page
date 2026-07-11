@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/safe-image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-context";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="site-header">
@@ -23,21 +24,21 @@ export default function Header() {
         </nav>
         <div className="header-actions">
           {user ? (
-            <>
-              <Link href="/profile" className="header-contact-link">{user.name}</Link>
-              <button type="button" onClick={logout} className="header-contact-link" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13.5px", fontWeight: 800, color: "var(--accent)" }}>
-                Salir
-              </button>
-            </>
+            <Link href="/profile" className="header-user-link">
+              <Avatar>
+                <AvatarImage src={user.avatarUrl} alt={user.name} />
+                <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className="header-avatar-name">{user.name}</span>
+            </Link>
           ) : (
             <>
-              <Link href="/register" className="header-contact-link">Registrarse</Link>
               <Link href="/login" className="header-contact-link">Iniciar sesión</Link>
+              <Button asChild variant="primary" className="header-primary">
+                <Link href="/cursos">Explorar cursos</Link>
+              </Button>
             </>
           )}
-          <Button asChild variant="primary" className="header-primary">
-            <Link href="/cursos">Explorar cursos</Link>
-          </Button>
         </div>
       </div>
     </header>

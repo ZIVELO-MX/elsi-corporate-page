@@ -21,8 +21,8 @@ export default function LoginPage() {
       return;
     }
     try {
-      await login(email, password);
-      router.push("/admin");
+      const user = await login(email, password);
+      router.push(user.role === "admin" ? "/admin" : "/profile");
     } catch {
       setError("Credenciales inválidas");
     }
@@ -74,7 +74,7 @@ export default function LoginPage() {
 
         <p style={{ textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>
           ¿No tienes cuenta?{" "}
-          <Link href="/contacto" style={{ color: "var(--accent)", fontWeight: 600 }}>Contáctanos</Link>
+          <Link href="/register" style={{ color: "var(--accent)", fontWeight: 600 }}>Crear cuenta</Link>
         </p>
       </form>
     </main>
