@@ -13,6 +13,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -38,13 +39,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const register = useCallback(async (name: string, email: string, password: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      if (!res.ok) throw new Error("Error al registrarse");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -30,7 +30,10 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="header-contact-link">Iniciar sesión</Link>
+            <>
+              <Link href="/register" className="header-contact-link">Registrarse</Link>
+              <Link href="/login" className="header-contact-link">Iniciar sesión</Link>
+            </>
           )}
           <Button asChild variant="primary" className="header-primary">
             <Link href="/cursos">Explorar cursos</Link>

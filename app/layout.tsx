@@ -3,7 +3,6 @@ import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
-import { SectionLabelToggle } from "@/components/section-label-toggle";
 import { AuthProvider } from "@/components/auth-context";
 
 export const metadata: Metadata = {
@@ -22,7 +21,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body data-section-labels={sectionLabelsEnabled ? "true" : undefined}>
-        <SectionLabelToggle />
         <AuthProvider>
           <Header />
           {children}

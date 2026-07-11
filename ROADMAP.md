@@ -4,22 +4,23 @@
 
 Migración y mejora de la página corporativa: header, footer, home, cursos, soluciones, nosotros, contacto, aviso de privacidad. Incluye auditoría visual, sistema de botones, carrusel de servicios, logos reales y tema claro del footer.
 
-## 2. Autenticación — EN PROGRESO (ELS-0002)
+## 2. Autenticación — COMPLETADA (ELS-0002)
 
-- [ ] Permitir registro de usuarios.
-- [ ] Permitir inicio de sesión.
-- [ ] Incluir acceso con Google.
-- [ ] Diferenciar usuarios y administradores.
-- [ ] Crear un login funcional y visualmente cuidado.
-- [ ] Permitir cerrar sesión.
+Login/logout funcional con mock. Registro de usuarios movido a ELS-0003, Google OAuth a ELS-0006, diferenciación de roles a ELS-0004.
 
-## 3. Perfil de usuario (ELS-0003)
+## 3. Perfil de usuario — EN PROGRESO (ELS-0003)
 
-Pendiente — depende de ELS-0002.
+- [x] Permitir registro de usuarios.
+- [ ] Mostrar información básica del usuario.
+- [ ] Mostrar los cursos asociados.
+- [ ] Mostrar el estado de acceso de cada curso.
+- [ ] Incluir el enlace externo para entrar al curso.
+- [ ] Mostrar un estado vacío cuando no tenga cursos.
+- [ ] Permitir cerrar sesión desde el perfil.
 
 ## 4. Panel de administración (ELS-0004)
 
-Pendiente — depende de ELS-0002 y ELS-0003.
+Pendiente — depende de ELS-0003.
 
 ## 5. Operación manual (ELS-0005)
 
@@ -27,7 +28,7 @@ Pendiente — depende de ELS-0003 y ELS-0004.
 
 ## 6. Mejora de perfil (ELS-0006)
 
-Pendiente.
+Pendiente — incluye Google OAuth.
 
 ## 7. Comunicación (ELS-0007)
 
@@ -52,3 +53,11 @@ Pendiente.
 ## 12. Investigaciones abiertas (ELS-0012 a ELS-0015)
 
 Pendientes.
+
+## 13. Contenido real (ELS-0016)
+
+Pendiente — depende de ELS-0001.
+
+## 14. Formularios con backend (ELS-0018)
+
+Pendiente.
