@@ -25,6 +25,12 @@ import {
 const allCourses = getAllCourses();
 const featuredCourses = allCourses.slice(0, 3);
 
+// Feature flags — activar/desactivar desde panel de administración
+const SECTIONS = {
+  stats: false,
+  porqueElegir: false,
+};
+
 const TESTIMONIALS = [
   { quote: '"Certificamos a nuestro equipo de 40 personas en 3 semanas y redujimos 30% las no conformidades ambientales en la primera auditoría siguiente."', name: 'Nombre Apellido', role: 'Gerente de Operaciones · Empresa manufacturera' },
   { quote: '"Más de 300 estudiantes se inscribieron al taller en 48 horas. ELSI entendió exactamente cómo hablarle a nuestra comunidad universitaria."', name: 'Nombre Apellido', role: 'Directora Académica · Universidad' },
@@ -156,7 +162,7 @@ export default function Home() {
       </section>
 
       {/* ===== STATS ===== */}
-      <section className="stats-band reveal" data-section-label="Home / Estadísticas">
+      {SECTIONS.stats && <section className="stats-band reveal" data-section-label="Home / Estadísticas">
         <div className="shell">
           <div className="stats-grid">
             {HOME_STATS.map((stat) => (
@@ -170,7 +176,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ===== HISTORIA RESUMIDA ===== */}
       <section className="historia-resumida" data-section-label="Home / Historia resumida">
@@ -275,7 +281,7 @@ export default function Home() {
       </section>
 
       {/* ===== POR QUÉ ELEGIR ELSI ===== */}
-      <section data-section-label="Home / Por qué elegir ELSI" style={{ padding: "64px 0" }}>
+      {SECTIONS.porqueElegir && <section data-section-label="Home / Por qué elegir ELSI" style={{ padding: "64px 0" }}>
         <div className="shell">
           <span className="section-kicker">¿Por qué elegir ELSI?</span>
           <h2 className="section-title">Un aliado estratégico, no solo un proveedor</h2>
@@ -296,7 +302,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ===== TESTIMONIALES ===== */}
       <section className="testimonios" data-section-label="Home / Testimonios">
