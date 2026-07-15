@@ -1,20 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminData } from "@/lib/admin-data";
+import { useAdminData, type EnrollmentSource } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+function SourceBadge({ source }: { source: EnrollmentSource }) {
+  return (
+    <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.6875rem" }}>
+      {source === "interna" ? "Sitio ELSI" : "Plataforma externa"}
+    </Badge>
+  );
+}
 
 export default function AdminEnrollments() {
   const { courses, users, enrollments, addEnrollment } = useAdminData();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [source, setSource] = useState<EnrollmentSource>("interna");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedCourse) return;
-    addEnrollment(selectedUser, selectedCourse);
+    addEnrollment(selectedUser, selectedCourse, source);
     setSelectedUser("");
     setSelectedCourse("");
+    setSource("interna");
   };
 
   return (
@@ -49,28 +60,46 @@ export default function AdminEnrollments() {
             ))}
           </select>
         </div>
+        <div style={{ minWidth: "10rem" }}>
+          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Origen</label>
+          <select value={source} onChange={e => setSource(e.target.value as EnrollmentSource)}
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            <option value="interna">Sitio ELSI</option>
+            <option value="externa">Plataforma externa</option>
+          </select>
+        </div>
         <Button type="submit" variant="primary">Inscribir</Button>
       </form>
 
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-              {["Usuario", "Curso", "Fecha de inscripción"].map(h => (
-                <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {enrollments.map(e => (
-              <tr key={e.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{e.userName}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.courseName}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.enrolledAt}</td>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
+                {["Usuario", "Curso", "Origen", "Fecha de inscripción"].map(h => (
+                  <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {enrollments.map(e => (
+                <tr key={e.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{e.userName}</td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.courseName}</td>
+                  <td style={{ padding: "0.75rem 1rem" }}><SourceBadge source={e.source} /></td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.enrolledAt}</td>
+                </tr>
+              ))}
+              {enrollments.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ padding: "2rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
+                    Todavía no hay inscripciones registradas.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

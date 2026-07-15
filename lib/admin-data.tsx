@@ -23,6 +23,8 @@ export type AdminUser = {
   createdAt: string;
 };
 
+export type EnrollmentSource = "interna" | "externa";
+
 export type Enrollment = {
   id: string;
   userId: string;
@@ -30,6 +32,7 @@ export type Enrollment = {
   courseId: string;
   courseName: string;
   enrolledAt: string;
+  source: EnrollmentSource;
 };
 
 export type Sale = {
@@ -68,12 +71,12 @@ const INITIAL_USERS: AdminUser[] = [
 ];
 
 const INITIAL_ENROLLMENTS: Enrollment[] = [
-  { id: "e1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-04-01" },
-  { id: "e2", userId: "u2", userName: "María García", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-04-15" },
-  { id: "e3", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-01" },
-  { id: "e4", userId: "u4", userName: "Ana Martínez", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-20" },
-  { id: "e5", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-06-01" },
-  { id: "e6", userId: "u4", userName: "Ana Martínez", courseId: "c3", courseName: "Liderazgo Ambiental Universitario", enrolledAt: "2025-06-10" },
+  { id: "e1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-04-01", source: "interna" },
+  { id: "e2", userId: "u2", userName: "María García", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-04-15", source: "externa" },
+  { id: "e3", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-01", source: "interna" },
+  { id: "e4", userId: "u4", userName: "Ana Martínez", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-20", source: "interna" },
+  { id: "e5", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-06-01", source: "externa" },
+  { id: "e6", userId: "u4", userName: "Ana Martínez", courseId: "c3", courseName: "Liderazgo Ambiental Universitario", enrolledAt: "2025-06-10", source: "interna" },
 ];
 
 const INITIAL_SALES: Sale[] = [
@@ -101,7 +104,7 @@ type AdminData = {
   addCourse: (c: Omit<AdminCourse, "id" | "students" | "createdAt">) => void;
   updateCourse: (id: string, data: Partial<AdminCourse>) => void;
   toggleCourse: (id: string) => void;
-  addEnrollment: (userId: string, courseId: string) => void;
+  addEnrollment: (userId: string, courseId: string, source?: EnrollmentSource) => void;
   addSale: (userId: string, courseId: string, amount: number) => void;
   updateSection: (id: string, data: Partial<PageSection>) => void;
   getUserName: (id: string) => string;
@@ -130,11 +133,11 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     setCourses(prev => prev.map(c => c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c));
   }, []);
 
-  const addEnrollment = useCallback((userId: string, courseId: string) => {
+  const addEnrollment = useCallback((userId: string, courseId: string, source: EnrollmentSource = "interna") => {
     const id = "e" + Date.now();
     const userName = INITIAL_USERS.find(u => u.id === userId)?.name ?? "Desconocido";
     const courseName = INITIAL_COURSES.find(c => c.id === courseId)?.title ?? "Desconocido";
-    setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0] }]);
+    setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0], source }]);
   }, []);
 
   const addSale = useCallback((userId: string, courseId: string, amount: number) => {
