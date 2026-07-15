@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth-context";
 import { AdminDataProvider } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "◇" },
@@ -21,6 +21,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close the mobile drawer on Escape, and whenever the route changes.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   if (!user) {
     return (
@@ -53,21 +67,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminDataProvider>
+      <div className="admin-mobile-bar">
+        <button
+          type="button"
+          aria-expanded={sidebarOpen}
+          aria-controls="admin-sidebar"
+          aria-label={sidebarOpen ? "Cerrar menú de administración" : "Abrir menú de administración"}
+          onClick={() => setSidebarOpen(v => !v)}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: "2.25rem", height: "2.25rem", padding: 0,
+            background: "transparent", border: "1px solid var(--border)",
+            borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "1rem",
+          }}
+        >
+          {sidebarOpen ? "✕" : "☰"}
+        </button>
+        <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "0.9375rem", fontWeight: 700, margin: 0 }}>Administración</h2>
+      </div>
+
+      <div
+        className="admin-sidebar-backdrop"
+        data-open={sidebarOpen}
+        aria-hidden="true"
+        onClick={() => setSidebarOpen(false)}
+      />
+
       <div style={{ display: "flex", minHeight: "calc(100vh - var(--header-height))", marginTop: "var(--header-height)" }}>
-        <aside style={{
-          width: "16rem",
-          flexShrink: 0,
-          background: "var(--card)",
-          borderRight: "1px solid var(--border)",
-          padding: "1.5rem 0",
-          display: "flex",
-          flexDirection: "column",
-          position: "sticky",
-          top: "var(--header-height)",
-          height: "calc(100vh - var(--header-height))",
-          overflowY: "auto",
-          zIndex: 10,
-        }} className="admin-sidebar">
+        <aside
+          id="admin-sidebar"
+          className="admin-sidebar"
+          data-open={sidebarOpen}
+          aria-label="Navegación de administración"
+        >
           <div style={{ padding: "0 1.25rem", marginBottom: "1.5rem" }}>
             <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.25rem" }}>Administración</p>
             <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1rem", fontWeight: 700, margin: 0 }}>ELSI</h2>
@@ -76,19 +108,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {NAV_ITEMS.map(item => {
               const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
               return (
-                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.625rem",
-                  padding: "0.5rem 0.75rem",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "0.875rem",
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "var(--primary)" : "var(--text)",
-                  background: isActive ? "var(--primary-light)" : "transparent",
-                  textDecoration: "none",
-                  transition: "background var(--motion-fast), color var(--motion-fast)",
-                }}>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  aria-current={isActive ? "page" : undefined}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.625rem",
+                    padding: "0.5rem 0.75rem",
+                    borderRadius: "var(--radius-sm)",
+                    fontSize: "0.875rem",
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive ? "var(--primary)" : "var(--text)",
+                    background: isActive ? "var(--primary-light)" : "transparent",
+                    textDecoration: "none",
+                    transition: "background var(--motion-fast), color var(--motion-fast)",
+                  }}>
                   <span style={{ fontSize: "1rem", opacity: 0.6 }}>{item.icon}</span>
                   {item.label}
                 </Link>
