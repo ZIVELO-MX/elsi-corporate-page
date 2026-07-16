@@ -23,6 +23,10 @@ export type AdminUser = {
   createdAt: string;
 };
 
+export type EnrollmentSource = "interna" | "externa";
+export type EnrollmentStatus = "en-curso" | "realizado";
+export type CertificateStatus = "pendiente" | "disponible";
+
 export type Enrollment = {
   id: string;
   userId: string;
@@ -30,6 +34,9 @@ export type Enrollment = {
   courseId: string;
   courseName: string;
   enrolledAt: string;
+  source: EnrollmentSource;
+  status: EnrollmentStatus;
+  certificateStatus?: CertificateStatus;
 };
 
 export type Sale = {
@@ -68,12 +75,12 @@ const INITIAL_USERS: AdminUser[] = [
 ];
 
 const INITIAL_ENROLLMENTS: Enrollment[] = [
-  { id: "e1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-04-01" },
-  { id: "e2", userId: "u2", userName: "María García", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-04-15" },
-  { id: "e3", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-01" },
-  { id: "e4", userId: "u4", userName: "Ana Martínez", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-20" },
-  { id: "e5", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-06-01" },
-  { id: "e6", userId: "u4", userName: "Ana Martínez", courseId: "c3", courseName: "Liderazgo Ambiental Universitario", enrolledAt: "2025-06-10" },
+  { id: "e1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-04-01", source: "interna", status: "realizado", certificateStatus: "disponible" },
+  { id: "e2", userId: "u2", userName: "María García", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-04-15", source: "externa", status: "en-curso" },
+  { id: "e3", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-01", source: "interna", status: "realizado", certificateStatus: "pendiente" },
+  { id: "e4", userId: "u4", userName: "Ana Martínez", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-20", source: "interna", status: "en-curso" },
+  { id: "e5", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-06-01", source: "externa", status: "en-curso" },
+  { id: "e6", userId: "u4", userName: "Ana Martínez", courseId: "c3", courseName: "Liderazgo Ambiental Universitario", enrolledAt: "2025-06-10", source: "interna", status: "en-curso" },
 ];
 
 const INITIAL_SALES: Sale[] = [
@@ -101,7 +108,9 @@ type AdminData = {
   addCourse: (c: Omit<AdminCourse, "id" | "students" | "createdAt">) => void;
   updateCourse: (id: string, data: Partial<AdminCourse>) => void;
   toggleCourse: (id: string) => void;
-  addEnrollment: (userId: string, courseId: string) => void;
+  addEnrollment: (userId: string, courseId: string, source?: EnrollmentSource) => void;
+  completeEnrollment: (id: string, method: "constancia" | "manual") => void;
+  completeEnrollmentsBulk: (ids: string[]) => void;
   addSale: (userId: string, courseId: string, amount: number) => void;
   updateSection: (id: string, data: Partial<PageSection>) => void;
   getUserName: (id: string) => string;
@@ -130,11 +139,25 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     setCourses(prev => prev.map(c => c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c));
   }, []);
 
-  const addEnrollment = useCallback((userId: string, courseId: string) => {
+  const addEnrollment = useCallback((userId: string, courseId: string, source: EnrollmentSource = "interna") => {
     const id = "e" + Date.now();
     const userName = INITIAL_USERS.find(u => u.id === userId)?.name ?? "Desconocido";
     const courseName = INITIAL_COURSES.find(c => c.id === courseId)?.title ?? "Desconocido";
-    setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0] }]);
+    setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0], source, status: "en-curso" }]);
+  }, []);
+
+  // "constancia" = admin cargo una constancia -> finalizacion automatica, pendiente de publicacion.
+  // "manual" = boton de respaldo para casos excepcionales, sin constancia asociada.
+  const completeEnrollment = useCallback((id: string, method: "constancia" | "manual") => {
+    setEnrollments(prev => prev.map(e => e.id === id
+      ? { ...e, status: "realizado", certificateStatus: method === "constancia" ? "pendiente" : e.certificateStatus }
+      : e));
+  }, []);
+
+  const completeEnrollmentsBulk = useCallback((ids: string[]) => {
+    setEnrollments(prev => prev.map(e => ids.includes(e.id)
+      ? { ...e, status: "realizado", certificateStatus: "pendiente" }
+      : e));
   }, []);
 
   const addSale = useCallback((userId: string, courseId: string, amount: number) => {
@@ -157,7 +180,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AdminDataContext.Provider value={{ courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, addSale, updateSection, getUserName, getCourseName }}>
+    <AdminDataContext.Provider value={{ courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, addSale, updateSection, getUserName, getCourseName }}>
       {children}
     </AdminDataContext.Provider>
   );
