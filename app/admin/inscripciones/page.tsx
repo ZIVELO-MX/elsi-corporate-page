@@ -32,21 +32,25 @@ function StatusCell({ enrollment }: { enrollment: Enrollment }) {
 }
 
 function CertificateDialog({
-  enrollments, onClose, onConfirm,
+  enrollments, isReplace, onClose, onConfirm,
 }: {
   enrollments: Enrollment[];
+  isReplace: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
   const isBulk = enrollments.length > 1;
+  const title = isBulk ? `Cargar constancias (${enrollments.length})` : isReplace ? "Reemplazar constancia" : "Cargar constancia";
   return (
     <Dialog open={enrollments.length > 0} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isBulk ? `Cargar constancias (${enrollments.length})` : "Cargar constancia"}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {isBulk
               ? "Se marcará como realizado a todos los alumnos seleccionados y sus constancias quedarán pendientes de publicación."
+              : isReplace
+              ? `Se reemplazará el archivo actual y la constancia volverá a quedar pendiente de publicación. ${enrollments[0]?.userName} — ${enrollments[0]?.courseName}`
               : `${enrollments[0]?.userName} — ${enrollments[0]?.courseName}`}
           </DialogDescription>
         </DialogHeader>
@@ -74,7 +78,7 @@ function CertificateDialog({
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
           <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
           <Button type="button" variant="primary" onClick={onConfirm}>
-            {isBulk ? "Cargar constancias" : "Cargar constancia"}
+            {isBulk ? "Cargar constancias" : isReplace ? "Reemplazar constancia" : "Cargar constancia"}
           </Button>
         </div>
       </DialogContent>
@@ -83,12 +87,13 @@ function CertificateDialog({
 }
 
 export default function AdminEnrollments() {
-  const { courses, users, enrollments, addEnrollment, completeEnrollment, completeEnrollmentsBulk } = useAdminData();
+  const { courses, users, enrollments, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable } = useAdminData();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [source, setSource] = useState<EnrollmentSource>("interna");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [certificateTarget, setCertificateTarget] = useState<Enrollment[]>([]);
+  const [isReplace, setIsReplace] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +123,7 @@ export default function AdminEnrollments() {
     }
     setSelectedIds([]);
     setCertificateTarget([]);
+    setIsReplace(false);
   };
 
   return (
@@ -223,7 +229,7 @@ export default function AdminEnrollments() {
                   <td style={{ padding: "0.75rem 1rem" }}>
                     {e.status === "en-curso" && (
                       <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                        <Button type="button" variant="outline" size="sm" onClick={() => setCertificateTarget([e])}>
+                        <Button type="button" variant="outline" size="sm" onClick={() => { setIsReplace(false); setCertificateTarget([e]); }}>
                           <Upload size={12} /> Constancia
                         </Button>
                         <Button
@@ -232,6 +238,21 @@ export default function AdminEnrollments() {
                           onClick={() => completeEnrollment(e.id, "manual")}
                         >
                           <CheckCircle2 size={12} /> Marcar realizado
+                        </Button>
+                      </div>
+                    )}
+                    {e.status === "realizado" && (
+                      <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
+                        {e.certificateStatus === "pendiente" && (
+                          <Button type="button" variant="ghost" size="sm" onClick={() => markCertificateAvailable(e.id)}>
+                            <CheckCircle2 size={12} /> Marcar disponible
+                          </Button>
+                        )}
+                        <Button
+                          type="button" variant="outline" size="sm"
+                          onClick={() => { setIsReplace(!!e.certificateStatus); setCertificateTarget([e]); }}
+                        >
+                          <Upload size={12} /> {e.certificateStatus ? "Reemplazar" : "Cargar constancia"}
                         </Button>
                       </div>
                     )}
@@ -252,7 +273,8 @@ export default function AdminEnrollments() {
 
       <CertificateDialog
         enrollments={certificateTarget}
-        onClose={() => setCertificateTarget([])}
+        isReplace={isReplace}
+        onClose={() => { setCertificateTarget([]); setIsReplace(false); }}
         onConfirm={confirmCertificates}
       />
     </div>

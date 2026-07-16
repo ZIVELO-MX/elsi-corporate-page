@@ -148,6 +148,7 @@ type AdminData = {
   addEnrollment: (userId: string, courseId: string, source?: EnrollmentSource) => void;
   completeEnrollment: (id: string, method: "constancia" | "manual") => void;
   completeEnrollmentsBulk: (ids: string[]) => void;
+  markCertificateAvailable: (id: string) => void;
   addSale: (userId: string, courseId: string, amount: number) => void;
   updateSection: (id: string, data: Partial<PageSection>) => void;
   getUserName: (id: string) => string;
@@ -197,6 +198,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       : e));
   }, []);
 
+  const markCertificateAvailable = useCallback((id: string) => {
+    setEnrollments(prev => prev.map(e => e.id === id ? { ...e, certificateStatus: "disponible" } : e));
+  }, []);
+
   const addSale = useCallback((userId: string, courseId: string, amount: number) => {
     const id = "s" + Date.now();
     const userName = INITIAL_USERS.find(u => u.id === userId)?.name ?? "Desconocido";
@@ -217,7 +222,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AdminDataContext.Provider value={{ courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, addSale, updateSection, getUserName, getCourseName }}>
+    <AdminDataContext.Provider value={{ courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }}>
       {children}
     </AdminDataContext.Provider>
   );
