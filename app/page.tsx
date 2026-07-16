@@ -40,19 +40,22 @@ const TESTIMONIALS = [
 
 const HERO_AVATARS = [
   {
-    src: "/images/avatar-1.webp",
-    alt: "Estudiantes de ELSI en un evento de liderazgo ambiental",
-    fallback: "EL",
-  },
-  {
-    src: "/images/avatar-2.webp",
-    alt: "Estudiantes de ELSI en un evento academico en la Universidad de Guanajuato",
-    fallback: "UG",
-  },
-  {
-    src: "/images/avatar-3.webp",
-    alt: "Miembros del equipo de ELSI en una conferencia",
+    src: "https://upload.wikimedia.org/wikipedia/en/d/dc/Pocket_Mortys.png",
+    alt: "Estudiante participante en una sesion formativa",
     fallback: "EC",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658307900",
+  },
+  {
+    src: "https://i.pinimg.com/736x/5f/af/6e/5faf6ef038c6185eb6c67e4bfccce4ee.jpg",
+    alt: "Participante de programa educativo ambiental",
+    fallback: "UG",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658311952",
+  },
+  {
+    src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9-Y5l2RCU9deuPoFZ9ZsVbXsUINjGtE1V0jrW--SECAeBliTMxdG2vwRO&s=10",
+    alt: "Estudiante en actividad de capacitacion",
+    fallback: "EL",
+    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658302076",
   },
 ];
 
@@ -113,7 +116,7 @@ export default function Home() {
               <AvatarGroup className="hero-avatar-group" aria-label="Participantes formados por ELSI">
                 {HERO_AVATARS.map((avatar) => (
                   <Avatar key={avatar.src} size="lg" className="hero-avatar-item">
-                    <AvatarImage src={avatar.src} alt={avatar.alt} />
+                    <AvatarImage src={avatar.src} alt={avatar.alt} title={avatar.attribution} />
                     <AvatarFallback>{avatar.fallback}</AvatarFallback>
                   </Avatar>
                 ))}

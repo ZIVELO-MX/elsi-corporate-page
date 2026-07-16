@@ -72,27 +72,6 @@
       "width": 1200,
       "height": 700,
       "label": "Soluciones / Educación universitaria"
-    },
-    {
-      "id": "avatar-1",
-      "source": "Gallery ELSI/small-portrait-ceremony-01.jpeg",
-      "width": 200,
-      "height": 200,
-      "label": "Hero / Avatar 1"
-    },
-    {
-      "id": "avatar-2",
-      "source": "Gallery ELSI/small-podium-speech-01.jpeg",
-      "width": 200,
-      "height": 200,
-      "label": "Hero / Avatar 2"
-    },
-    {
-      "id": "avatar-3",
-      "source": "Gallery ELSI/small-portrait-leadership-01.jpeg",
-      "width": 200,
-      "height": 200,
-      "label": "Hero / Avatar 3"
     }
   ]
 }
