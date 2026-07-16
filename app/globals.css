@@ -379,6 +379,8 @@ body[data-section-labels="true"] section[data-section-label]::before {
   background: var(--paper) !important;
   box-shadow: var(--shadow-card-hover) !important;
 }
+.solution-card { padding-top: 0 !important; }
+.solution-card-media { aspect-ratio: 16 / 9; margin: 0 0 8px; }
 .solution-card-header { gap: 12px !important; }
 .solution-card-icon {
   width: 48px;
