@@ -38,7 +38,7 @@ export default function AdminSales() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
@@ -48,7 +48,7 @@ export default function AdminSales() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
           <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
@@ -64,27 +64,36 @@ export default function AdminSales() {
       </form>
 
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-              {["Usuario", "Curso", "Monto", "Fecha"].map(h => (
-                <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sales.map(s => (
-              <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{s.userName}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.courseName}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
-                  {s.amount === 0 ? <span style={{ color: "var(--leaf)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
-                </td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.soldAt}</td>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
+                {["Usuario", "Curso", "Monto", "Fecha"].map(h => (
+                  <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sales.map(s => (
+                <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{s.userName}</td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.courseName}</td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
+                    {s.amount === 0 ? <span style={{ color: "var(--leaf)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
+                  </td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.soldAt}</td>
+                </tr>
+              ))}
+              {sales.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ padding: "2.5rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
+                    Aún no hay ventas registradas. Usa el formulario para registrar la primera.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
