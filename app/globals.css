@@ -718,6 +718,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-sidebar {
   width: 16rem;
   flex-shrink: 0;
+  align-self: flex-start;
   background: var(--card);
   border-right: 1px solid var(--border);
   padding: 1.5rem 0;
@@ -725,12 +726,28 @@ body[data-section-labels="true"] section[data-section-label]::before {
   flex-direction: column;
   position: sticky;
   top: var(--header-height);
-  height: calc(100vh - var(--header-height));
-  overflow-y: auto;
   z-index: 10;
 }
 .admin-mobile-bar { display: none; }
 .admin-sidebar-backdrop { display: none; }
+
+.admin-kpi-tile { transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease; }
+.admin-user-row-btn { transition: color var(--motion-fast) ease, transform var(--motion-fast) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .admin-kpi-tile:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+  .admin-user-row-btn:hover { color: var(--primary); }
+}
+.admin-kpi-tile:active, .admin-user-row-btn:active { transform: scale(0.98); }
+
+.admin-checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
 
 @media (max-width: 800px) {
   .admin-mobile-bar {

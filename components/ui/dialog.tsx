@@ -57,7 +57,7 @@ function DialogContent({
         {showClose && (
           <DialogPrimitive.Close
             aria-label="Cerrar"
-            className="absolute top-4 right-4 rounded-[var(--radius-sm)] p-1 opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+            className="absolute top-4 right-4 rounded-[var(--radius-sm)] p-1 opacity-70 transition-[opacity,transform] duration-[var(--motion-fast)] hover:opacity-100 focus-visible:opacity-100 active:scale-[0.9]"
           >
             <X size={16} />
           </DialogPrimitive.Close>

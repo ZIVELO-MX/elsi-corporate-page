@@ -193,7 +193,7 @@ export default function AdminEnrollments() {
                     checked={allPendingSelected}
                     onChange={toggleSelectAll}
                     disabled={pendingIds.length === 0}
-                    style={{ width: "1rem", height: "1rem" }}
+                    className="admin-checkbox"
                   />
                 </th>
                 {["Usuario", "Curso", "Origen", "Estado", "Fecha de inscripción", ""].map(h => (
@@ -211,7 +211,7 @@ export default function AdminEnrollments() {
                         aria-label={`Seleccionar inscripción de ${e.userName}`}
                         checked={selectedIds.includes(e.id)}
                         onChange={() => toggleSelect(e.id)}
-                        style={{ width: "1rem", height: "1rem" }}
+                        className="admin-checkbox"
                       />
                     )}
                   </td>

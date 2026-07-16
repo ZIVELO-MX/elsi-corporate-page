@@ -40,14 +40,12 @@ export default function AdminDashboard() {
           <Link
             key={card.label}
             href={card.href}
+            className="admin-kpi-tile"
             style={{
               display: "block", padding: "1.25rem", background: "var(--card)",
               borderRadius: "var(--radius)", border: "1px solid var(--border)",
               textDecoration: "none", color: "inherit",
-              transition: "border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease",
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.boxShadow = "var(--shadow-sm)"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; }}
           >
             <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.5rem" }}>{card.label}</p>
             <p style={{ fontFamily: "'Sora',sans-serif", fontSize: "2rem", fontWeight: 800, margin: "0 0 0.25rem", color: "var(--primary)" }}>{card.value}</p>

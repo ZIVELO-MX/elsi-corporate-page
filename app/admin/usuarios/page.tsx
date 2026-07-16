@@ -132,13 +132,11 @@ export default function AdminUsers() {
                     <button
                       type="button"
                       onClick={() => setSelected(u)}
+                      className="admin-user-row-btn"
                       style={{
                         width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500,
                         background: "transparent", border: "none", cursor: "pointer", color: "var(--text)",
-                        transition: "color var(--motion-fast) ease",
                       }}
-                      onMouseOver={e => { e.currentTarget.style.color = "var(--primary)"; }}
-                      onMouseOut={e => { e.currentTarget.style.color = "var(--text)"; }}
                     >
                       {u.name}
                     </button>
