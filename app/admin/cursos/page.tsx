@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+type StatusFilter = "todos" | "active" | "inactive";
 
 type CourseForm = {
   title: string;
@@ -37,6 +40,17 @@ export default function AdminCourses() {
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CourseForm>(emptyForm());
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter(c => {
+      if (statusFilter !== "todos" && c.status !== statusFilter) return false;
+      if (!q) return true;
+      return c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q);
+    });
+  }, [courses, query, statusFilter]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,12 +83,40 @@ export default function AdminCourses() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", marginBottom: "1.5rem" }}>
         <div>
           <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Cursos</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>{courses.length} cursos registrados</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+            {filtered.length === courses.length
+              ? `${courses.length} cursos registrados`
+              : `${filtered.length} de ${courses.length} cursos`}
+          </p>
         </div>
         <Button variant="primary" onClick={startCreate}>Crear curso</Button>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: "14rem" }}>
+          <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar por título o categoría"
+            aria-label="Buscar cursos"
+            style={{ width: "100%", padding: "0.5rem 0.75rem 0.5rem 2rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }}
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+          aria-label="Filtrar por estado"
+          style={{ padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }}
+        >
+          <option value="todos">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+        </select>
       </div>
 
       <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditing(null); } }}>
@@ -185,7 +227,7 @@ export default function AdminCourses() {
             </tr>
           </thead>
           <tbody>
-            {courses.map(c => (
+            {filtered.map(c => (
               <tr key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
                 <td style={{ padding: 0 }}>
                   <button
@@ -211,6 +253,13 @@ export default function AdminCourses() {
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>Editar &rarr;</td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ padding: "2.5rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
+                  Ningún curso coincide con los filtros actuales.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
         </div>

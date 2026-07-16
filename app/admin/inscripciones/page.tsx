@@ -1,11 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { Upload, CheckCircle2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Upload, CheckCircle2, Search } from "lucide-react";
 import { useAdminData, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+type StatusFilter = "todas" | "en-curso" | "realizado";
+type SourceFilter = "todas" | EnrollmentSource;
+
+const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
+
+function ConfirmDialog({
+  open, title, description, confirmLabel, onClose, onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent style={{ maxWidth: "26rem" }}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="primary" onClick={onConfirm}>{confirmLabel}</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function SourceBadge({ source }: { source: EnrollmentSource }) {
   return (
@@ -94,6 +125,10 @@ export default function AdminEnrollments() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [certificateTarget, setCertificateTarget] = useState<Enrollment[]>([]);
   const [isReplace, setIsReplace] = useState(false);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todas");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("todas");
+  const [manualTarget, setManualTarget] = useState<Enrollment | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +139,17 @@ export default function AdminEnrollments() {
     setSource("interna");
   };
 
-  const pendingIds = enrollments.filter(e => e.status === "en-curso").map(e => e.id);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return enrollments.filter(e => {
+      if (statusFilter !== "todas" && e.status !== statusFilter) return false;
+      if (sourceFilter !== "todas" && e.source !== sourceFilter) return false;
+      if (!q) return true;
+      return e.userName.toLowerCase().includes(q) || e.courseName.toLowerCase().includes(q);
+    });
+  }, [enrollments, query, statusFilter, sourceFilter]);
+
+  const pendingIds = filtered.filter(e => e.status === "en-curso").map(e => e.id);
   const allPendingSelected = pendingIds.length > 0 && pendingIds.every(id => selectedIds.includes(id));
 
   const toggleSelectAll = () => {
@@ -130,7 +175,11 @@ export default function AdminEnrollments() {
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Inscripciones</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>{enrollments.length} inscripciones registradas</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+          {filtered.length === enrollments.length
+            ? `${enrollments.length} inscripciones registradas`
+            : `${filtered.length} de ${enrollments.length} inscripciones`}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} style={{
@@ -141,7 +190,7 @@ export default function AdminEnrollments() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
@@ -151,7 +200,7 @@ export default function AdminEnrollments() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
           <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
@@ -161,13 +210,37 @@ export default function AdminEnrollments() {
         <div style={{ minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Origen</label>
           <select value={source} onChange={e => setSource(e.target.value as EnrollmentSource)}
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }}>
+            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
             <option value="interna">Sitio ELSI</option>
             <option value="externa">Plataforma externa</option>
           </select>
         </div>
         <Button type="submit" variant="primary">Inscribir</Button>
       </form>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: "14rem" }}>
+          <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar por alumno o curso"
+            aria-label="Buscar inscripciones"
+            style={{ ...filterControlStyle, width: "100%", paddingLeft: "2rem" }}
+          />
+        </div>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" style={filterControlStyle}>
+          <option value="todas">Todos los estados</option>
+          <option value="en-curso">En curso</option>
+          <option value="realizado">Realizado</option>
+        </select>
+        <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value as SourceFilter)} aria-label="Filtrar por origen" style={filterControlStyle}>
+          <option value="todas">Todos los orígenes</option>
+          <option value="interna">Sitio ELSI</option>
+          <option value="externa">Plataforma externa</option>
+        </select>
+      </div>
 
       {selectedIds.length > 0 && (
         <div style={{
@@ -208,7 +281,7 @@ export default function AdminEnrollments() {
               </tr>
             </thead>
             <tbody>
-              {enrollments.map(e => (
+              {filtered.map(e => (
                 <tr key={e.id} style={{ borderBottom: "1px solid var(--border)" }}>
                   <td style={{ padding: "0.75rem 1rem" }}>
                     {e.status === "en-curso" && (
@@ -235,7 +308,7 @@ export default function AdminEnrollments() {
                         <Button
                           type="button" variant="ghost" size="sm"
                           title="Respaldo para casos excepcionales, sin constancia"
-                          onClick={() => completeEnrollment(e.id, "manual")}
+                          onClick={() => setManualTarget(e)}
                         >
                           <CheckCircle2 size={12} /> Marcar realizado
                         </Button>
@@ -259,10 +332,12 @@ export default function AdminEnrollments() {
                   </td>
                 </tr>
               ))}
-              {enrollments.length === 0 && (
+              {filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} style={{ padding: "2rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                    Todavía no hay inscripciones registradas.
+                    {enrollments.length === 0
+                      ? "Todavía no hay inscripciones registradas."
+                      : "Ninguna inscripción coincide con los filtros actuales."}
                   </td>
                 </tr>
               )}
@@ -276,6 +351,17 @@ export default function AdminEnrollments() {
         isReplace={isReplace}
         onClose={() => { setCertificateTarget([]); setIsReplace(false); }}
         onConfirm={confirmCertificates}
+      />
+
+      <ConfirmDialog
+        open={!!manualTarget}
+        title="Marcar como realizado"
+        description={manualTarget
+          ? `Se marcará el curso como realizado para ${manualTarget.userName} (${manualTarget.courseName}) sin cargar una constancia. Úsalo solo para casos excepcionales.`
+          : ""}
+        confirmLabel="Marcar realizado"
+        onClose={() => setManualTarget(null)}
+        onConfirm={() => { if (manualTarget) completeEnrollment(manualTarget.id, "manual"); setManualTarget(null); }}
       />
     </div>
   );
