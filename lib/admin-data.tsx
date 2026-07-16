@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 
+export type CourseModality = "online" | "presencial";
+
 export type AdminCourse = {
   id: string;
   title: string;
@@ -16,6 +18,11 @@ export type AdminCourse = {
   duration: string;
   targetAudience: string;
   curriculum: string;
+  modality: CourseModality;
+  presencialLocation: string;
+  presencialDate: string;
+  presencialTime: string;
+  presencialInfo: string;
 };
 
 export type AdminUser = {
@@ -65,27 +72,35 @@ const INITIAL_COURSES: AdminCourse[] = [
   { id: "c1", title: "Fundamentos de Educación Ambiental", category: "Sostenibilidad", slug: "fundamentos-de-educacion-ambiental", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 184, createdAt: "2025-01-15",
     synopsis: "Introducción a los principios de la educación ambiental aplicada a contextos comunitarios y escolares.",
     duration: "8 horas", targetAudience: "Docentes, promotores comunitarios y público general",
-    curriculum: "Fundamentos de sostenibilidad\n- Recursos naturales y su gestión\n- Huella ecológica\nEstrategias de educación ambiental\n- Diseño de talleres\n- Evaluación de impacto" },
+    curriculum: "Fundamentos de sostenibilidad\n- Recursos naturales y su gestión\n- Huella ecológica\nEstrategias de educación ambiental\n- Diseño de talleres\n- Evaluación de impacto",
+    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
   { id: "c2", title: "Cumplimiento Ambiental para Empresas", category: "Normatividad", slug: "cumplimiento-ambiental-para-empresas", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 92, createdAt: "2025-02-20",
     synopsis: "Marco normativo ambiental vigente y su aplicación práctica en procesos industriales.",
     duration: "12 horas", targetAudience: "Responsables de cumplimiento y gerencia de operaciones",
-    curriculum: "Marco legal ambiental\n- Normas federales y estatales\n- Permisos y licencias\nAuditoría y reporte\n- Indicadores de cumplimiento\n- Documentación requerida" },
-  { id: "c3", title: "Liderazgo Ambiental Universitario", category: "Formación", slug: "liderazgo-ambiental-universitario", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 56, createdAt: "2025-03-10",
+    curriculum: "Marco legal ambiental\n- Normas federales y estatales\n- Permisos y licencias\nAuditoría y reporte\n- Indicadores de cumplimiento\n- Documentación requerida",
+    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
+  { id: "c3", title: "Liderazgo Ambiental Universitario", category: "Formación", slug: "liderazgo-ambiental-universitario", price: 0, status: "active", externalUrl: "", students: 56, createdAt: "2025-03-10",
     synopsis: "Formación de liderazgo estudiantil orientado a iniciativas de sostenibilidad en campus universitarios.",
     duration: "6 horas", targetAudience: "Estudiantes universitarios y grupos ambientales estudiantiles",
-    curriculum: "Liderazgo y trabajo en equipo\n- Gestión de proyectos estudiantiles\nIniciativas sostenibles en campus\n- Casos de éxito\n- Planeación de campañas" },
+    curriculum: "Liderazgo y trabajo en equipo\n- Gestión de proyectos estudiantiles\nIniciativas sostenibles en campus\n- Casos de éxito\n- Planeación de campañas",
+    modality: "presencial", presencialLocation: "Campus Central ELSI, Auditorio B", presencialDate: "2025-08-14", presencialTime: "09:00 - 13:00",
+    presencialInfo: "Cupo limitado a 40 personas. Se recomienda llegar 15 minutos antes del inicio." },
   { id: "c4", title: "Gestión de Residuos Industriales", category: "Operaciones", slug: "gestion-de-residuos-industriales", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-04-05",
     synopsis: "Manejo integral de residuos peligrosos y no peligrosos en entornos industriales.",
     duration: "10 horas", targetAudience: "Personal operativo y de seguridad industrial",
-    curriculum: "Clasificación de residuos\n- Peligrosos y no peligrosos\nManejo y disposición\n- Almacenamiento temporal\n- Proveedores autorizados" },
+    curriculum: "Clasificación de residuos\n- Peligrosos y no peligrosos\nManejo y disposición\n- Almacenamiento temporal\n- Proveedores autorizados",
+    modality: "presencial", presencialLocation: "Planta industrial ELSI, Zona Norte", presencialDate: "Por confirmar", presencialTime: "Por confirmar",
+    presencialInfo: "Requiere equipo de protección personal, proporcionado por la empresa anfitriona." },
   { id: "c5", title: "Impacto Ambiental y Permisos", category: "Normatividad", slug: "impacto-ambiental-y-permisos", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-05-12",
     synopsis: "Evaluación de impacto ambiental y proceso de obtención de permisos para nuevos proyectos.",
     duration: "8 horas", targetAudience: "Equipos de proyectos y consultoría ambiental",
-    curriculum: "Manifiesto de impacto ambiental\n- Estructura y contenido\nProceso de permisos\n- Autoridades competentes\n- Tiempos y requisitos" },
+    curriculum: "Manifiesto de impacto ambiental\n- Estructura y contenido\nProceso de permisos\n- Autoridades competentes\n- Tiempos y requisitos",
+    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
   { id: "c6", title: "Comunicación de Sostenibilidad", category: "Sostenibilidad", slug: "comunicacion-de-sostenibilidad", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-06-01",
     synopsis: "Estrategias de comunicación para divulgar resultados y compromisos de sostenibilidad.",
     duration: "5 horas", targetAudience: "Equipos de comunicación y relaciones institucionales",
-    curriculum: "Narrativa de sostenibilidad\n- Mensajes clave por audiencia\nCanales y formatos\n- Reportes públicos\n- Redes y medios" },
+    curriculum: "Narrativa de sostenibilidad\n- Mensajes clave por audiencia\nCanales y formatos\n- Reportes públicos\n- Redes y medios",
+    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
 ];
 
 const INITIAL_USERS: AdminUser[] = [

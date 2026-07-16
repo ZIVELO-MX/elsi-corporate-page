@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminData, type AdminCourse } from "@/lib/admin-data";
+import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -16,11 +16,17 @@ type CourseForm = {
   duration: string;
   targetAudience: string;
   curriculum: string;
+  modality: CourseModality;
+  presencialLocation: string;
+  presencialDate: string;
+  presencialTime: string;
+  presencialInfo: string;
 };
 
 const emptyForm = (): CourseForm => ({
   title: "", category: "", slug: "", price: 0, externalUrl: "",
   synopsis: "", duration: "", targetAudience: "", curriculum: "",
+  modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "",
 });
 
 const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" };
@@ -49,6 +55,8 @@ export default function AdminCourses() {
     setForm({
       title: c.title, category: c.category, slug: c.slug, price: c.price, externalUrl: c.externalUrl,
       synopsis: c.synopsis, duration: c.duration, targetAudience: c.targetAudience, curriculum: c.curriculum,
+      modality: c.modality, presencialLocation: c.presencialLocation, presencialDate: c.presencialDate,
+      presencialTime: c.presencialTime, presencialInfo: c.presencialInfo,
     });
     setShowForm(true);
   };
@@ -119,9 +127,44 @@ export default function AdminCourses() {
                   style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
               </div>
               <div>
-                <label style={fieldLabelStyle}>Enlace externo</label>
-                <input value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />
+                <label style={fieldLabelStyle}>Modalidad</label>
+                <select value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} style={fieldInputStyle}>
+                  <option value="online">En línea</option>
+                  <option value="presencial">Presencial</option>
+                </select>
               </div>
+              {form.modality === "online" ? (
+                <div>
+                  <label style={fieldLabelStyle}>Enlace de acceso en línea</label>
+                  <input value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label style={fieldLabelStyle}>Lugar</label>
+                    <input required value={form.presencialLocation} onChange={e => setForm({ ...form, presencialLocation: e.target.value })}
+                      placeholder="Ej. Campus Central ELSI, Auditorio B" style={fieldInputStyle} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    <div>
+                      <label style={fieldLabelStyle}>Fecha</label>
+                      <input required value={form.presencialDate} onChange={e => setForm({ ...form, presencialDate: e.target.value })}
+                        placeholder="Ej. 2025-08-14" style={fieldInputStyle} />
+                    </div>
+                    <div>
+                      <label style={fieldLabelStyle}>Hora</label>
+                      <input required value={form.presencialTime} onChange={e => setForm({ ...form, presencialTime: e.target.value })}
+                        placeholder="Ej. 09:00 - 13:00" style={fieldInputStyle} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={fieldLabelStyle}>Información general</label>
+                    <textarea rows={2} value={form.presencialInfo} onChange={e => setForm({ ...form, presencialInfo: e.target.value })}
+                      placeholder="Cupo, requisitos de acceso, recomendaciones para asistentes."
+                      style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+                  </div>
+                </>
+              )}
             </div>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
               <Button type="button" onClick={() => { setShowForm(false); setEditing(null); }}>Cancelar</Button>
@@ -133,10 +176,10 @@ export default function AdminCourses() {
 
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", minWidth: "40rem", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", minWidth: "46rem", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-              {["Título", "Categoría", "Duración", "Estado", "Estudiantes", "Acciones"].map(h => (
+              {["Título", "Categoría", "Modalidad", "Duración", "Estado", "Estudiantes", "Acciones"].map(h => (
                 <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
               ))}
             </tr>
@@ -155,6 +198,9 @@ export default function AdminCourses() {
                   </button>
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.category}</td>
+                <td style={{ padding: "0.75rem 1rem" }}>
+                  <Badge variant="outline" style={{ fontSize: "0.6875rem" }}>{c.modality === "online" ? "En línea" : "Presencial"}</Badge>
+                </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.duration}</td>
                 <td style={{ padding: "0.75rem 1rem" }}>
                   <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ cursor: "pointer" }} onClick={() => toggleCourse(c.id)}>
