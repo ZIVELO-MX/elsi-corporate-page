@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAdminData, type AdminCourse } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type CourseForm = {
   title: string;
@@ -11,9 +12,19 @@ type CourseForm = {
   slug: string;
   price: number;
   externalUrl: string;
+  synopsis: string;
+  duration: string;
+  targetAudience: string;
+  curriculum: string;
 };
 
-const emptyForm = (): CourseForm => ({ title: "", category: "", slug: "", price: 0, externalUrl: "" });
+const emptyForm = (): CourseForm => ({
+  title: "", category: "", slug: "", price: 0, externalUrl: "",
+  synopsis: "", duration: "", targetAudience: "", curriculum: "",
+});
+
+const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" };
+const fieldInputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" };
 
 export default function AdminCourses() {
   const { courses, addCourse, updateCourse, toggleCourse } = useAdminData();
@@ -35,7 +46,10 @@ export default function AdminCourses() {
 
   const startEdit = (c: AdminCourse) => {
     setEditing(c.id);
-    setForm({ title: c.title, category: c.category, slug: c.slug, price: c.price, externalUrl: c.externalUrl });
+    setForm({
+      title: c.title, category: c.category, slug: c.slug, price: c.price, externalUrl: c.externalUrl,
+      synopsis: c.synopsis, duration: c.duration, targetAudience: c.targetAudience, curriculum: c.curriculum,
+    });
     setShowForm(true);
   };
 
@@ -55,39 +69,58 @@ export default function AdminCourses() {
         <Button variant="primary" onClick={startCreate}>Crear curso</Button>
       </div>
 
-      {showForm && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 50,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,0,0.3)", padding: "1rem",
-        }} onClick={() => { setShowForm(false); setEditing(null); }}>
-          <form onSubmit={handleSubmit} onClick={e => e.stopPropagation()} style={{
-            background: "var(--card)", borderRadius: "var(--radius-lg)",
-            padding: "2rem", width: "100%", maxWidth: "32rem",
-            boxShadow: "var(--shadow-card)", maxHeight: "90vh", overflowY: "auto",
-          }}>
-            <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.125rem", fontWeight: 700, margin: "0 0 1.5rem" }}>
-              {editing ? "Editar curso" : "Crear curso"}
-            </h2>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditing(null); } }}>
+        <DialogContent style={{ maxWidth: "34rem", maxHeight: "85vh", overflowY: "auto" }}>
+          <DialogHeader>
+            <DialogTitle>{editing ? "Editar curso" : "Crear curso"}</DialogTitle>
+            <DialogDescription>Información pública y operativa que verán alumnos y administradores.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {(["title", "category", "slug"] as const).map(field => (
-                <div key={field}>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem", textTransform: "capitalize" }}>
-                    {field === "slug" ? "Slug" : field === "title" ? "Título" : "Categoría"}
-                  </label>
-                  <input required value={form[field]} onChange={e => setForm({ ...form, [field]: e.target.value })}
-                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }} />
-                </div>
-              ))}
               <div>
-                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Precio</label>
-                <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
-                  style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }} />
+                <label style={fieldLabelStyle}>Título</label>
+                <input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={fieldInputStyle} />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={fieldLabelStyle}>Categoría</label>
+                  <input required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={fieldInputStyle} />
+                </div>
+                <div>
+                  <label style={fieldLabelStyle}>Slug</label>
+                  <input required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} style={fieldInputStyle} />
+                </div>
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Enlace externo</label>
-                <input value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..."
-                  style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }} />
+                <label style={fieldLabelStyle}>Sinopsis</label>
+                <textarea required rows={3} value={form.synopsis} onChange={e => setForm({ ...form, synopsis: e.target.value })}
+                  placeholder="Resumen breve del curso para el listado público."
+                  style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={fieldLabelStyle}>Duración</label>
+                  <input required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" style={fieldInputStyle} />
+                </div>
+                <div>
+                  <label style={fieldLabelStyle}>Precio</label>
+                  <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} style={fieldInputStyle} />
+                </div>
+              </div>
+              <div>
+                <label style={fieldLabelStyle}>Público objetivo</label>
+                <input required value={form.targetAudience} onChange={e => setForm({ ...form, targetAudience: e.target.value })}
+                  placeholder="Ej. Docentes y promotores comunitarios" style={fieldInputStyle} />
+              </div>
+              <div>
+                <label style={fieldLabelStyle}>Temario (temas y subtemas)</label>
+                <textarea rows={5} value={form.curriculum} onChange={e => setForm({ ...form, curriculum: e.target.value })}
+                  placeholder={"Un tema por línea. Antecede subtemas con \"- \".\nEj.\nIntroducción\n- Objetivos\n- Alcance"}
+                  style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+              </div>
+              <div>
+                <label style={fieldLabelStyle}>Enlace externo</label>
+                <input value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />
               </div>
             </div>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
@@ -95,14 +128,15 @@ export default function AdminCourses() {
               <Button type="submit" variant="primary">{editing ? "Guardar cambios" : "Crear curso"}</Button>
             </div>
           </form>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", minWidth: "40rem", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-              {["Título", "Categoría", "Estado", "Estudiantes", "Enlace externo", "Acciones"].map(h => (
+              {["Título", "Categoría", "Duración", "Estado", "Estudiantes", "Acciones"].map(h => (
                 <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
               ))}
             </tr>
@@ -110,31 +144,30 @@ export default function AdminCourses() {
           <tbody>
             {courses.map(c => (
               <tr key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{c.title}</td>
+                <td style={{ padding: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(c)}
+                    className="admin-user-row-btn"
+                    style={{ width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" }}
+                  >
+                    {c.title}
+                  </button>
+                </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.category}</td>
+                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.duration}</td>
                 <td style={{ padding: "0.75rem 1rem" }}>
                   <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ cursor: "pointer" }} onClick={() => toggleCourse(c.id)}>
                     {c.status === "active" ? "Activo" : "Inactivo"}
                   </Badge>
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{c.students}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>
-                  {c.externalUrl ? (
-                    <input value={c.externalUrl} onChange={e => updateCourse(c.id, { externalUrl: e.target.value })}
-                      style={{ width: "100%", padding: "0.25rem 0.5rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.8125rem", background: "var(--paper)" }} />
-                  ) : (
-                    <span style={{ color: "var(--text-muted)" }}>—</span>
-                  )}
-                </td>
-                <td style={{ padding: "0.75rem 1rem" }}>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button onClick={() => startEdit(c)} style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", background: "transparent", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", cursor: "pointer" }}>Editar</button>
-                  </div>
-                </td>
+                <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>Editar &rarr;</td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
