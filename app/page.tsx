@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { BadgeCheck, GraduationCap, ShieldCheck, Users, Building2, Users2, Mic, Wrench, Leaf } from "lucide-react";
 import { getAllCourses, money } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
 import { courseImages, siteImages } from "@/lib/image-assets";
@@ -39,22 +40,19 @@ const TESTIMONIALS = [
 
 const HERO_AVATARS = [
   {
-    src: "https://upload.wikimedia.org/wikipedia/en/d/dc/Pocket_Mortys.png",
-    alt: "Estudiante participante en una sesion formativa",
-    fallback: "EC",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658307900",
-  },
-  {
-    src: "https://i.pinimg.com/736x/5f/af/6e/5faf6ef038c6185eb6c67e4bfccce4ee.jpg",
-    alt: "Participante de programa educativo ambiental",
-    fallback: "UG",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658311952",
-  },
-  {
-    src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9-Y5l2RCU9deuPoFZ9ZsVbXsUINjGtE1V0jrW--SECAeBliTMxdG2vwRO&s=10",
-    alt: "Estudiante en actividad de capacitacion",
+    src: "/images/avatar-1.webp",
+    alt: "Estudiantes de ELSI en un evento de liderazgo ambiental",
     fallback: "EL",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658302076",
+  },
+  {
+    src: "/images/avatar-2.webp",
+    alt: "Estudiantes de ELSI en un evento academico en la Universidad de Guanajuato",
+    fallback: "UG",
+  },
+  {
+    src: "/images/avatar-3.webp",
+    alt: "Miembros del equipo de ELSI en una conferencia",
+    fallback: "EC",
   },
 ];
 
@@ -73,12 +71,12 @@ const STORY_PREVIEW = [
 ];
 
 const servicios = [
-  { icon: "C", title: "Capacitación Ambiental", text: "Programas de formación práctica y medible para equipos." },
-  { icon: "C", title: "Consultoría Ambiental", text: "Diagnóstico, cumplimiento normativo y sostenibilidad." },
-  { icon: "P", title: "Programas Universitarios", text: "Experiencias formativas para estudiantes." },
-  { icon: "C", title: "Conferencias", text: "Charlas que despiertan conciencia ambiental." },
-  { icon: "T", title: "Talleres", text: "Sesiones prácticas para escuelas y empresas." },
-  { icon: "S", title: "Proyectos de Sostenibilidad", text: "Acompañamiento de largo plazo." },
+  { Icon: GraduationCap, title: "Capacitación Ambiental", text: "Programas de formación práctica y medible para equipos." },
+  { Icon: Building2, title: "Consultoría Ambiental", text: "Diagnóstico, cumplimiento normativo y sostenibilidad." },
+  { Icon: Users2, title: "Programas Universitarios", text: "Experiencias formativas para estudiantes." },
+  { Icon: Mic, title: "Conferencias", text: "Charlas que despiertan conciencia ambiental." },
+  { Icon: Wrench, title: "Talleres", text: "Sesiones prácticas para escuelas y empresas." },
+  { Icon: Leaf, title: "Proyectos de Sostenibilidad", text: "Acompañamiento de largo plazo." },
 ];
 
 export default function Home() {
@@ -115,7 +113,7 @@ export default function Home() {
               <AvatarGroup className="hero-avatar-group" aria-label="Participantes formados por ELSI">
                 {HERO_AVATARS.map((avatar) => (
                   <Avatar key={avatar.src} size="lg" className="hero-avatar-item">
-                    <AvatarImage src={avatar.src} alt={avatar.alt} title={avatar.attribution} />
+                    <AvatarImage src={avatar.src} alt={avatar.alt} />
                     <AvatarFallback>{avatar.fallback}</AvatarFallback>
                   </Avatar>
                 ))}
@@ -145,14 +143,14 @@ export default function Home() {
         <div className="shell">
           <div className="feature-grid">
             {[
-              { svg: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01 9 11.01", text: "Constancias con validez curricular" },
-              { svg: "M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5", text: "Origen en la Universidad de Guanajuato" },
-              { svg: "M20 6 9 17l-5-5", text: "Contenido alineado a normatividad mexicana" },
-              { svg: "M20 21v-2a4 4 0 0 0-3-3.87M4 21v-2a4 4 0 0 1 3-3.87M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", text: "Instructores con experiencia comprobada" },
+              { Icon: BadgeCheck, text: "Constancias con validez curricular" },
+              { Icon: GraduationCap, text: "Origen en la Universidad de Guanajuato" },
+              { Icon: ShieldCheck, text: "Contenido alineado a normatividad mexicana" },
+              { Icon: Users, text: "Instructores con experiencia comprobada" },
             ].map((item, i) => (
               <div key={i} className="feature-item">
                 <div className="feature-icon">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={item.svg} /></svg>
+                  <item.Icon size={19} strokeWidth={2} aria-hidden="true" />
                 </div>
                 <span>{item.text}</span>
               </div>
@@ -181,12 +179,10 @@ export default function Home() {
       {/* ===== HISTORIA RESUMIDA ===== */}
       <section className="historia-resumida" data-section-label="Home / Historia resumida">
         <div className="shell">
-          <div className="section-heading-row">
-            <div>
-              <span className="section-kicker">Nuestra historia</span>
-              <h2 className="section-title">De Bee Blue a una plataforma de aprendizaje ambiental</h2>
-            </div>
-            <p className="section-lede">Home solo muestra los hitos esenciales. La línea completa vive en Nosotros para que la narrativa pueda crecer sin saturar la conversión principal.</p>
+          <div style={{ marginBottom: 30 }}>
+            <span className="section-kicker">Nuestra historia</span>
+            <h2 className="section-title">De Bee Blue a una plataforma de aprendizaje ambiental</h2>
+            <p className="section-lede" style={{ marginTop: 12 }}>Home solo muestra los hitos esenciales. La línea completa vive en Nosotros para que la narrativa pueda crecer sin saturar la conversión principal.</p>
           </div>
           <div className="timeline-grid">
             {STORY_PREVIEW.map((step) => (
@@ -221,7 +217,7 @@ export default function Home() {
                 <CarouselItem key={svc.title} className="pl-4 md:basis-1/2 lg:basis-1/3">
                   <Card className="servicio-card">
                     <CardHeader>
-                      <div className="service-mark">{svc.icon}</div>
+                      <div className="service-mark"><svc.Icon size={20} strokeWidth={2} aria-hidden="true" /></div>
                       <CardTitle className="service-title">{svc.title}</CardTitle>
                       <CardDescription className="service-copy">{svc.text}</CardDescription>
                     </CardHeader>
