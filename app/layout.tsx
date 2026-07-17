@@ -21,9 +21,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body data-section-labels={sectionLabelsEnabled ? "true" : undefined}>
+        <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
         <AuthProvider>
           <Header />
-          {children}
+          <div id="main-content" className="site-content" tabIndex={-1}>{children}</div>
         </AuthProvider>
         <Footer />
         <Toaster />

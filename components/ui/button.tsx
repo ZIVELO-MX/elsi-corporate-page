@@ -10,27 +10,27 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
         primary:
-          "border border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-[var(--primary)] bg-transparent text-[var(--primary)] shadow-xs hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:shadow-sm dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-[var(--primary)] bg-transparent text-[var(--primary-hover)] shadow-xs hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] hover:shadow-sm dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "border border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:-translate-y-0.5 hover:border-[var(--primary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)]",
+          "border border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:-translate-y-0.5 hover:border-[var(--primary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)]",
         inverse:
-          "border border-white bg-white text-[var(--primary)] shadow-sm hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:shadow-md",
+          "border border-white bg-white text-[var(--primary-hover)] shadow-sm hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] hover:shadow-md",
         ghost:
-          "text-foreground hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:hover:bg-accent/50",
-        link: "h-auto rounded-none px-0 py-0 text-[var(--primary)] underline-offset-4 hover:text-[var(--accent)] hover:underline",
+          "text-foreground hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] dark:hover:bg-accent/50",
+        link: "h-auto rounded-none px-0 py-0 text-[var(--primary-hover)] underline-offset-4 hover:text-[var(--accent)] hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        default: "h-11 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        icon: "size-11",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",
         "icon-lg": "size-10",

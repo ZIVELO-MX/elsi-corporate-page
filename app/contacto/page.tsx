@@ -24,12 +24,12 @@ function ContactoContent() {
               Escríbenos y compártenos qué necesitas aprender o resolver
             </h1>
             <p className="contact-lede">
-              Este formulario simula el flujo de contacto de la fase corporativa. Sirve para validar el mensaje, la intención del usuario y los campos mínimos antes de conectar un backend.
+              Cuéntanos qué necesitas aprender o resolver. Te responderemos por los canales de contacto del instituto.
             </p>
             <div className="contact-info">
-              <div><strong>Teléfono:</strong> 392-110-4719</div>
-              <div><strong>Correo:</strong> instituteelsi@gmail.com</div>
-              <div><strong>Correo:</strong> emapime123@gmail.com</div>
+              <div><strong>Teléfono:</strong> <a href="tel:+523921104719">392-110-4719</a></div>
+              <div><strong>Correo:</strong> <a href="mailto:instituteelsi@gmail.com">instituteelsi@gmail.com</a></div>
+              <div><strong>Correo:</strong> <a href="mailto:emapime123@gmail.com">emapime123@gmail.com</a></div>
               <div><strong>Ubicación:</strong> Guanajuato, México</div>
             </div>
           </div>
@@ -39,15 +39,15 @@ function ContactoContent() {
           >
             <Field>
               <Label htmlFor="nombre">Nombre</Label>
-              <Input id="nombre" type="text" placeholder="Tu nombre" required />
+              <Input id="nombre" name="name" autoComplete="name" type="text" placeholder="Tu nombre" required />
             </Field>
             <Field>
               <Label htmlFor="email">Correo</Label>
-              <Input id="email" type="email" placeholder="tu@correo.com" required />
+              <Input id="email" name="email" autoComplete="email" type="email" placeholder="tu@correo.com" required />
             </Field>
             <Field>
               <Label htmlFor="mensaje">Mensaje</Label>
-              <Textarea id="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} defaultValue={courseMessage} required />
+              <Textarea id="mensaje" name="message" placeholder="¿En qué podemos ayudarte?" rows={4} defaultValue={courseMessage} required />
             </Field>
             {sent && <div className="contact-sent" role="status">Solicitud registrada en modo demo. Te responderemos pronto cuando el flujo esté conectado.</div>}
             <Button type="submit" disabled={sent} variant="primary" className="contact-submit">{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>

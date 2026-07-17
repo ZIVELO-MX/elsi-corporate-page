@@ -31,12 +31,12 @@ export default function Footer() {
           <div className="footer-col">
             <strong>Academia</strong>
             <Link href="/cursos">Cursos</Link>
-            <span>Ingresar</span>
+            <Link href="/login">Ingresar</Link>
           </div>
           <div className="footer-col">
-            <strong>Síguenos</strong>
-            <span>Instagram</span>
-            <span>Facebook</span>
+            <strong>Contacto</strong>
+            <a href="tel:+523921104719">392-110-4719</a>
+            <a href="mailto:instituteelsi@gmail.com">instituteelsi@gmail.com</a>
           </div>
         </div>
         <div className="footer-bottom">

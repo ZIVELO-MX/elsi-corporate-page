@@ -37,7 +37,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div style={{ background: "#FDF2F2", color: "#9F2F32", padding: "0.75rem 1rem", borderRadius: "var(--radius)", fontSize: "0.875rem" }}>
+          <div id="login-error" role="alert" style={{ background: "#FDF2F2", color: "#9F2F32", padding: "0.75rem 1rem", borderRadius: "var(--radius)", fontSize: "0.875rem" }}>
             {error}
           </div>
         )}
@@ -50,7 +50,11 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="tu@correo.com"
-            style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }}
+            name="email"
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
+            required
+            style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }}
             autoComplete="email"
           />
         </div>
@@ -63,7 +67,11 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }}
+            name="password"
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
+            required
+            style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }}
             autoComplete="current-password"
           />
         </div>
