@@ -3,17 +3,24 @@
 import { useState } from "react";
 import { useAdminData } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 
 export default function AdminSales() {
-  const { courses, users, sales, addSale } = useAdminData();
+  const { loading, courses, users, sales, addSale } = useAdminData();
+  const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [amount, setAmount] = useState(0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser || !selectedCourse) return;
+    if (!selectedUser || !selectedCourse) {
+      toast({ title: "Selecciona un alumno y un curso.", variant: "error" });
+      return;
+    }
     addSale(selectedUser, selectedCourse, amount);
+    toast({ title: "Venta registrada.", variant: "success" });
     setSelectedUser("");
     setSelectedCourse("");
     setAmount(0);
@@ -63,6 +70,9 @@ export default function AdminSales() {
         <Button type="submit" variant="primary">Registrar venta</Button>
       </form>
 
+      {loading ? (
+        <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
+      ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
@@ -95,6 +105,7 @@ export default function AdminSales() {
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }

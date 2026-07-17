@@ -6,37 +6,14 @@ import { useAdminData, type EnrollmentSource, type Enrollment } from "@/lib/admi
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todas" | "en-curso" | "realizado";
 type SourceFilter = "todas" | EnrollmentSource;
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
-
-function ConfirmDialog({
-  open, title, description, confirmLabel, onClose, onConfirm,
-}: {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmLabel: string;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent style={{ maxWidth: "26rem" }}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
-          <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button type="button" variant="primary" onClick={onConfirm}>{confirmLabel}</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function SourceBadge({ source }: { source: EnrollmentSource }) {
   return (
@@ -118,7 +95,8 @@ function CertificateDialog({
 }
 
 export default function AdminEnrollments() {
-  const { courses, users, enrollments, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable } = useAdminData();
+  const { loading, courses, users, enrollments, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable } = useAdminData();
+  const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [source, setSource] = useState<EnrollmentSource>("interna");
@@ -132,8 +110,17 @@ export default function AdminEnrollments() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser || !selectedCourse) return;
+    if (!selectedUser || !selectedCourse) {
+      toast({ title: "Selecciona un alumno y un curso.", variant: "error" });
+      return;
+    }
+    const already = enrollments.some(en => en.userId === selectedUser && en.courseId === selectedCourse);
+    if (already) {
+      toast({ title: "Ese alumno ya está inscrito en el curso.", variant: "error" });
+      return;
+    }
     addEnrollment(selectedUser, selectedCourse, source);
+    toast({ title: "Inscripción registrada.", variant: "success" });
     setSelectedUser("");
     setSelectedCourse("");
     setSource("interna");
@@ -163,8 +150,10 @@ export default function AdminEnrollments() {
   const confirmCertificates = () => {
     if (certificateTarget.length > 1) {
       completeEnrollmentsBulk(certificateTarget.map(e => e.id));
+      toast({ title: `${certificateTarget.length} constancias cargadas.`, variant: "success" });
     } else if (certificateTarget[0]) {
       completeEnrollment(certificateTarget[0].id, "constancia");
+      toast({ title: isReplace ? "Constancia reemplazada." : "Constancia cargada.", variant: "success" });
     }
     setSelectedIds([]);
     setCertificateTarget([]);
@@ -260,6 +249,9 @@ export default function AdminEnrollments() {
         </div>
       )}
 
+      {loading ? (
+        <TableSkeleton rows={6} widths={["1.5rem", "9rem", "12rem", "6rem", "6rem", "6rem", "8rem"]} />
+      ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", minWidth: "44rem", borderCollapse: "collapse" }}>
@@ -317,7 +309,7 @@ export default function AdminEnrollments() {
                     {e.status === "realizado" && (
                       <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
                         {e.certificateStatus === "pendiente" && (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => markCertificateAvailable(e.id)}>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => { markCertificateAvailable(e.id); toast({ title: "Constancia publicada.", variant: "success" }); }}>
                             <CheckCircle2 size={12} /> Marcar disponible
                           </Button>
                         )}
@@ -345,6 +337,7 @@ export default function AdminEnrollments() {
           </table>
         </div>
       </div>
+      )}
 
       <CertificateDialog
         enrollments={certificateTarget}
@@ -361,7 +354,13 @@ export default function AdminEnrollments() {
           : ""}
         confirmLabel="Marcar realizado"
         onClose={() => setManualTarget(null)}
-        onConfirm={() => { if (manualTarget) completeEnrollment(manualTarget.id, "manual"); setManualTarget(null); }}
+        onConfirm={() => {
+          if (manualTarget) {
+            completeEnrollment(manualTarget.id, "manual");
+            toast({ title: "Curso marcado como realizado.", variant: "success" });
+          }
+          setManualTarget(null);
+        }}
       />
     </div>
   );

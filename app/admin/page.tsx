@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAdminData } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function EmptyRow({ label }: { label: string }) {
   return (
@@ -10,8 +11,10 @@ function EmptyRow({ label }: { label: string }) {
   );
 }
 
+const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
+
 export default function AdminDashboard() {
-  const { courses, users, enrollments, sales } = useAdminData();
+  const { loading, courses, users, enrollments, sales } = useAdminData();
 
   const activeCourses = courses.filter(c => c.status === "active");
   const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
@@ -35,6 +38,31 @@ export default function AdminDashboard() {
         <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>Resumen general de la plataforma.</p>
       </div>
 
+      {loading && (
+        <div role="status" aria-label="Cargando resumen">
+          <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={panelStyle}>
+                <Skeleton width="6rem" height="0.7rem" />
+                <Skeleton width="3rem" height="1.8rem" style={{ display: "block", margin: "0.75rem 0 0.5rem" }} />
+                <Skeleton width="5rem" height="0.7rem" />
+              </div>
+            ))}
+          </div>
+          <div className="admin-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            {[0, 1].map(col => (
+              <div key={col} style={panelStyle}>
+                <Skeleton width="8rem" height="0.85rem" style={{ display: "block", marginBottom: "1rem" }} />
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} width="100%" height="0.8rem" style={{ display: "block", marginBottom: "0.75rem", opacity: 1 - i * 0.15 }} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!loading && (<>
       <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
         {cards.map(card => (
           <Link
@@ -80,6 +108,7 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+      </>)}
     </div>
   );
 }

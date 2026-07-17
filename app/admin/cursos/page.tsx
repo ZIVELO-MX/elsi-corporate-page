@@ -6,6 +6,9 @@ import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todos" | "active" | "inactive";
 
@@ -36,12 +39,17 @@ const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.81
 const fieldInputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" };
 
 export default function AdminCourses() {
-  const { courses, addCourse, updateCourse, toggleCourse } = useAdminData();
+  const { loading, courses, addCourse, updateCourse, toggleCourse } = useAdminData();
+  const { toast } = useToast();
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CourseForm>(emptyForm());
+  const [initialForm, setInitialForm] = useState<CourseForm>(emptyForm());
+  const [discardOpen, setDiscardOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -52,32 +60,60 @@ export default function AdminCourses() {
     });
   }, [courses, query, statusFilter]);
 
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
+    setForm(emptyForm());
+    setInitialForm(emptyForm());
+  };
+
+  // Guard against losing edits: only prompt when the form actually changed.
+  // The form modal steps aside for the confirm (single modal at a time) but keeps
+  // its state, so "Seguir editando" can reopen it exactly where it was left.
+  const requestClose = () => {
+    if (isDirty) {
+      setShowForm(false);
+      setDiscardOpen(true);
+    } else {
+      closeForm();
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const slug = form.slug.trim().toLowerCase();
+    const slugTaken = courses.some(c => c.slug.toLowerCase() === slug && c.id !== editing);
+    if (slugTaken) {
+      toast({ title: "Ya existe un curso con ese slug.", variant: "error" });
+      return;
+    }
     if (editing) {
       updateCourse(editing, form);
+      toast({ title: "Cambios guardados.", variant: "success" });
     } else {
       addCourse({ ...form, status: "active" });
+      toast({ title: "Curso creado.", variant: "success" });
     }
-    setEditing(null);
-    setShowForm(false);
-    setForm(emptyForm());
+    closeForm();
   };
 
   const startEdit = (c: AdminCourse) => {
-    setEditing(c.id);
-    setForm({
+    const next: CourseForm = {
       title: c.title, category: c.category, slug: c.slug, price: c.price, externalUrl: c.externalUrl,
       synopsis: c.synopsis, duration: c.duration, targetAudience: c.targetAudience, curriculum: c.curriculum,
       modality: c.modality, presencialLocation: c.presencialLocation, presencialDate: c.presencialDate,
       presencialTime: c.presencialTime, presencialInfo: c.presencialInfo,
-    });
+    };
+    setEditing(c.id);
+    setForm(next);
+    setInitialForm(next);
     setShowForm(true);
   };
 
   const startCreate = () => {
     setEditing(null);
     setForm(emptyForm());
+    setInitialForm(emptyForm());
     setShowForm(true);
   };
 
@@ -119,7 +155,7 @@ export default function AdminCourses() {
         </select>
       </div>
 
-      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditing(null); } }}>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) requestClose(); }}>
         <DialogContent style={{ maxWidth: "34rem", maxHeight: "85vh", overflowY: "auto" }}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar curso" : "Crear curso"}</DialogTitle>
@@ -209,13 +245,16 @@ export default function AdminCourses() {
               )}
             </div>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
-              <Button type="button" onClick={() => { setShowForm(false); setEditing(null); }}>Cancelar</Button>
+              <Button type="button" onClick={requestClose}>Cancelar</Button>
               <Button type="submit" variant="primary">{editing ? "Guardar cambios" : "Crear curso"}</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
+      {loading ? (
+        <TableSkeleton rows={6} widths={["12rem", "8rem", "5rem", "5rem", "5rem", "4rem", "4rem"]} />
+      ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", minWidth: "46rem", borderCollapse: "collapse" }}>
@@ -264,6 +303,18 @@ export default function AdminCourses() {
         </table>
         </div>
       </div>
+      )}
+
+      <ConfirmDialog
+        open={discardOpen}
+        title="Descartar cambios"
+        description="Hay cambios sin guardar en este curso. Si sales ahora se perderán."
+        confirmLabel="Descartar"
+        cancelLabel="Seguir editando"
+        destructive
+        onClose={() => { setDiscardOpen(false); setShowForm(true); }}
+        onConfirm={() => { setDiscardOpen(false); closeForm(); }}
+      />
     </div>
   );
 }

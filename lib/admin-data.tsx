@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 
 export type CourseModality = "online" | "presencial";
 
@@ -137,6 +137,7 @@ const INITIAL_SECTIONS: PageSection[] = [
 ];
 
 type AdminData = {
+  loading: boolean;
   courses: AdminCourse[];
   users: AdminUser[];
   enrollments: Enrollment[];
@@ -163,6 +164,14 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
   const [sales, setSales] = useState<Sale[]>(INITIAL_SALES);
   const [sections, setSections] = useState<PageSection[]>(INITIAL_SECTIONS);
+  // Simulated initial fetch: the provider mounts once for the whole panel, so the
+  // skeleton shows on first entry and navigation stays instant afterward. When the
+  // Supabase data layer lands, this flag becomes the real query loading state.
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 650);
+    return () => clearTimeout(t);
+  }, []);
 
   const addCourse = useCallback((c: Omit<AdminCourse, "id" | "students" | "createdAt">) => {
     const id = "c" + Date.now();
@@ -222,7 +231,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AdminDataContext.Provider value={{ courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }}>
+    <AdminDataContext.Provider value={{ loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }}>
       {children}
     </AdminDataContext.Provider>
   );
