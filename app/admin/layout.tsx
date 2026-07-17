@@ -24,7 +24,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Close the mobile drawer on Escape, and whenever the route changes.
+  // Close the mobile drawer on Escape. Route-change closing is handled where the
+  // navigation happens (each drawer link and the backdrop call setSidebarOpen(false)),
+  // so no pathname effect is needed — that would be a cascading render on every route.
   useEffect(() => {
     if (!sidebarOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -33,10 +35,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
 
   if (!user) {
     return (
