@@ -147,7 +147,7 @@ export default function AdminCourses() {
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value as StatusFilter)}
           aria-label="Filtrar por estado"
-          style={{ padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }}
+          className="admin-select"
         >
           <option value="todos">Todos los estados</option>
           <option value="active">Activos</option>
@@ -206,7 +206,7 @@ export default function AdminCourses() {
               </div>
               <div>
                 <label style={fieldLabelStyle}>Modalidad</label>
-                <select value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} style={fieldInputStyle}>
+                <select value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} className="admin-select" style={{ width: "100%" }}>
                   <option value="online">En línea</option>
                   <option value="presencial">Presencial</option>
                 </select>

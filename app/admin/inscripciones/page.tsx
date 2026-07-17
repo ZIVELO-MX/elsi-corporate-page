@@ -179,7 +179,7 @@ export default function AdminEnrollments() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
+            className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
@@ -189,7 +189,7 @@ export default function AdminEnrollments() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
           <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
+            className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
@@ -199,7 +199,7 @@ export default function AdminEnrollments() {
         <div style={{ minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Origen</label>
           <select value={source} onChange={e => setSource(e.target.value as EnrollmentSource)}
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
+            className="admin-select" style={{ width: "100%" }}>
             <option value="interna">Sitio ELSI</option>
             <option value="externa">Plataforma externa</option>
           </select>
@@ -219,12 +219,12 @@ export default function AdminEnrollments() {
             style={{ ...filterControlStyle, width: "100%", paddingLeft: "2rem" }}
           />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" style={filterControlStyle}>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" className="admin-select">
           <option value="todas">Todos los estados</option>
           <option value="en-curso">En curso</option>
           <option value="realizado">Realizado</option>
         </select>
-        <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value as SourceFilter)} aria-label="Filtrar por origen" style={filterControlStyle}>
+        <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value as SourceFilter)} aria-label="Filtrar por origen" className="admin-select">
           <option value="todas">Todos los orígenes</option>
           <option value="interna">Sitio ELSI</option>
           <option value="externa">Plataforma externa</option>

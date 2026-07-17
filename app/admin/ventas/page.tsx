@@ -45,7 +45,7 @@ export default function AdminSales() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
+            className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
@@ -55,7 +55,7 @@ export default function AdminSales() {
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
           <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" }}>
+            className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
