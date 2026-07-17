@@ -7,15 +7,16 @@ import { AdminDataProvider } from "@/lib/admin-data";
 import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: "◇" },
-  { href: "/admin/cursos", label: "Cursos", icon: "▣" },
-  { href: "/admin/usuarios", label: "Usuarios", icon: "◎" },
-  { href: "/admin/inscripciones", label: "Inscripciones", icon: "⇄" },
-  { href: "/admin/ventas", label: "Ventas", icon: "₿" },
-  { href: "/admin/contenido", label: "Contenido", icon: "✎" },
+  { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/admin/cursos", label: "Cursos", Icon: BookOpen },
+  { href: "/admin/usuarios", label: "Usuarios", Icon: Users },
+  { href: "/admin/inscripciones", label: "Inscripciones", Icon: ClipboardList },
+  { href: "/admin/ventas", label: "Ventas", Icon: Receipt },
+  { href: "/admin/contenido", label: "Contenido", Icon: FileText },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -128,7 +129,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     textDecoration: "none",
                     transition: "background var(--motion-fast), color var(--motion-fast)",
                   }}>
-                  <span style={{ fontSize: "1rem", opacity: 0.6 }}>{item.icon}</span>
+                  <item.Icon size={18} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0, opacity: isActive ? 1 : 0.75 }} />
                   {item.label}
                 </Link>
               );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookOpen, Users, ClipboardList, Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,10 +23,10 @@ export default function AdminDashboard() {
   // Each tile links to its section so the KPI row acts as a shortcut,
   // not just a decorative count.
   const cards = [
-    { label: "Cursos activos", value: activeCourses.length, sub: `${courses.length} totales`, href: "/admin/cursos" },
-    { label: "Usuarios registrados", value: users.length, sub: `${users.filter(u => u.role === "admin").length} administradores`, href: "/admin/usuarios" },
-    { label: "Inscripciones", value: enrollments.length, sub: `${users.filter(u => u.enrolledCourses > 0).length} usuarios con cursos`, href: "/admin/inscripciones" },
-    { label: "Ventas registradas", value: sales.length, sub: totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora", href: "/admin/ventas" },
+    { label: "Cursos activos", value: activeCourses.length, sub: `${courses.length} totales`, href: "/admin/cursos", Icon: BookOpen },
+    { label: "Usuarios registrados", value: users.length, sub: `${users.filter(u => u.role === "admin").length} administradores`, href: "/admin/usuarios", Icon: Users },
+    { label: "Inscripciones", value: enrollments.length, sub: `${users.filter(u => u.enrolledCourses > 0).length} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
+    { label: "Ventas registradas", value: sales.length, sub: totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora", href: "/admin/ventas", Icon: Receipt },
   ];
 
   const recentCourses = courses.slice(0, 4);
@@ -75,7 +76,12 @@ export default function AdminDashboard() {
               textDecoration: "none", color: "inherit",
             }}
           >
-            <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.5rem" }}>{card.label}</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.5rem" }}>
+              <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{card.label}</p>
+              <span aria-hidden="true" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2rem", height: "2rem", borderRadius: "var(--radius-sm)", background: "var(--primary-light)", color: "var(--primary)", flexShrink: 0 }}>
+                <card.Icon size={16} strokeWidth={2} />
+              </span>
+            </div>
             <p style={{ fontFamily: "'Sora',sans-serif", fontSize: "2rem", fontWeight: 800, margin: "0 0 0.25rem", color: "var(--primary)" }}>{card.value}</p>
             <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>{card.sub}</p>
           </Link>
