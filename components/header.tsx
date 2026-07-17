@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/safe-image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +9,10 @@ import { useAuth } from "@/components/auth-context";
 
 export default function Header() {
   const { user } = useAuth();
+  const pathname = usePathname();
+
+  // The admin panel is its own full-height shell with its own navigation.
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="site-header">

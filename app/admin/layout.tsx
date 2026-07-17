@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onClick={() => setSidebarOpen(false)}
       />
 
-      <div style={{ display: "flex", minHeight: "calc(100vh - var(--header-height))", marginTop: "var(--header-height)" }}>
+      <div className="admin-shell">
         <aside
           id="admin-sidebar"
           className="admin-sidebar"
@@ -159,7 +159,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </div>
         </aside>
-        <main style={{ flex: 1, padding: "2rem", minWidth: 0, background: "var(--bg)" }}>
+        <main className="admin-main">
           {children}
         </main>
       </div>

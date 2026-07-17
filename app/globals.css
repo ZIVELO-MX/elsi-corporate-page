@@ -714,19 +714,33 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- ADMIN PANEL ---- */
+/* ---- ADMIN PANEL ----
+   The panel is its own full-height shell (marketing header/footer are hidden
+   on /admin). Desktop: a fixed full-height sidebar with the content offset by
+   its width. Mobile (<=800px): the sidebar becomes an off-canvas drawer. */
+.admin-shell {
+  min-height: 100dvh;
+  background: var(--bg);
+}
 .admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 16rem;
-  flex-shrink: 0;
-  align-self: flex-start;
   background: var(--card);
   border-right: 1px solid var(--border);
   padding: 1.5rem 0;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: var(--header-height);
-  z-index: 10;
+  overflow-y: auto;
+  z-index: 20;
+}
+.admin-main {
+  min-width: 0;
+  margin-left: 16rem;
+  padding: 2rem;
+  background: var(--bg);
 }
 .admin-mobile-bar { display: none; }
 .admin-sidebar-backdrop { display: none; }
@@ -829,17 +843,23 @@ body[data-section-labels="true"] section[data-section-label]::before {
     display: flex;
     align-items: center;
     gap: .75rem;
-    padding: .875rem 1.25rem;
+    height: 3.5rem;
+    box-sizing: border-box;
+    padding: 0 1.25rem;
     background: var(--card);
     border-bottom: 1px solid var(--border);
     position: sticky;
-    top: var(--header-height);
+    top: 0;
     z-index: 30;
   }
+  .admin-main {
+    margin-left: 0;
+    padding: 1.25rem;
+  }
   .admin-sidebar {
-    position: fixed;
-    inset-block: var(--header-height) 0;
+    inset-block: 3.5rem 0;
     left: 0;
+    width: 18rem;
     max-width: 82vw;
     transform: translateX(-100%);
     transition: transform var(--motion-med) ease;
@@ -850,7 +870,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .admin-sidebar-backdrop {
     display: block;
     position: fixed;
-    inset: var(--header-height) 0 0 0;
+    inset: 3.5rem 0 0 0;
     background: rgba(28, 35, 31, .32);
     opacity: 0;
     pointer-events: none;

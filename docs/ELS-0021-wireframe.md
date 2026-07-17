@@ -105,8 +105,11 @@ es el único portador de estado: se acompaña de texto e icono (badges, toasts).
 
 ## Responsive
 
-- Navegación: en escritorio la barra lateral es fija; por debajo de 800 px se condensa
-  en un cajón con botón hamburguesa, backdrop, cierre con `Escape` y al cambiar de ruta.
+- El panel es un shell propio a toda altura: el header y el footer de marketing se
+  ocultan en `/admin`, y la navegación vive solo en la barra lateral.
+- Navegación: en escritorio la barra lateral es fija a pantalla completa y el contenido
+  se desplaza a su derecha; por debajo de 800 px se condensa en un cajón con barra
+  superior (hamburguesa), backdrop y cierre con `Escape` o al cambiar de ruta.
 - Tablas: cada una vive en un contenedor con `overflow-x` y ancho mínimo, de modo que
   la página nunca desborda horizontalmente en 390 px.
 - Formularios: las barras de alta/filtros se apilan con `flex-wrap`; los campos pareados
