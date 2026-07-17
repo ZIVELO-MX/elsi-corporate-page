@@ -58,3 +58,57 @@ es el único portador de estado: se acompaña de texto e icono (badges, toasts).
 - Entradas con `ease-out`/`cubic-bezier(0.23,1,0.32,1)` desde `scale(0.96)`, nunca desde 0.
 - El shimmer del esqueleto y las animaciones de toast/diálogo se desactivan con
   `prefers-reduced-motion: reduce`.
+
+## Comportamiento
+
+- Las inscripciones internas y externas comparten la misma tabla; el estado es
+  `En curso` o `Realizado` y el origen se marca con badge (`Sitio ELSI` / `Plataforma externa`).
+- Un curso pasa a `Realizado` cuando administración carga la constancia (individual
+  o masiva) o lo marca manualmente. El marcado manual es respaldo para casos
+  excepcionales y **exige confirmación** por no dejar constancia.
+- La constancia se distingue como `Constancia pendiente de publicación` o
+  `disponible`. `Marcar disponible` la publica; `Reemplazar` sube un archivo nuevo y
+  la regresa a pendiente.
+- Cursos en línea: se registra la liga de acceso (no se muestra en el perfil del
+  alumno; se envía por correo — ver ELS-0020). Presenciales: lugar, fecha, hora e
+  información general.
+- Búsqueda y filtros operan en cliente; el subtítulo `N de M` refleja el subconjunto
+  visible y hay estado vacío diferenciado (sin datos vs. sin coincidencias).
+- Los formularios validan antes de mutar (slug de curso único, inscripción no
+  duplicada, campos requeridos) y comunican el resultado con toast de éxito o error.
+- El formulario de curso rastrea cambios y, al intentar cerrarse sucio, ofrece
+  descartar; conserva su estado para `Seguir editando`.
+- Los toggles de estado de curso y de activación de sección son reversibles e
+  inmediatos.
+- Son wireframes sobre datos simulados: no hay persistencia, carga de archivos real
+  ni envío de correo.
+
+## Accesibilidad
+
+- Controles nativos (`button`, `a`, `input`, `select`, `textarea`) con nombre visible
+  o `aria-label` cuando son solo-icono: menú hamburguesa, cerrar toast, buscar,
+  cambiar estado del curso.
+- Foco visible global conservado (contorno de 3 px, separación de 3 px y halo del token).
+- El estado se comunica con texto e icono además del color (badges, toasts
+  `success`/`error`).
+- El switch de sección usa `role="switch"` + `aria-checked`; el estado del curso es un
+  `button` cuyo `aria-label` indica el estado actual.
+- Regiones dinámicas anunciadas: esqueleto y viewport de toasts con `role="status"`
+  / `region`; los diálogos (Radix) atrapan foco, cierran con `Escape` y exponen
+  título/descripción.
+- Sólo un modal a la vez: la confirmación de descarte reemplaza al formulario para no
+  romper el manejo de foco de diálogos anidados.
+- Objetivos táctiles: casillas de 24 px; los controles móviles cumplen ≥ 44 px según
+  `app/globals.css`.
+- `prefers-reduced-motion: reduce` desactiva el shimmer del esqueleto y las
+  animaciones de toast y diálogo.
+
+## Responsive
+
+- Navegación: en escritorio la barra lateral es fija; por debajo de 800 px se condensa
+  en un cajón con botón hamburguesa, backdrop, cierre con `Escape` y al cambiar de ruta.
+- Tablas: cada una vive en un contenedor con `overflow-x` y ancho mínimo, de modo que
+  la página nunca desborda horizontalmente en 390 px.
+- Formularios: las barras de alta/filtros se apilan con `flex-wrap`; los campos pareados
+  del formulario de curso pasan de dos columnas a una en pantallas angostas
+  (`auto-fit minmax`), con objetivos de toque a ancho completo.

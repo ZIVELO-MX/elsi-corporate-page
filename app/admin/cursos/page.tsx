@@ -284,9 +284,16 @@ export default function AdminCourses() {
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.duration}</td>
                 <td style={{ padding: "0.75rem 1rem" }}>
-                  <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ cursor: "pointer" }} onClick={() => toggleCourse(c.id)}>
-                    {c.status === "active" ? "Activo" : "Inactivo"}
-                  </Badge>
+                  <button
+                    type="button"
+                    onClick={() => toggleCourse(c.id)}
+                    aria-label={`Cambiar estado de ${c.title}; actualmente ${c.status === "active" ? "activo" : "inactivo"}`}
+                    style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}
+                  >
+                    <Badge variant={c.status === "active" ? "default" : "secondary"}>
+                      {c.status === "active" ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </button>
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{c.students}</td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>Editar &rarr;</td>
