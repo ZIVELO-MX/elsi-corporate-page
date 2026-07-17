@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 import { getCourseBySlug, getAllCourses, money } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
 import { courseImages } from "@/lib/image-assets";
@@ -37,7 +38,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               <div className="curso-detail-modules">
                 {course.moduleList.map((mod) => (
                   <div key={mod} className="curso-detail-module">
-                    <div className="curso-detail-check">✓</div>
+                    <div className="curso-detail-check"><Check size={13} strokeWidth={2.5} aria-hidden="true" /></div>
                     {mod}
                   </div>
                 ))}

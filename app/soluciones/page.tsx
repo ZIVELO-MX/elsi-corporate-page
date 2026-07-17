@@ -3,6 +3,8 @@
 import { ArrowRight, Building2, GraduationCap, Sprout } from "lucide-react";
 import Link from "next/link";
 import { solutions } from "@/lib/solutions";
+import { solutionImages } from "@/lib/image-assets";
+import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,10 +27,16 @@ export default function SolucionesPage() {
         <div className="solutions-grid">
           {solutions.map(({ slug, title, description, items }) => {
             const Icon = serviceIcons[slug];
+            const image = solutionImages[slug];
 
             return (
               <Link key={slug} href={`/soluciones/${slug}`} className="solution-card-link">
                 <Card className="solution-card">
+                  {image && (
+                    <div className="featured-course-media solution-card-media">
+                      <SafeImage src={image.src} alt={image.alt} loading="lazy" />
+                    </div>
+                  )}
                   <CardHeader className="solution-card-header">
                     <div className="solution-card-icon">
                       <Icon aria-hidden="true" />

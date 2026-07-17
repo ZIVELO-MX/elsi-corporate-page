@@ -1,34 +1,34 @@
 export const courseImages: Record<string, { src: string; alt: string }> = {
   "fundamentos-de-educacion-ambiental": {
     src: "/images/course-1.webp",
-    alt: "Grupo participando en una actividad de educacion ambiental",
+    alt: "Estudiantes de la Universidad de Guanajuato armando filtros de agua caseros en un taller de educacion ambiental",
   },
   "cumplimiento-ambiental-para-empresas": {
     src: "/images/course-2.webp",
-    alt: "Visita tecnica en instalaciones industriales",
+    alt: "Estudiantes en visita tecnica a una planta industrial de manufactura",
   },
   "liderazgo-ambiental-universitario": {
     src: "/images/course-3.webp",
-    alt: "Evento academico de liderazgo ambiental",
+    alt: "Discurso en evento academico de liderazgo ambiental en la Universidad de Guanajuato",
   },
   "gestion-de-residuos-industriales": {
-    src: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1200&q=80",
-    alt: "Centro de gestion y separacion de residuos",
+    src: "/images/course-4.webp",
+    alt: "Recorrido por instalaciones industriales con protocolo de sala limpia",
   },
   "impacto-ambiental-y-permisos": {
-    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-    alt: "Paisaje natural usado para evaluacion de impacto ambiental",
+    src: "/images/course-5.webp",
+    alt: "Grupo realizando trabajo de campo ambiental en zona forestal",
   },
   "comunicacion-de-sostenibilidad": {
-    src: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
-    alt: "Equipo revisando una estrategia de sostenibilidad",
+    src: "/images/course-6.webp",
+    alt: "Actividad de divulgacion y comunicacion ambiental con estudiantes",
   },
 };
 
 export const siteImages = {
   story: {
     src: "/images/story.webp",
-    alt: "Comunidad reunida en una actividad de educacion ambiental",
+    alt: "Equipo de Bee Blue celebrando con trofeo, el origen estudiantil de ELSI",
   },
   team: {
     src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
@@ -37,5 +37,20 @@ export const siteImages = {
   testimonial: {
     src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80",
     alt: "Persona participando en una sesion de consultoria",
+  },
+};
+
+export const solutionImages: Record<string, { src: string; alt: string }> = {
+  capacitacion: {
+    src: "/images/solucion-capacitacion.webp",
+    alt: "Voluntarios universitarios en una jornada de servicio comunitario",
+  },
+  "soluciones-ambientales": {
+    src: "/images/solucion-ambientales.webp",
+    alt: "Recorrido tecnico en instalaciones industriales con protocolo de sala limpia",
+  },
+  "educacion-universitaria": {
+    src: "/images/solucion-educacion.webp",
+    alt: "Estudiantes en ceremonia de juramentacion de un programa de liderazgo universitario",
   },
 };

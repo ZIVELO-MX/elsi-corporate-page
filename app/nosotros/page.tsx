@@ -47,6 +47,12 @@ export default function NosotrosPage() {
         <p>ELSI nace de Bee Blue, un movimiento universitario que demostró que la educación ambiental puede transformar comunidades enteras.</p>
       </div>
 
+      <div className="shell" style={{ marginBottom: 48 }}>
+        <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-card)", aspectRatio: "21 / 9" }}>
+          <SafeImage src={siteImages.story.src} alt={siteImages.story.alt} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+      </div>
+
       <section className="about-timeline-section" data-section-label="Nosotros / Línea de tiempo">
         <div className="shell">
           <div className="timeline-lg">

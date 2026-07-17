@@ -5,13 +5,31 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/safe-image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/components/auth-context";
+
+const navigation = [["/", "Inicio"], ["/nosotros", "Quiénes somos"], ["/soluciones", "Soluciones"], ["/cursos", "Cursos"], ["/contacto", "Contacto"]] as const;
 
 export default function Header() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setMenuOpen(false); triggerRef.current?.focus(); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    menuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   // The admin panel is its own full-height shell with its own navigation.
+  // (Runs after all hooks so the Rules of Hooks are respected.)
   if (pathname?.startsWith("/admin")) return null;
 
   return (
@@ -21,11 +39,7 @@ export default function Header() {
           <SafeImage src="/logos/elsi-wordmark.png" alt="ELSI" className="header-logo-img" width={123} height={70} />
         </Link>
         <nav className="header-nav" aria-label="Navegación principal">
-          <Link href="/">Inicio</Link>
-          <Link href="/nosotros">Quiénes somos</Link>
-          <Link href="/soluciones">Soluciones</Link>
-          <Link href="/cursos">Cursos</Link>
-          <Link href="/contacto">Contacto</Link>
+          {navigation.map(([href, label]) => <Link href={href} key={href}>{label}</Link>)}
         </nav>
         <div className="header-actions">
           {user ? (
@@ -45,6 +59,14 @@ export default function Header() {
             </>
           )}
         </div>
+        <button ref={triggerRef} type="button" className="header-menu-toggle" aria-expanded={menuOpen} aria-controls="mobile-navigation" aria-label={menuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"} onClick={() => setMenuOpen((open) => !open)}>
+          {menuOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+        </button>
+      </div>
+      <div className="mobile-nav-backdrop" data-open={menuOpen} aria-hidden="true" onClick={() => setMenuOpen(false)} />
+      <div id="mobile-navigation" ref={menuRef} className="mobile-navigation" data-open={menuOpen} aria-label="Navegación móvil">
+        <nav aria-label="Navegación principal móvil">{navigation.map(([href, label]) => <Link href={href} key={href} onClick={() => setMenuOpen(false)}>{label}</Link>)}</nav>
+        <div className="mobile-navigation-actions">{user ? <Link href="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link> : <Link href="/login" onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>}<Link href="/cursos" className="mobile-navigation-cta" onClick={() => setMenuOpen(false)}>Explorar cursos</Link></div>
       </div>
     </header>
   );

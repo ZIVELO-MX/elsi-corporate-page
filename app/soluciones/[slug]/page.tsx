@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getSolutionBySlug, solutions } from "@/lib/solutions";
+import { solutionImages } from "@/lib/image-assets";
+import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -41,6 +43,8 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
     notFound();
   }
 
+  const image = solutionImages[slug];
+
   return (
     <main>
       <section className="solution-article" data-section-label={`Soluciones / ${solution.title}`}>
@@ -55,6 +59,12 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
             <h1>{solution.title}</h1>
             <p>{solution.intro}</p>
           </div>
+
+          {image && (
+            <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-card)", aspectRatio: "21 / 9", marginBottom: 40 }}>
+              <SafeImage src={image.src} alt={image.alt} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
 
           <div className="solution-article-grid">
             <article className="solution-article-content">
