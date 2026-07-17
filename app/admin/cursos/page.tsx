@@ -167,7 +167,7 @@ export default function AdminCourses() {
                 <label style={fieldLabelStyle}>Título</label>
                 <input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={fieldInputStyle} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
                 <div>
                   <label style={fieldLabelStyle}>Categoría</label>
                   <input required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={fieldInputStyle} />
@@ -183,7 +183,7 @@ export default function AdminCourses() {
                   placeholder="Resumen breve del curso para el listado público."
                   style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
                 <div>
                   <label style={fieldLabelStyle}>Duración</label>
                   <input required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" style={fieldInputStyle} />
@@ -223,7 +223,7 @@ export default function AdminCourses() {
                     <input required value={form.presencialLocation} onChange={e => setForm({ ...form, presencialLocation: e.target.value })}
                       placeholder="Ej. Campus Central ELSI, Auditorio B" style={fieldInputStyle} />
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
                     <div>
                       <label style={fieldLabelStyle}>Fecha</label>
                       <input required value={form.presencialDate} onChange={e => setForm({ ...form, presencialDate: e.target.value })}
