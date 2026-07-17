@@ -112,3 +112,33 @@ es el único portador de estado: se acompaña de texto e icono (badges, toasts).
 - Formularios: las barras de alta/filtros se apilan con `flex-wrap`; los campos pareados
   del formulario de curso pasan de dos columnas a una en pantallas angostas
   (`auto-fit minmax`), con objetivos de toque a ancho completo.
+
+## Alcance del MVP y límites
+
+El wireframe cubre la operación manual mínima para alimentar el perfil del alumno.
+Dos módulos se mantienen deliberadamente básicos porque su ampliación pertenece a
+misiones de *farming* posteriores, dependientes de este panel y de acumular volumen.
+
+### Usuarios — frente a ELS-0009 (Ampliar la gestión de usuarios)
+
+- **En el MVP:** listado de usuarios, búsqueda por nombre/correo y detalle del alumno
+  con sus inscripciones y origen.
+- **Fuera del MVP → ELS-0009:** filtros avanzados de usuario, historial de accesos,
+  historial de compras y exportación de información. Se justifican cuando exista un
+  volumen de usuarios que lo amerite.
+
+### Contenido — frente a ELS-0010 (Ampliar la administración de contenido)
+
+- **En el MVP:** edición del texto y activación/desactivación de las secciones ya
+  definidas de la página corporativa.
+- **Fuera del MVP → ELS-0010:** editar más secciones, administrar imágenes y recursos,
+  reordenar secciones y crear secciones nuevas desde el panel.
+
+### Fuera de alcance del panel (todas las misiones de wireframe)
+
+- Implementación real, backend y persistencia.
+- Envío automático de correos y descarga/almacenamiento de constancias.
+- Reproducción o consumo de cursos dentro de la plataforma.
+- Cancelaciones o modificaciones de inscripción desde el perfil del alumno.
+- Estados de inscripción más allá de `No pagado`/`Pagado` y de constancia
+  `pendiente`/`disponible`.
