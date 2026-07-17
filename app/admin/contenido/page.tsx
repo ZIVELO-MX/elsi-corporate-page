@@ -40,7 +40,7 @@ export default function AdminContent() {
                 }} aria-label={`${s.active ? "Desactivar" : "Activar"} sección ${s.label}`}>
                 <span style={{
                   display: "block", width: "1.125rem", height: "1.125rem", borderRadius: "50%",
-                  background: "#fff", transition: "transform var(--motion-fast)",
+                  background: "var(--card)", transition: "transform var(--motion-fast)",
                   transform: s.active ? "translateX(1.25rem)" : "translateX(0.1875rem)",
                 }} />
               </button>
