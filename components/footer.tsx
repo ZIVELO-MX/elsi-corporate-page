@@ -1,7 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // The admin panel is a self-contained app shell without the marketing footer.
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="site-footer">
       <div className="shell">

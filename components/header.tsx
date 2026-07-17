@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/safe-image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +13,7 @@ const navigation = [["/", "Inicio"], ["/nosotros", "Quiénes somos"], ["/solucio
 
 export default function Header() {
   const { user } = useAuth();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -25,6 +27,10 @@ export default function Header() {
     menuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus();
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
+
+  // The admin panel is its own full-height shell with its own navigation.
+  // (Runs after all hooks so the Rules of Hooks are respected.)
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="site-header">

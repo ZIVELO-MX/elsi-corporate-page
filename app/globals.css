@@ -707,19 +707,33 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- ADMIN PANEL ---- */
+/* ---- ADMIN PANEL ----
+   The panel is its own full-height shell (marketing header/footer are hidden
+   on /admin). Desktop: a fixed full-height sidebar with the content offset by
+   its width. Mobile (<=800px): the sidebar becomes an off-canvas drawer. */
+.admin-shell {
+  min-height: 100dvh;
+  background: var(--bg);
+}
 .admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 16rem;
-  flex-shrink: 0;
-  align-self: flex-start;
   background: var(--card);
   border-right: 1px solid var(--border);
   padding: 1.5rem 0;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: var(--header-height);
-  z-index: 10;
+  overflow-y: auto;
+  z-index: 20;
+}
+.admin-main {
+  min-width: 0;
+  margin-left: 16rem;
+  padding: 2rem;
+  background: var(--bg);
 }
 .admin-mobile-bar { display: none; }
 .admin-sidebar-backdrop { display: none; }
@@ -742,22 +756,125 @@ body[data-section-labels="true"] section[data-section-label]::before {
   accent-color: var(--primary);
 }
 
+/* Selects: strip the native widget (huge on Safari, inconsistent on Chrome)
+   and draw our own chevron so they match the text inputs across browsers. */
+.admin-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 2.375rem;
+  padding: 0 2rem 0 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23596157' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.admin-select::-ms-expand { display: none; }
+
+/* Loading skeleton */
+.admin-skeleton {
+  display: inline-block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--text-muted) 17%, transparent) 25%,
+    color-mix(in oklab, var(--text-muted) 8%, transparent) 37%,
+    color-mix(in oklab, var(--text-muted) 17%, transparent) 63%
+  );
+  background-size: 400% 100%;
+  animation: admin-skeleton-shimmer 1.4s ease infinite;
+}
+@keyframes admin-skeleton-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Toast notifications */
+.admin-toast-viewport {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: calc(100vw - 2.5rem);
+  pointer-events: none;
+}
+.admin-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  min-width: 15rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  font-size: 0.8125rem;
+  color: var(--text);
+  pointer-events: auto;
+  animation: admin-toast-in var(--motion-med) cubic-bezier(0.23, 1, 0.32, 1);
+}
+.admin-toast[data-variant="success"] svg { color: var(--leaf); }
+.admin-toast[data-variant="error"] svg { color: var(--destructive); }
+.admin-toast[data-leaving="true"] { animation: admin-toast-out var(--motion-fast) ease-in forwards; }
+.admin-toast-close {
+  display: flex;
+  padding: 0.125rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.admin-toast-close:hover { color: var(--text); }
+@keyframes admin-toast-in {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes admin-toast-out {
+  to { opacity: 0; transform: translateY(0.5rem) scale(0.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-skeleton { animation: none; }
+  .admin-toast, .admin-toast[data-leaving="true"] { animation: none; }
+}
+
+@media (max-width: 800px) {
+  .admin-toast-viewport { left: 1.25rem; right: 1.25rem; }
+  .admin-toast { min-width: 0; }
+}
+
 @media (max-width: 800px) {
   .admin-mobile-bar {
     display: flex;
     align-items: center;
     gap: .75rem;
-    padding: .875rem 1.25rem;
+    height: 3.5rem;
+    box-sizing: border-box;
+    padding: 0 1.25rem;
     background: var(--card);
     border-bottom: 1px solid var(--border);
     position: sticky;
-    top: var(--header-height);
+    top: 0;
     z-index: 30;
   }
+  .admin-main {
+    margin-left: 0;
+    padding: 1.25rem;
+  }
   .admin-sidebar {
-    position: fixed;
-    inset-block: var(--header-height) 0;
+    inset-block: 3.5rem 0;
     left: 0;
+    width: 18rem;
     max-width: 82vw;
     transform: translateX(-100%);
     transition: transform var(--motion-med) ease;
@@ -768,7 +885,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .admin-sidebar-backdrop {
     display: block;
     position: fixed;
-    inset: var(--header-height) 0 0 0;
+    inset: 3.5rem 0 0 0;
     background: rgba(28, 35, 31, .32);
     opacity: 0;
     pointer-events: none;

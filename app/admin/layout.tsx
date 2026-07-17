@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-context";
 import { AdminDataProvider } from "@/lib/admin-data";
+import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
@@ -67,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminDataProvider>
+      <ToastProvider>
       <div className="admin-mobile-bar">
         <button
           type="button"
@@ -93,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onClick={() => setSidebarOpen(false)}
       />
 
-      <div style={{ display: "flex", minHeight: "calc(100vh - var(--header-height))", marginTop: "var(--header-height)" }}>
+      <div className="admin-shell">
         <aside
           id="admin-sidebar"
           className="admin-sidebar"
@@ -157,10 +159,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </div>
         </aside>
-        <main style={{ flex: 1, padding: "2rem", minWidth: 0, background: "var(--bg)" }}>
+        <main className="admin-main">
           {children}
         </main>
       </div>
+      </ToastProvider>
     </AdminDataProvider>
   );
 }

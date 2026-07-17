@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useAdminData, type AdminUser } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { TableSkeleton } from "@/components/ui/skeleton";
 
 function SourceBadge({ source }: { source: "interna" | "externa" }) {
   return (
@@ -80,7 +81,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
 }
 
 export default function AdminUsers() {
-  const { users, enrollments } = useAdminData();
+  const { loading, users, enrollments } = useAdminData();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
 
@@ -115,6 +116,9 @@ export default function AdminUsers() {
         </div>
       </div>
 
+      {loading ? (
+        <TableSkeleton rows={5} widths={["9rem", "12rem", "5rem", "6rem", "6rem"]} />
+      ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", minWidth: "36rem", borderCollapse: "collapse" }}>
@@ -162,6 +166,7 @@ export default function AdminUsers() {
           </table>
         </div>
       </div>
+      )}
 
       <UserDetailDialog user={selected} onClose={() => setSelected(null)} />
     </div>
