@@ -50,25 +50,25 @@ export default function RegisterPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="name" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Nombre</label>
-          <input id="name" name="name" autoComplete="name" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} value={name} onChange={(e) => setName(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
+          <input id="name" name="name" autoComplete="name" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} required value={name} onChange={(e) => setName(e.target.value)} style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="email" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Correo electrónico</label>
-          <input id="email" name="email" type="email" autoComplete="email" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
+          <input id="email" name="email" type="email" autoComplete="email" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} required value={email} onChange={(e) => setEmail(e.target.value)} style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="phone" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Teléfono</label>
-          <input id="phone" name="phone" type="tel" autoComplete="tel" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} value={phone} onChange={(e) => setPhone(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
+          <input id="phone" name="phone" type="tel" autoComplete="tel" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} required value={phone} onChange={(e) => setPhone(e.target.value)} style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="password" style={{ fontSize: "0.8125rem", fontWeight: 600 }}>Contraseña</label>
-          <input id="password" name="password" type="password" autoComplete="new-password" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }} />
+          <input id="password" name="password" type="password" autoComplete="new-password" aria-invalid={Boolean(error)} aria-describedby={error ? "register-error" : undefined} required value={password} onChange={(e) => setPassword(e.target.value)} style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }} />
         </div>
 
-        <button type="submit" disabled={loading} style={{ padding: "0.625rem 1rem", background: "var(--primary)", color: "#fff", border: "none", borderRadius: "var(--radius)", fontSize: "0.9375rem", fontWeight: 700, cursor: "pointer" }}>
+        <button type="submit" disabled={loading} style={{ minHeight: 44, padding: "0.625rem 1rem", background: "var(--primary)", color: "var(--text)", border: "none", borderRadius: "var(--radius)", fontSize: "0.9375rem", fontWeight: 700, cursor: "pointer" }}>
           {loading ? "Registrando..." : "Crear cuenta"}
         </button>
 

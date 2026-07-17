@@ -34,9 +34,9 @@ export default function Footer() {
             <Link href="/login">Ingresar</Link>
           </div>
           <div className="footer-col">
-            <strong>Síguenos</strong>
-            <a href="https://www.instagram.com/elsiacademy/" rel="noopener noreferrer" target="_blank">Instagram</a>
-            <a href="https://www.facebook.com/" rel="noopener noreferrer" target="_blank">Facebook</a>
+            <strong>Contacto</strong>
+            <a href="tel:+523921104719">392-110-4719</a>
+            <a href="mailto:instituteelsi@gmail.com">instituteelsi@gmail.com</a>
           </div>
         </div>
         <div className="footer-bottom">

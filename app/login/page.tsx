@@ -53,7 +53,8 @@ export default function LoginPage() {
             name="email"
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "login-error" : undefined}
-            style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }}
+            required
+            style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }}
             autoComplete="email"
           />
         </div>
@@ -69,7 +70,8 @@ export default function LoginPage() {
             name="password"
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "login-error" : undefined}
-            style={{ padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", outline: "none", background: "var(--card)" }}
+            required
+            style={{ minHeight: 44, padding: "0.625rem 0.875rem", border: "1px solid var(--input)", borderRadius: "var(--radius)", fontSize: "0.9375rem", background: "var(--card)" }}
             autoComplete="current-password"
           />
         </div>
