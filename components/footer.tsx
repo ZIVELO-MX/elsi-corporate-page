@@ -31,12 +31,12 @@ export default function Footer() {
           <div className="footer-col">
             <strong>Academia</strong>
             <Link href="/cursos">Cursos</Link>
-            <span>Ingresar</span>
+            <Link href="/login">Ingresar</Link>
           </div>
           <div className="footer-col">
             <strong>Síguenos</strong>
-            <span>Instagram</span>
-            <span>Facebook</span>
+            <a href="https://www.instagram.com/elsiacademy/" rel="noopener noreferrer" target="_blank">Instagram</a>
+            <a href="https://www.facebook.com/" rel="noopener noreferrer" target="_blank">Facebook</a>
           </div>
         </div>
         <div className="footer-bottom">
