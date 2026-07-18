@@ -8,3 +8,6 @@ tsconfig.tsbuildinfo
 .DS_Store
 raw_images/
 public/images/
+!public/images/
+public/images/*
+!public/images/*.webp

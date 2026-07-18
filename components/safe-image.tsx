@@ -15,7 +15,18 @@ type SafeImageProps = {
 
 export function SafeImage({ src, alt, className, style, width, height, loading = "lazy", fetchPriority = "auto" }: SafeImageProps) {
   const [hidden, setHidden] = useState(false);
-  if (hidden) return <div className="image-fallback" aria-hidden="true" />;
+  if (hidden) {
+    return (
+      <div
+        className={["image-fallback", className].filter(Boolean).join(" ")}
+        style={style}
+        role="img"
+        aria-label={`Imagen no disponible: ${alt}`}
+      >
+        <span>Imagen no disponible</span>
+      </div>
+    );
+  }
   return (
     <img
       src={src}

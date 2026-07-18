@@ -69,22 +69,10 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
           <div className="solution-article-grid">
             <article className="solution-article-content">
               <h2>Una ruta clara para avanzar</h2>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer facilisis, justo sed
-                dictum finibus, sem nisl facilisis risus, vitae viverra neque erat sed justo.
-              </p>
-              <p>
-                Donec consequat, nibh vitae luctus tincidunt, magna lacus viverra arcu, sed rhoncus
-                mi justo at erat. La propuesta se adapta al contexto de cada organización y prioriza
-                acciones comprensibles, medibles y sostenibles.
-              </p>
+              <p>{solution.approach}</p>
 
-              <h2>Cómo trabajamos</h2>
-              <p>
-                Praesent sed justo nec arcu varius volutpat. Aenean sed sem eget augue luctus
-                hendrerit. Cada proyecto se plantea con objetivos concretos, sesiones de seguimiento
-                y materiales que facilitan la implementación.
-              </p>
+              <h2>Alcance transparente</h2>
+              <p>{solution.delivery}</p>
             </article>
 
             <aside className="solution-article-aside">
