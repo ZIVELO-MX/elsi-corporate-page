@@ -20,7 +20,7 @@ export default function Footer() {
               alt="ELSI — Environmental Learning & Solutions Institute"
               width={180}
               height={101}
-              className="block h-auto w-[190px] object-contain"
+              className="footer-logo block h-auto w-[190px] object-contain"
             />
           </div>
           <div className="footer-col">
@@ -33,7 +33,7 @@ export default function Footer() {
             <Link href="/cursos">Cursos</Link>
             <Link href="/login">Ingresar</Link>
           </div>
-          <div className="footer-col">
+          <div className="footer-col footer-col-contact">
             <strong>Contacto</strong>
             <a href="tel:+523921104719">392-110-4719</a>
             <a href="mailto:instituteelsi@gmail.com">instituteelsi@gmail.com</a>
