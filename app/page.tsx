@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BadgeCheck, GraduationCap, ShieldCheck, Users, Building2, Users2, Mic, Wrench, Leaf } from "lucide-react";
+import { GraduationCap, Building2, Users2, Mic, Wrench, Leaf } from "lucide-react";
 import { getAllCourses, money } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
-import { courseImages, siteImages } from "@/lib/image-assets";
+import { courseImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/avatar";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,50 +24,10 @@ import {
 const allCourses = getAllCourses();
 const featuredCourses = allCourses.slice(0, 3);
 
-// Feature flags — activar/desactivar desde panel de administración
-const SECTIONS = {
-  stats: false,
-  porqueElegir: false,
-};
-
-const TESTIMONIALS = [
-  { quote: '"Certificamos a nuestro equipo de 40 personas en 3 semanas y redujimos 30% las no conformidades ambientales en la primera auditoría siguiente."', name: 'Nombre Apellido', role: 'Gerente de Operaciones · Empresa manufacturera' },
-  { quote: '"Más de 300 estudiantes se inscribieron al taller en 48 horas. ELSI entendió exactamente cómo hablarle a nuestra comunidad universitaria."', name: 'Nombre Apellido', role: 'Directora Académica · Universidad' },
-  { quote: '"En 6 semanas pasamos de no tener plan de cumplimiento a documentar el 100% de nuestros procesos ambientales críticos."', name: 'Nombre Apellido', role: 'Coordinador Ambiental · Institución pública' },
-];
-
-const HERO_AVATARS = [
-  {
-    src: "https://upload.wikimedia.org/wikipedia/en/d/dc/Pocket_Mortys.png",
-    alt: "Estudiante participante en una sesion formativa",
-    fallback: "EC",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658307900",
-  },
-  {
-    src: "https://i.pinimg.com/736x/5f/af/6e/5faf6ef038c6185eb6c67e4bfccce4ee.jpg",
-    alt: "Participante de programa educativo ambiental",
-    fallback: "UG",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658311952",
-  },
-  {
-    src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9-Y5l2RCU9deuPoFZ9ZsVbXsUINjGtE1V0jrW--SECAeBliTMxdG2vwRO&s=10",
-    alt: "Estudiante en actividad de capacitacion",
-    fallback: "EL",
-    attribution: "Student Portrait, Englewood Codes 2013 by danxoneil, CC BY 2.0, via Openverse/Flickr: https://www.flickr.com/photos/36521980095@N01/9658302076",
-  },
-];
-
-const HOME_STATS = [
-  { num: "+2,200", label: "estudiantes universitarios alcanzados", note: "dato real del sitio actual" },
-  { num: "+100", label: "espacios formativos realizados", note: "dato real del sitio actual" },
-  { num: "3", label: "líneas de servicio", note: "capacitación, soluciones y universidades" },
-  { num: "2026", label: "nuevo sitio corporativo", note: "migración en proceso" },
-];
-
 const STORY_PREVIEW = [
   { num: "2019", label: "Bee Blue", desc: "Iniciativa estudiantil enfocada en educación ambiental." },
   { num: "UG", label: "Comunidad universitaria", desc: "Conferencias, talleres y eventos en Guanajuato." },
-  { num: "+2.2k", label: "Alcance formativo", desc: "Miles de estudiantes impactados con experiencias ambientales." },
+  { num: "Aula", label: "Experiencias formativas", desc: "Actividades para acercar el aprendizaje ambiental a la práctica." },
   { num: "ELSI", label: "Instituto", desc: "La iniciativa evoluciona hacia capacitación y soluciones ambientales." },
 ];
 
@@ -112,72 +70,10 @@ export default function Home() {
                 <Link href="/contacto">Solicita información</Link>
               </Button>
             </div>
-            <div className="hero-stat">
-              <AvatarGroup className="hero-avatar-group" aria-label="Participantes formados por ELSI">
-                {HERO_AVATARS.map((avatar) => (
-                  <Avatar key={avatar.src} size="lg" className="hero-avatar-item">
-                    <AvatarImage src={avatar.src} alt={avatar.alt} title={avatar.attribution} />
-                    <AvatarFallback>{avatar.fallback}</AvatarFallback>
-                  </Avatar>
-                ))}
-                <AvatarGroupCount className="hero-avatar-count">+2k</AvatarGroupCount>
-              </AvatarGroup>
-              <span className="hero-stat-text"><strong>+2,200 estudiantes</strong> ya se han formado con nosotros desde 2019.</span>
-            </div>
           </div>
           <div style={{ display: "none" }} />
         </div>
       </section>
-
-      {/* ===== PARTNERS ===== */}
-      <section className="partners reveal" data-delay="1" data-section-label="Home / Confianza">
-        <div className="shell">
-          <p className="partners-label">Organizaciones que han confiado en ELSI</p>
-          <div className="partners-grid">
-            {["UG", "INDUSTRIA", "GOBIERNO", "EDUCACIÓN", "ORG. CIVIL"].map((name) => (
-              <div key={name} className="partner-badge">{name}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FEATURE STRIP ===== */}
-      <section className="feature-strip reveal" data-delay="2" data-section-label="Home / Beneficios rápidos">
-        <div className="shell">
-          <div className="feature-grid">
-            {[
-              { Icon: BadgeCheck, text: "Constancias con validez curricular" },
-              { Icon: GraduationCap, text: "Origen en la Universidad de Guanajuato" },
-              { Icon: ShieldCheck, text: "Contenido alineado a normatividad mexicana" },
-              { Icon: Users, text: "Instructores con experiencia comprobada" },
-            ].map((item, i) => (
-              <div key={i} className="feature-item">
-                <div className="feature-icon">
-                  <item.Icon size={19} strokeWidth={2} aria-hidden="true" />
-                </div>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== STATS ===== */}
-      {SECTIONS.stats && <section className="stats-band reveal" data-section-label="Home / Estadísticas">
-        <div className="shell">
-          <div className="stats-grid">
-            {HOME_STATS.map((stat) => (
-              <Card key={stat.num} className="stat-card">
-                <CardHeader className="stat-card-header">
-                  <span className="stat-number">{stat.num}</span>
-                  <CardDescription className="stat-label">{stat.label}</CardDescription>
-                  <span className="stat-note">{stat.note}</span>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>}
 
       {/* ===== HISTORIA RESUMIDA ===== */}
       <section className="historia-resumida" data-section-label="Home / Historia resumida">
@@ -241,7 +137,7 @@ export default function Home() {
             <div>
               <span className="section-kicker">Aprende a tu ritmo</span>
               <h2 className="section-title" style={{ margin: 0 }}>Cursos destacados</h2>
-              <p className="section-lede">Catálogo propuesto para presentar la oferta y capturar interés antes de activar compra o inscripción automática.</p>
+              <p className="section-lede">Explora programas ambientales y revisa su temario antes de solicitar información.</p>
             </div>
             <Button asChild variant="link">
               <Link href="/cursos">Ver catálogo completo →</Link>
@@ -279,85 +175,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== POR QUÉ ELEGIR ELSI ===== */}
-      {SECTIONS.porqueElegir && <section data-section-label="Home / Por qué elegir ELSI" style={{ padding: "64px 0" }}>
-        <div className="shell">
-          <span className="section-kicker">¿Por qué elegir ELSI?</span>
-          <h2 className="section-title">Un aliado estratégico, no solo un proveedor</h2>
-          <div className="beneficios-grid">
-            {[
-              { strong: "Equipo especializado", p: "Profesionales en ciencias ambientales y educación." },
-              { strong: "Metodologías prácticas", p: "Aprender haciendo, no solo escuchando." },
-              { strong: "Experiencia comprobada", p: "Miles de personas capacitadas desde 2019." },
-              { strong: "Programas personalizados", p: "Cada organización recibe una solución a su medida." },
-              { strong: "Impacto medible", p: "Indicadores claros antes, durante y después." },
-              { strong: "Innovación constante", p: "Contenidos actualizados a normativa y tendencias." },
-            ].map((ben, i) => (
-              <div key={ben.strong} className="beneficio-card">
-                <span className="beneficio-index">0{i + 1}</span>
-                <strong>{ben.strong}</strong>
-                <p>{ben.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>}
-
-      {/* ===== TESTIMONIALES ===== */}
-      <section className="testimonios" data-section-label="Home / Testimonios">
-        <div className="shell">
-          <Carousel opts={{ align: "center", loop: true }} className="testimonial-carousel">
-            <CarouselContent>
-              {TESTIMONIALS.map((testimonial) => (
-                <CarouselItem key={testimonial.role}>
-                  <div className="testimonial-card">
-                    <div className="portrait-thumb testimonial-portrait">
-                      <SafeImage src={siteImages.testimonial.src} alt={siteImages.testimonial.alt} width={160} height={160} />
-                    </div>
-                    <div className="testimonial-stars" aria-hidden="true">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <svg key={i} width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
-                      ))}
-                    </div>
-                    <p>{testimonial.quote}</p>
-                    <div className="testimonial-name">{testimonial.name}</div>
-                    <div className="testimonial-role">{testimonial.role}</div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="testimonial-carousel-button" />
-            <CarouselNext className="testimonial-carousel-button" />
-          </Carousel>
-        </div>
-      </section>
-
-      {/* ===== FAQ ===== */}
-      <section data-section-label="Home / FAQ" style={{ padding: "64px 0" }}>
-        <div className="shell" style={{ maxWidth: 820, margin: "0 auto" }}>
-          <span className="section-kicker" style={{ textAlign: "center" }}>Preguntas frecuentes</span>
-          <h2 style={{ textAlign: "center", fontFamily: "'Sora',sans-serif", fontSize: 26, fontWeight: 700, margin: "0 0 28px" }}>Resolvemos tus dudas</h2>
-          <Accordion type="single" collapsible>
-            <AccordionItem value="0">
-              <AccordionTrigger style={{ fontFamily: "'Manrope',sans-serif", fontSize: 15 }}>¿Qué tipo de organizaciones pueden trabajar con ELSI?</AccordionTrigger>
-              <AccordionContent style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Trabajamos con empresas, instituciones educativas y organizaciones públicas de cualquier tamaño.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="1">
-              <AccordionTrigger style={{ fontFamily: "'Manrope',sans-serif", fontSize: 15 }}>¿Los cursos se toman en línea o de forma presencial?</AccordionTrigger>
-              <AccordionContent style={{ fontSize: 13.5, color: "var(--text-muted)" }}>La mayoría de nuestros cursos son 100% en línea, a tu ritmo, con acceso desde tu cuenta.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="2">
-              <AccordionTrigger style={{ fontFamily: "'Manrope',sans-serif", fontSize: 15 }}>¿Ofrecen certificados al terminar?</AccordionTrigger>
-              <AccordionContent style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Sí, la mayoría de nuestros programas incluyen constancia o certificado descargable.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="3">
-              <AccordionTrigger style={{ fontFamily: "'Manrope',sans-serif", fontSize: 15 }}>¿Cómo se cotiza una consultoría o programa in-company?</AccordionTrigger>
-              <AccordionContent style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Escríbenos desde Contacto y te enviamos una propuesta a la medida de tu organización.</AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </section>
-
       {/* ===== CTA ===== */}
       <section className="cta-section" data-section-label="Home / CTA formulario">
         <div className="shell cta-grid">
@@ -384,7 +201,7 @@ export default function Home() {
               <Label htmlFor="cta-mensaje">Mensaje</Label>
               <Textarea id="cta-mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} required />
             </Field>
-            {ctaSent && <div className="cta-sent" role="status">Solicitud recibida. Te contactaremos pronto.</div>}
+            {ctaSent && <div className="cta-sent" role="status">Vista previa completada. El envío se habilitará al conectar el canal de contacto.</div>}
             <Button type="submit" size="lg" variant="primary" className="cta-submit">
               Enviar solicitud
             </Button>

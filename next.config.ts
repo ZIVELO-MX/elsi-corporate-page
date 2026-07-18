@@ -1,4 +1,14 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: "/shop", destination: "/cursos", permanent: true },
+      { source: "/tienda", destination: "/cursos", permanent: true },
+      { source: "/checkout", destination: "/finalizar-compra", permanent: true },
+      { source: "/account", destination: "/profile", permanent: true },
+      { source: "/mi-cuenta", destination: "/profile", permanent: true },
+    ];
+  },
+};
 export default nextConfig;

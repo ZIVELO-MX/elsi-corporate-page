@@ -5,37 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const timelineItems = [
-  { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil enfocada en educación y concientización ambiental.", status: "Validar año exacto" },
-  { num: "UG", style: "outlined", label: "Universidad de Guanajuato", desc: "El movimiento crece dentro de la comunidad universitaria.", status: "Validar hitos por campus" },
-  { num: "+2.2k", style: "outlined", label: "Miles de estudiantes", desc: "Conferencias, talleres, cursos, congresos, eventos y dinámicas.", status: "Dato publicado" },
-  { num: "ELSI", style: "filled", label: "Nace ELSI", desc: "La iniciativa se profesionaliza como instituto de aprendizaje y soluciones.", status: "Validar fecha" },
-  { num: "B2B", style: "outlined", label: "Consultoría y capacitación", desc: "La oferta se extiende a empresas, instituciones y comunidades.", status: "Validar casos" },
-  { num: "2026", style: "outlined", label: "Nueva web corporativa", desc: "Migración hacia una experiencia clara para cursos y contacto.", status: "En progreso" },
-];
-
-const researchItems = [
-  "Años e hitos reales de Bee Blue y transición a ELSI.",
-  "Logo vectorial, colores oficiales y usos permitidos de marca.",
-  "Fotografías en alta resolución de talleres, eventos y equipo.",
-  "Catálogo real de cursos, nombres, módulos, precios y disponibilidad.",
-  "Confirmación de cifras adicionales antes de publicarlas como logros.",
-];
-
-const teamMembers = [
-  {
-    name: "Emmanuel Pimentel Cerrillos",
-    role: "Asesor ELSI",
-    stat: "+50 talleres impartidos",
-    email: "e.pimentelcerrillos@ugto.mx",
-    avatar: "https://elsyacademy.me/wp-content/uploads/2026/04/IMG_2639-1024x573.jpeg",
-  },
-  {
-    name: "Aldo Espinoza Tapia",
-    role: "Asesor ELSI",
-    stat: "Especialista en cumplimiento ambiental",
-    email: "a.espinozatapia@ugto.mx",
-    avatar: "https://elsyacademy.me/wp-content/uploads/2026/04/5c69e245-42eb-4179-ac5c-6b6c9716e0ec.jpeg",
-  },
+  { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil enfocada en educación y concientización ambiental." },
+  { num: "UG", style: "outlined", label: "Comunidad universitaria", desc: "El movimiento crea actividades de aprendizaje ambiental en Guanajuato." },
+  { num: "Aula", style: "outlined", label: "Experiencias formativas", desc: "Conferencias, talleres y actividades acercan el aprendizaje a la práctica." },
+  { num: "ELSI", style: "filled", label: "Evolución del proyecto", desc: "La iniciativa amplía su trabajo hacia capacitación y soluciones ambientales." },
 ];
 
 export default function NosotrosPage() {
@@ -61,25 +34,9 @@ export default function NosotrosPage() {
                 <div className={`timeline-lg-num ${item.style}`}>{item.num}</div>
                 <strong>{item.label}</strong>
                 <span>{item.desc}</span>
-                <small>{item.status}</small>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="about-research" data-section-label="Nosotros / Por investigar">
-        <div className="shell about-research-grid">
-          <div>
-            <span className="section-kicker">Por investigar</span>
-            <h2 className="section-title">La historia debe crecer con evidencia, no con relleno.</h2>
-            <p className="section-lede">Estos puntos deben validarse antes de cerrar la versión aprobada de la web corporativa. Mientras tanto, la narrativa se mantiene clara y marcada como propuesta cuando corresponde.</p>
-          </div>
-          <ul className="research-list">
-            {researchItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
         </div>
       </section>
 
@@ -95,29 +52,6 @@ export default function NosotrosPage() {
                 <CardContent style={{ padding: 0 }}>
                   <strong style={{ fontSize: 19, fontFamily: "'Sora',sans-serif" }}>{item.title}</strong>
                   <p style={{ margin: "10px 0 0", fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{item.text}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section data-section-label="Nosotros / Equipo" style={{ padding: "64px 0" }}>
-        <div className="shell">
-          <span style={{ display: "block", marginBottom: 28, fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--primary)" }}>Nuestro equipo</span>
-          <div className="team-grid">
-            {teamMembers.map((person) => (
-              <Card key={person.name} className="team-card" style={{ boxShadow: "none" }}>
-                <CardContent className="team-card-content" style={{ padding: 24 }}>
-                  <div className="team-avatar">
-                    <SafeImage src={person.avatar} alt={siteImages.team.alt} width={160} height={160} />
-                  </div>
-                  <div>
-                    <div className="team-name">{person.name}</div>
-                    <div className="team-role">{person.role}</div>
-                    <div className="team-stat">{person.stat}</div>
-                    <a className="team-email" href={`mailto:${person.email}`}>{person.email}</a>
-                  </div>
                 </CardContent>
               </Card>
             ))}

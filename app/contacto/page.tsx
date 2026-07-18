@@ -29,7 +29,6 @@ function ContactoContent() {
             <div className="contact-info">
               <div><strong>Teléfono:</strong> <a href="tel:+523921104719">392-110-4719</a></div>
               <div><strong>Correo:</strong> <a href="mailto:instituteelsi@gmail.com">instituteelsi@gmail.com</a></div>
-              <div><strong>Correo:</strong> <a href="mailto:emapime123@gmail.com">emapime123@gmail.com</a></div>
               <div><strong>Ubicación:</strong> Guanajuato, México</div>
             </div>
           </div>
@@ -49,7 +48,7 @@ function ContactoContent() {
               <Label htmlFor="mensaje">Mensaje</Label>
               <Textarea id="mensaje" name="message" placeholder="¿En qué podemos ayudarte?" rows={4} defaultValue={courseMessage} required />
             </Field>
-            {sent && <div className="contact-sent" role="status">Solicitud registrada en modo demo. Te responderemos pronto cuando el flujo esté conectado.</div>}
+            {sent && <div className="contact-sent" role="status">Vista previa completada. El envío se habilitará al conectar el canal de contacto.</div>}
             <Button type="submit" disabled={sent} variant="primary" className="contact-submit">{sent ? "Solicitud registrada" : "Enviar mensaje"}</Button>
           </form>
         </div>

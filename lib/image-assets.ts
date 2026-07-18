@@ -30,14 +30,6 @@ export const siteImages = {
     src: "/images/story.webp",
     alt: "Equipo de Bee Blue celebrando con trofeo, el origen estudiantil de ELSI",
   },
-  team: {
-    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
-    alt: "Equipo profesional colaborando en una mesa de trabajo",
-  },
-  testimonial: {
-    src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80",
-    alt: "Persona participando en una sesion de consultoria",
-  },
 };
 
 export const solutionImages: Record<string, { src: string; alt: string }> = {
