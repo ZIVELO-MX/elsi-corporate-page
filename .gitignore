@@ -4,6 +4,9 @@ out
 .env*
 !.env.example
 *.log
+test-results/
+playwright-report/
+blob-report/
 tsconfig.tsbuildinfo
 .DS_Store
 raw_images/

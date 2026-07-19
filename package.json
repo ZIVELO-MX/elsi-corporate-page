@@ -8,7 +8,9 @@
     "build": "next build",
     "build:sections": "NEXT_PUBLIC_SECTION_LABELS=1 next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "screenshots:capture": "pnpm build && playwright test tests/mission-screenshots.spec.ts",
+    "screenshots:publish": "PUBLISH_MISSION_SCREENSHOTS=1 pnpm screenshots:capture"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "latest",
@@ -27,12 +29,14 @@
     "tw-animate-css": "latest"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "^9.39.4",
     "eslint-config-next": "latest",
+    "sharp": "^0.34.5",
     "tailwindcss": "latest",
     "typescript": "latest"
   },
