@@ -11,14 +11,19 @@ export type CaptureTarget = {
 const section = (label: string) => `section[data-section-label="${label}"]`;
 
 async function prepareAdminProfile(page: Page) {
-  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await page.goto("/login", { waitUntil: "networkidle" });
   await page.getByLabel("Correo electrónico").fill("admin@elsi.com");
   await page.getByLabel("Contraseña").fill("capturas-ci");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL("**/admin");
-  await page.locator(".header-user-link").click();
+  await Promise.all([
+    page.waitForURL("**/admin", { timeout: 10_000 }),
+    page.getByRole("button", { name: "Entrar" }).click(),
+  ]);
+  await page.goBack();
+  await page.waitForURL("**/login");
+  await page.getByRole("button", { name: /Abrir menú de usuario/ }).click();
+  await page.getByRole("menuitem", { name: "Mi perfil" }).click();
   await page.waitForURL("**/profile");
-  await page.getByText("Sostenibilidad y gestión ambiental").waitFor();
+  await page.getByRole("heading", { name: "Datos de la cuenta" }).waitFor();
 }
 
 async function prepareAdminDashboard(page: Page) {
@@ -32,8 +37,8 @@ export const captureTargets: CaptureTarget[] = [
   { key: "home-story", title: "Home — Historia resumida", path: "/", selector: section("Home / Historia resumida") },
   { key: "home-services", title: "Home — Servicios", path: "/", selector: section("Home / Servicios carrusel") },
   { key: "home-featured-courses", title: "Home — Cursos destacados", path: "/", selector: section("Home / Cursos destacados") },
-  { key: "home-testimonials", title: "Home — Testimonios", path: "/", selector: section("Home / Testimonios") },
-  { key: "home-faq", title: "Home — Preguntas frecuentes", path: "/", selector: section("Home / FAQ") },
+  { key: "home-contact", title: "Home — Contacto", path: "/", selector: section("Home / CTA formulario") },
+  { key: "privacy-notice", title: "Legal — Aviso de privacidad", path: "/aviso-de-privacidad", selector: section("Legal / Aviso de privacidad") },
   { key: "courses-catalog", title: "Cursos — Catálogo", path: "/cursos", selector: section("Cursos / Catálogo") },
   { key: "course-detail-fundamentals", title: "Curso — Fundamentos de Educación Ambiental", path: "/cursos/fundamentos-de-educacion-ambiental", selector: section("Detalle curso / Contenido") },
   { key: "solutions-overview", title: "Soluciones — Servicios", path: "/soluciones", selector: section("Soluciones / Servicios") },

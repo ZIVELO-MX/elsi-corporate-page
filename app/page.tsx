@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Building2, Users2, Mic, Wrench, Leaf } from "lucide-react";
 import { getAllCourses, money } from "@/lib/courses";
@@ -9,10 +6,7 @@ import { courseImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { PublicContactForm } from "@/components/public-contact-form";
 import {
   Carousel,
   CarouselContent,
@@ -41,8 +35,6 @@ const servicios = [
 ];
 
 export default function Home() {
-  const [ctaSent, setCtaSent] = useState(false);
-
   return (
     <main>
       {/* ===== HERO ===== */}
@@ -182,30 +174,13 @@ export default function Home() {
             <h2>Encuentra el curso o programa ambiental adecuado.</h2>
             <p>Comparte tus datos y te contactaremos para orientar la ruta de aprendizaje, capacitación o consultoría más útil para tu organización.</p>
           </div>
-          <form
+          <PublicContactForm
             className="cta-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setCtaSent(true);
-            }}
-          >
-            <Field>
-              <Label htmlFor="cta-nombre">Nombre</Label>
-              <Input id="cta-nombre" name="nombre" type="text" placeholder="Tu nombre" autoComplete="given-name" required />
-            </Field>
-            <Field>
-              <Label htmlFor="cta-email">Correo</Label>
-              <Input id="cta-email" name="email" type="email" placeholder="tu@correo.com" autoComplete="email" required />
-            </Field>
-            <Field>
-              <Label htmlFor="cta-mensaje">Mensaje</Label>
-              <Textarea id="cta-mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" rows={4} required />
-            </Field>
-            {ctaSent && <div className="cta-sent" role="status">Vista previa completada. El envío se habilitará al conectar el canal de contacto.</div>}
-            <Button type="submit" size="lg" variant="primary" className="cta-submit">
-              Enviar solicitud
-            </Button>
-          </form>
+            buttonClassName="cta-submit"
+            buttonLabel="Enviar solicitud"
+            idPrefix="home-contact"
+            statusClassName="cta-sent"
+          />
         </div>
       </section>
     </main>
