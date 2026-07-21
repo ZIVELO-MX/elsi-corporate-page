@@ -13,12 +13,13 @@ concurrency:
 
 jobs:
   screenshots:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.body, 'Misión:')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       ZIPFORM_TOKEN: ${{ secrets.ZIPFORM_TOKEN }}
       TLOZ_MISSION_ID: ${{ vars.TLOZ_MISSION_ID }}
+      PR_BODY: ${{ github.event.pull_request.body }}
       APP_BASE_URL: http://127.0.0.1:3000
       PR_NUMBER: ${{ github.event.pull_request.number }}
       SOURCE_REVISION: ${{ github.event.pull_request.head.sha }}
