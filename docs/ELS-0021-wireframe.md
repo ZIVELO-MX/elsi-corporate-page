@@ -145,3 +145,29 @@ misiones de *farming* posteriores, dependientes de este panel y de acumular volu
 - Cancelaciones o modificaciones de inscripción desde el perfil del alumno.
 - Estados de inscripción más allá de `No pagado`/`Pagado` y de constancia
   `pendiente`/`disponible`.
+
+## Modo oscuro — evaluación (ELS-0032)
+
+**Decisión: diferir el modo oscuro; no se requiere en esta fase.**
+
+- El producto público de ELSI es *light-only* (paleta cálida sobre `--bg #F7F6F2`);
+  no existe una identidad oscura definida ni una necesidad de usuarios que la exija.
+- El panel es una herramienta interna sobre datos simulados (aún sin backend); un
+  tema oscuro no aporta valor al MVP y agregaría una identidad paralela sin dirección
+  de producto.
+
+**Preparación ya existente (si se adopta más adelante):**
+
+- El panel usa exclusivamente tokens semánticos (`--card`, `--bg`, `--text`,
+  `--border`, `--primary-light`, `--secondary-foreground`, …) y `color-mix`, no
+  colores fijos: un tema oscuro encajaría redefiniendo ~20 tokens, sin tocar los
+  componentes.
+- `app/globals.css` ya declara el hook `@custom-variant dark (&:is(.dark *))`,
+  listo para un bloque de overrides.
+
+**Si se adopta (tarea acotada, fuera de ELS-0032):**
+
+1. Definir valores oscuros de los tokens bajo `@media (prefers-color-scheme: dark)`
+   y/o la clase `.dark`.
+2. Auditar contraste AA de cada par en oscuro (mismo método usado en ELS-0032).
+3. Añadir `prefers-reduced-transparency` y `prefers-contrast: more` en la misma pasada.

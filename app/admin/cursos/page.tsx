@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, SearchX, ChevronRight } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todos" | "active" | "inactive";
@@ -256,12 +257,12 @@ export default function AdminCourses() {
         <TableSkeleton rows={6} widths={["12rem", "8rem", "5rem", "5rem", "5rem", "4rem", "4rem"]} />
       ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", minWidth: "46rem", borderCollapse: "collapse" }}>
+        <div className="admin-table-scroll">
+        <table className="admin-table" style={{ width: "100%", minWidth: "46rem", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
               {["Título", "Categoría", "Modalidad", "Duración", "Estado", "Estudiantes", "Acciones"].map(h => (
-                <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: h === "Estudiantes" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -295,14 +296,20 @@ export default function AdminCourses() {
                     </Badge>
                   </button>
                 </td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{c.students}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>Editar &rarr;</td>
+                <td className="admin-num" style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{c.students}</td>
+                <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem" }}>Editar <ChevronRight size={13} strokeWidth={2} aria-hidden="true" /></span>
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: "2.5rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                  Ningún curso coincide con los filtros actuales.
+                <td colSpan={7} style={{ padding: 0 }}>
+                  <EmptyState
+                    icon={<SearchX size={20} aria-hidden="true" />}
+                    title="Sin coincidencias"
+                    hint="Ningún curso coincide con los filtros actuales. Ajusta la búsqueda o el estado."
+                  />
                 </td>
               </tr>
             )}

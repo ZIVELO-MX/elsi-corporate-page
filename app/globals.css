@@ -40,6 +40,9 @@
   --focus-ring: 0 0 0 4px rgba(var(--primary-rgb), .18);
   --motion-fast: 160ms;
   --motion-med: 240ms;
+  /* Strong ease-out for admin UI feedback (hover, press, focus). Same curve the
+     toast already used — centralized so the panel's motion reads consistent. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @theme inline {
@@ -805,13 +808,53 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-mobile-bar { display: none; }
 .admin-sidebar-backdrop { display: none; }
 
-.admin-kpi-tile { transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease; }
-.admin-user-row-btn { transition: color var(--motion-fast) ease, transform var(--motion-fast) ease; }
+.admin-kpi-tile { transition: border-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out); }
+.admin-user-row-btn { transition: color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
   .admin-kpi-tile:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
-  .admin-user-row-btn:hover { color: var(--primary); }
+  .admin-user-row-btn:hover { color: var(--primary-hover); }
 }
 .admin-kpi-tile:active, .admin-user-row-btn:active { transform: scale(0.98); }
+
+/* Sidebar nav: active state is driven by aria-current (set in the layout), so
+   hover/focus feedback lives here in CSS. Inline styles can't express :hover,
+   which left inactive items with no response until click — this fixes that. */
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+}
+.admin-nav-link svg { flex-shrink: 0; opacity: 0.75; transition: opacity var(--motion-fast) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .admin-nav-link:hover { background: var(--muted); color: var(--text); }
+  .admin-nav-link:hover svg { opacity: 1; }
+}
+.admin-nav-link[aria-current="page"] {
+  font-weight: 600;
+  /* --primary on --primary-light is only 2.94:1 (fails AA even for graphics).
+     --secondary-foreground is the palette's ink for this tinted surface: 5.44:1. */
+  color: var(--secondary-foreground);
+  background: var(--primary-light);
+}
+.admin-nav-link[aria-current="page"] svg { opacity: 1; }
+
+/* Admin page titles: a hair of optical tightening on the Sora display face. */
+.admin-main h1 { letter-spacing: -0.01em; }
+
+/* Dense data tables: tabular figures so columns of numbers align, plus a
+   scroll wrapper whose header stays pinned once the table outgrows the viewport. */
+.admin-table { font-variant-numeric: tabular-nums; }
+.admin-table-scroll { overflow: auto; max-height: calc(100dvh - 15rem); }
+.admin-table-scroll thead th { position: sticky; top: 0; z-index: 1; background: var(--muted); }
+.admin-num { text-align: right; font-variant-numeric: tabular-nums; }
+.admin-cell-truncate { max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .admin-checkbox {
   width: 1.5rem;
@@ -842,8 +885,11 @@ body[data-section-labels="true"] section[data-section-label]::before {
   border: 1px solid var(--input);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: border-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
 }
 .admin-select::-ms-expand { display: none; }
+/* Match the focus affordance of the text inputs (which get a primary border). */
+.admin-select:focus-visible { border-color: var(--primary); }
 
 /* Loading skeleton */
 .admin-skeleton {
@@ -888,11 +934,11 @@ body[data-section-labels="true"] section[data-section-label]::before {
   font-size: 0.8125rem;
   color: var(--text);
   pointer-events: auto;
-  animation: admin-toast-in var(--motion-med) cubic-bezier(0.23, 1, 0.32, 1);
+  animation: admin-toast-in var(--motion-med) var(--ease-out);
 }
 .admin-toast[data-variant="success"] svg { color: var(--leaf); }
 .admin-toast[data-variant="error"] svg { color: var(--destructive); }
-.admin-toast[data-leaving="true"] { animation: admin-toast-out var(--motion-fast) ease-in forwards; }
+.admin-toast[data-leaving="true"] { animation: admin-toast-out var(--motion-fast) var(--ease-out) forwards; }
 .admin-toast-close {
   display: flex;
   padding: 0.125rem;
@@ -913,6 +959,25 @@ body[data-section-labels="true"] section[data-section-label]::before {
 @media (prefers-reduced-motion: reduce) {
   .admin-skeleton { animation: none; }
   .admin-toast, .admin-toast[data-leaving="true"] { animation: none; }
+}
+
+/* System-preference responses beyond reduced-motion (Apple/Emil §14).
+   The panel has no glass surfaces, so reduced-transparency only needs to solidify
+   the drawer scrim. For increased contrast we redefine the tinted tokens on the
+   panel scope — every inline `var(--border)` / `var(--text-muted)` inherits the
+   stronger value automatically, no per-element overrides needed. */
+@media (prefers-reduced-transparency: reduce) {
+  .admin-sidebar-backdrop { background: rgba(28, 35, 31, .62); }
+}
+@media (prefers-contrast: more) {
+  .admin-shell, .admin-mobile-bar {
+    --border: #B4AD9B;
+    --input: #9C9683;
+    --text-muted: #3D423B;
+    --text-light: #474D45;
+  }
+  .admin-nav-link[aria-current="page"] { outline: 2px solid var(--secondary-foreground); outline-offset: -2px; }
+  .admin-table thead th { border-bottom: 2px solid var(--text-light); }
 }
 
 @media (max-width: 800px) {

@@ -7,7 +7,7 @@ import { AdminDataProvider } from "@/lib/admin-data";
 import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
@@ -79,10 +79,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             display: "flex", alignItems: "center", justifyContent: "center",
             width: "2.25rem", height: "2.25rem", padding: 0,
             background: "transparent", border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "1rem",
+            borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text)",
           }}
         >
-          {sidebarOpen ? "✕" : "☰"}
+          {sidebarOpen ? <X size={18} strokeWidth={2} aria-hidden="true" /> : <Menu size={18} strokeWidth={2} aria-hidden="true" />}
         </button>
         <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "0.9375rem", fontWeight: 700, margin: 0 }}>Administración</h2>
       </div>
@@ -112,22 +112,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
+                  className="admin-nav-link"
                   onClick={() => setSidebarOpen(false)}
-                  aria-current={isActive ? "page" : undefined}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.625rem",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "0.875rem",
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? "var(--primary)" : "var(--text)",
-                    background: isActive ? "var(--primary-light)" : "transparent",
-                    textDecoration: "none",
-                    transition: "background var(--motion-fast), color var(--motion-fast)",
-                  }}>
-                  <item.Icon size={18} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0, opacity: isActive ? 1 : 0.75 }} />
+                  aria-current={isActive ? "page" : undefined}>
+                  <item.Icon size={18} strokeWidth={2} aria-hidden="true" />
                   {item.label}
                 </Link>
               );
@@ -138,7 +126,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div style={{
                 width: "2rem", height: "2rem", borderRadius: "50%", background: "var(--primary-light)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "var(--primary)",
+                fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "var(--secondary-foreground)",
               }}>
                 {user.name.charAt(0).toUpperCase()}
               </div>

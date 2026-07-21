@@ -1,0 +1,23 @@
+import type { ReactNode } from "react";
+
+// A composed empty state: a soft icon chip, a title, and an optional hint.
+// Used inside table `<td colSpan>` cells and small panels so "no data" and
+// "no matches" read as designed states, not as a stray line of gray text.
+export function EmptyState({ icon, title, hint }: { icon: ReactNode; title: string; hint?: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", padding: "2.75rem 1rem", textAlign: "center" }}>
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: "2.75rem", height: "2.75rem", borderRadius: "50%",
+          background: "var(--muted)", color: "var(--text-muted)", marginBottom: "0.125rem",
+        }}
+      >
+        {icon}
+      </span>
+      <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 600, color: "var(--text)" }}>{title}</p>
+      {hint && <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-muted)", maxWidth: "24rem", lineHeight: 1.5 }}>{hint}</p>}
+    </div>
+  );
+}
