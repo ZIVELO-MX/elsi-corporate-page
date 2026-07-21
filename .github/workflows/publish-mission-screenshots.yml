@@ -48,7 +48,7 @@ jobs:
         run: |
           DISPLAY_ID=$(echo "$PR_BODY" | grep -oP 'Misión:\s*\K(ELS-\d{4})' || true)
           if [ -n "$DISPLAY_ID" ]; then
-            MISSION_URL="https://zipform.zivelo.dev/missions/$DISPLAY_ID"
+            MISSION_URL="https://zipform.zivelo.dev/tloz/elsi/$DISPLAY_ID"
             gh pr comment "$PR_NUMBER" --body "📸 Capturas publicadas en la misión **$DISPLAY_ID**: [$MISSION_URL]($MISSION_URL)"
           else
             gh pr comment "$PR_NUMBER" --body "📸 Capturas publicadas automáticamente."
