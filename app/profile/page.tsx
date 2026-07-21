@@ -1,81 +1,329 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/components/auth-context";
+import { useRouter } from "next/navigation";
+import {
+  AlertCircle, BookOpen, CalendarDays, CheckCircle2, Download, FileClock,
+  GraduationCap, LoaderCircle, Mail, MapPin, TicketCheck,
+} from "lucide-react";
+import { useAuth, type User } from "@/components/auth-context";
+import type { ProfilePayload, ProfileUpcoming, ProfileCertificate } from "@/app/api/profile/route";
 
-type Course = { id: string; title: string; status: string; url: string | null; progress: number };
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
+
+type LoadState = "loading" | "error" | "ready";
+
+/* --- Presentational pieces (ported from the approved ELS-0020 wireframe) --- */
+
+function Status({ children, tone = "teal" }: { children: React.ReactNode; tone?: "teal" | "green" | "purple" }) {
+  const colors = {
+    teal: "bg-[var(--primary-light)] text-[var(--primary-hover)]",
+    green: "bg-[#edf3e8] text-[var(--moss)]",
+    purple: "bg-[var(--accent-light)] text-[var(--accent)]",
+  };
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-extrabold ${colors[tone]}`}>{children}</span>;
+}
+
+function Metric({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 text-center sm:text-left">
+      <p className="font-heading text-[22px] font-bold tabular-nums text-[var(--primary-hover)]">{value}</p>
+      <p className="mt-1 text-[11px] font-bold text-[var(--text-muted)]">{label}</p>
+    </div>
+  );
+}
+
+function SectionTitle({ title, id }: { title: string; id?: string }) {
+  return <h2 id={id} className="mb-3 font-heading text-[16px] font-bold text-[var(--text)]">{title}</h2>;
+}
+
+function InfoNote({ children }: { children: React.ReactNode }) {
+  return <p className="mt-3 rounded-[var(--radius-sm)] bg-[var(--primary-light)] p-3 text-[11px] leading-5 text-[var(--text-muted)]">{children}</p>;
+}
+
+function UpcomingCard({ c }: { c: ProfileUpcoming }) {
+  if (c.access === "access-pending") {
+    return (
+      <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
+        <Status tone="purple"><Mail size={12} aria-hidden="true" />Información de acceso pendiente</Status>
+        <h3 className="mt-3 break-words font-heading text-[15px] font-bold text-[var(--text)]">{c.title}</h3>
+        <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">
+          Tu inscripción está pagada. Recibirás la información de acceso por correo.
+        </p>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          style={{ color: "var(--primary-hover)" }}
+          className="mt-3 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-extrabold transition-colors pointer-fine:hover:bg-[var(--primary-light)]"
+        >
+          Contactar soporte
+        </a>
+      </article>
+    );
+  }
+  const online = c.modality === "online";
+  return (
+    <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="mb-1 text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--primary-hover)]">Próximo curso</p>
+          <h3 className="break-words font-heading text-[15px] font-bold text-[var(--text)]">{c.title}</h3>
+        </div>
+        <span className="shrink-0"><Status tone="green"><TicketCheck size={12} aria-hidden="true" />Pagado</Status></span>
+      </div>
+      <dl className="grid gap-2 text-[12px] text-[var(--text-muted)] sm:grid-cols-2">
+        <div className="flex gap-2"><CalendarDays size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Fecha y hora</dt><dd>{c.date} · {c.time}</dd></div></div>
+        <div className="flex gap-2"><GraduationCap size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Modalidad</dt><dd>{online ? "En línea" : "Presencial"}</dd></div></div>
+        <div className="flex gap-2 sm:col-span-2"><MapPin size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Información de acceso</dt><dd>{online ? "Te enviaremos los datos de acceso por correo." : c.location}</dd></div></div>
+      </dl>
+    </article>
+  );
+}
+
+function CertificateCard({ c }: { c: ProfileCertificate }) {
+  if (c.status === "pendiente") {
+    return (
+      <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
+        <div className="flex gap-3">
+          <FileClock size={20} className="shrink-0 text-[var(--earth)]" aria-hidden="true" />
+          <div className="min-w-0">
+            <Status tone="purple">Constancia pendiente de publicación</Status>
+            <h3 className="mt-2 break-words text-[13px] font-bold text-[var(--text)]">Constancia · {c.course}</h3>
+            <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">Aparecerá aquí cuando el instituto la cargue. Todavía no hay descarga disponible.</p>
+          </div>
+        </div>
+      </article>
+    );
+  }
+  return (
+    <article className="flex items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4">
+      <div className="flex min-w-0 gap-3">
+        <div className="rounded-[var(--radius-sm)] bg-[var(--accent-light)] p-2 text-[var(--accent)]"><BookOpen size={18} aria-hidden="true" /></div>
+        <div className="min-w-0">
+          <Status tone="green">Disponible</Status>
+          <h3 className="mt-2 break-words text-[13px] font-bold text-[var(--text)]">Constancia · {c.course}</h3>
+          {c.fileLabel && <p className="mt-1 text-[11px] text-[var(--text-muted)]">{c.fileLabel}</p>}
+        </div>
+      </div>
+      <button
+        type="button"
+        aria-label={`Descargar constancia de ${c.course}`}
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-[var(--text)] transition-transform active:scale-95"
+      >
+        <Download size={16} aria-hidden="true" />
+      </button>
+    </article>
+  );
+}
+
+function Discover({ empty = false }: { empty?: boolean }) {
+  return (
+    <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--accent)] p-5 text-white">
+      <p className="text-[10px] font-extrabold uppercase tracking-[.1em] text-white/70">{empty ? "Aún no tienes cursos" : "Sigue aprendiendo"}</p>
+      <h2 className="mt-2 font-heading text-[18px] font-bold">Descubre nuevos cursos</h2>
+      <p className="mt-2 max-w-md text-[12px] leading-5 text-white/80">Explora la oferta disponible y elige tu próxima experiencia de aprendizaje.</p>
+      {/* Inline color: globals.css `a { color: inherit }` is unlayered and beats
+          Tailwind's layered color utilities, so a link on the navy card would
+          otherwise inherit white-on-white. Inline wins the cascade. */}
+      <Link href="/cursos" style={{ color: "var(--accent)" }} className="mt-4 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold transition-transform active:scale-95">Cursos</Link>
+    </article>
+  );
+}
+
+function AccountSection({ user }: { user: User }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(user.name);
+  const [saved, setSaved] = useState(false);
+
+  return (
+    <section aria-labelledby="account-title" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="account-title" className="font-heading text-[15px] font-bold text-[var(--text)]">Datos de la cuenta</h2>
+        {!editing && (
+          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Editar</button>
+        )}
+      </div>
+
+      {!editing ? (
+        <dl className="mt-3 grid gap-2 text-[13px]">
+          <div className="flex justify-between gap-3"><dt className="shrink-0 text-[var(--text-muted)]">Nombre</dt><dd className="min-w-0 break-words text-right font-bold text-[var(--text)]">{name}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="shrink-0 text-[var(--text-muted)]">Correo</dt><dd className="min-w-0 break-all text-right font-bold text-[var(--text)]">{user.email}</dd></div>
+        </dl>
+      ) : (
+        <form
+          className="mt-3 flex flex-col gap-3"
+          onSubmit={(e) => { e.preventDefault(); setEditing(false); setSaved(true); }}
+        >
+          <label className="text-[12px] font-bold text-[var(--text)]">
+            Nombre
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              required
+              className="mt-1 block h-9 w-full rounded-[var(--radius-sm)] border border-[var(--input)] bg-[var(--paper)] px-3 text-[13px] text-[var(--text)]"
+            />
+          </label>
+          <label className="text-[12px] font-bold text-[var(--text-muted)]">
+            Correo
+            <input
+              value={user.email}
+              readOnly
+              aria-readonly="true"
+              className="mt-1 block h-9 w-full rounded-[var(--radius-sm)] border border-[var(--input)] bg-[var(--muted)] px-3 text-[13px] text-[var(--text-muted)]"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button type="submit" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 text-[12px] font-extrabold text-[var(--text)] transition-transform active:scale-95">Guardar</button>
+            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Cancelar</button>
+          </div>
+          <p className="text-[11px] text-[var(--text-muted)]">Prototipo: por ahora los cambios no se guardan.</p>
+        </form>
+      )}
+
+      {saved && !editing && <p role="status" className="mt-2 text-[12px] font-bold text-[var(--moss)]">Datos actualizados.</p>}
+    </section>
+  );
+}
+
+/* --- Page --- */
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const router = useRouter();
+  const [data, setData] = useState<ProfilePayload | null>(null);
+  const [state, setState] = useState<LoadState>("loading");
 
+  // Setting state lives inside the async then/catch (not synchronously in the
+  // effect), so the initial fetch doesn't trigger a cascading render. Initial
+  // state is already "loading"; the retry handler resets it before calling load.
+  const load = useCallback(() => {
+    fetch("/api/profile")
+      .then((r) => { if (!r.ok) throw new Error("bad status"); return r.json(); })
+      .then((d: ProfilePayload) => { setData(d); setState("ready"); })
+      .catch(() => setState("error"));
+  }, []);
+
+  // Redirect to login when the profile is visited without a session.
   useEffect(() => {
-    if (!user) return;
-    fetch("/api/profile").then((r) => r.json()).then((d) => { setCourses(d.courses); setLoaded(true); });
-  }, [user]);
+    if (!user) { router.replace("/login"); return; }
+    load();
+  }, [user, router, load]);
 
   if (!user) {
     return (
-      <main style={{ padding: "4rem 2rem", textAlign: "center" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700 }}>Perfil</h1>
-        <p style={{ color: "var(--text-muted)", margin: "1rem 0 2rem" }}>Inicia sesión para ver tu perfil.</p>
-        <Link href="/login" style={{ display: "inline-block", padding: "0.625rem 1rem", background: "var(--primary)", color: "#fff", borderRadius: "var(--radius)", textDecoration: "none", fontWeight: 700 }}>Iniciar sesión</Link>
+      <main className="mx-auto max-w-md px-4 py-24 text-center">
+        <p className="text-[13px] text-[var(--text-muted)]">Redirigiendo al inicio de sesión…</p>
       </main>
     );
   }
 
+  const firstName = user.name.split(" ")[0];
+  const isEmpty = data && data.upcoming.length === 0 && data.history.length === 0 && data.certificates.length === 0;
+
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: "4rem 2rem" }}>
-      <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 1.5rem" }}>Mi perfil</h1>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1.5rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--card)", marginBottom: "2rem" }}>
-        <div><span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>Nombre</span><p style={{ margin: "0.25rem 0 0" }}>{user.name}</p></div>
-        <div><span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>Correo</span><p style={{ margin: "0.25rem 0 0" }}>{user.email}</p></div>
-        <div><span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>Rol</span><p style={{ margin: "0.25rem 0 0", textTransform: "capitalize" }}>{user.role}</p></div>
-      </div>
-
-      <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.125rem", fontWeight: 700, margin: "0 0 1rem" }}>Mis cursos</h2>
-
-      {!loaded ? (
-        <p style={{ color: "var(--text-muted)" }}>Cargando...</p>
-      ) : courses.length === 0 ? (
-        <div style={{ padding: "2rem", textAlign: "center", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--card)" }}>
-          <p style={{ color: "var(--text-muted)", margin: "0 0 1rem" }}>Aún no tienes cursos asignados.</p>
-          <Link href="/cursos" style={{ color: "var(--accent)", fontWeight: 600 }}>Explorar cursos</Link>
+    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[var(--primary)]">Portal del alumno</p>
+          <h1 className="mt-1 break-words font-heading text-2xl font-bold text-[var(--text)]">Hola, {firstName}</h1>
         </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {courses.map((course) => (
-            <div key={course.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--card)", gap: "1rem" }}>
-              <div>
-                <p style={{ margin: 0, fontWeight: 600 }}>{course.title}</p>
-                <p style={{ margin: "0.25rem 0 0", fontSize: "0.8125rem", color: course.status === "active" ? "var(--leaf)" : "var(--text-muted)" }}>
-                  {course.status === "active" ? "Activo" : "Inactivo"} {course.progress > 0 && `— ${course.progress}% completado`}
-                </p>
-              </div>
-              {course.url ? (
-                <a href={course.url} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0, padding: "0.5rem 0.75rem", background: "var(--accent)", color: "#fff", borderRadius: "var(--radius)", textDecoration: "none", fontSize: "0.8125rem", fontWeight: 600 }}>
-                  Entrar
-                </a>
-              ) : (
-                <span style={{ flexShrink: 0, fontSize: "0.8125rem", color: "var(--text-muted)" }}>Próximamente</span>
-              )}
+        <div className="flex items-center gap-2">
+          {user.role === "admin" && (
+            <Link href="/admin" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Panel admin</Link>
+          )}
+          <button type="button" onClick={logout} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Cerrar sesión</button>
+        </div>
+      </header>
+
+      {state === "loading" && (
+        <div role="status" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5">
+          <div className="flex items-center gap-3">
+            <LoaderCircle className="animate-spin text-[var(--primary)] motion-reduce:animate-none" size={20} aria-hidden="true" />
+            <div>
+              <p className="text-[13px] font-bold text-[var(--text)]">Cargando tu portal</p>
+              <p className="mt-1 text-[11px] text-[var(--text-muted)]">Esto puede tomar unos segundos.</p>
             </div>
-          ))}
+          </div>
         </div>
       )}
 
-      <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
-        <button onClick={logout} style={{ padding: "0.5rem 1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--card)", cursor: "pointer", fontSize: "0.875rem" }}>
-          Cerrar sesión
-        </button>
-        {user.role === "admin" && (
-          <Link href="/admin" style={{ padding: "0.5rem 1rem", background: "var(--primary)", color: "#fff", borderRadius: "var(--radius)", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600 }}>
-            Panel admin
-          </Link>
-        )}
+      {state === "error" && (
+        <div role="alert" className="rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4">
+          <div className="flex gap-3">
+            <AlertCircle className="shrink-0 text-[var(--destructive)]" size={19} aria-hidden="true" />
+            <div>
+              <p className="text-[13px] font-bold text-[var(--destructive)]">No pudimos cargar tu portal</p>
+              <p className="mt-1 text-[11px] text-[var(--text-muted)]">Comprueba tu conexión e inténtalo de nuevo.</p>
+              <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-colors pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {state === "ready" && data && isEmpty && <Discover empty />}
+
+      {state === "ready" && data && !isEmpty && (
+        <div className="flex flex-col gap-8">
+          {/* Apple/Emil: lead with the real next action (the upcoming course),
+              not a grid of equivalent metrics. Metrics follow as context. */}
+          {data.upcoming.length > 0 && (
+            <section aria-labelledby="next-title">
+              <SectionTitle id="next-title" title="Lo siguiente" />
+              <div className="flex flex-col gap-3">
+                {data.upcoming.map((c) => <UpcomingCard key={c.id} c={c} />)}
+              </div>
+              <InfoNote>La liga de los cursos en línea no aparece en el perfil: se envía únicamente por correo.</InfoNote>
+            </section>
+          )}
+
+          <section aria-label="Resumen">
+            <div className="grid grid-cols-3 gap-2">
+              <Metric value={data.summary.upcoming} label="Próximos" />
+              <Metric value={data.summary.completed} label="Realizados" />
+              <Metric value={data.summary.certificates} label="Constancias" />
+            </div>
+          </section>
+
+          {data.history.length > 0 && (
+            <section aria-labelledby="history-title">
+              <SectionTitle id="history-title" title="Historial" />
+              <div className="divide-y divide-[var(--border)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-4">
+                {data.history.map((h) => (
+                  <div key={h.id} className="flex items-center justify-between gap-3 py-3">
+                    <div className="min-w-0">
+                      <p className="break-words text-[13px] font-bold text-[var(--text)]">{h.title}</p>
+                      <p className="mt-1 text-[11px] text-[var(--text-muted)]">Realizado · {h.year}</p>
+                    </div>
+                    <CheckCircle2 className="shrink-0 text-[var(--leaf)]" size={18} aria-label="Realizado" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.certificates.length > 0 && (
+            <section aria-labelledby="cert-title">
+              <SectionTitle id="cert-title" title="Constancias" />
+              <div className="flex flex-col gap-3">
+                {data.certificates.map((c) => <CertificateCard key={c.id} c={c} />)}
+              </div>
+            </section>
+          )}
+
+          <section aria-label="Descubre nuevos cursos"><Discover /></section>
+
+          <section aria-labelledby="help-title" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
+            <Mail className="text-[var(--primary)]" size={22} aria-hidden="true" />
+            <h2 id="help-title" className="mt-3 font-heading text-[15px] font-bold text-[var(--text)]">¿Necesitas ayuda?</h2>
+            <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">Para dudas sobre inscripciones, acceso o constancias, escribe al canal de soporte.</p>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 text-[12px] font-extrabold text-[var(--text)] transition-transform active:scale-95">Enviar correo</a>
+          </section>
+        </div>
+      )}
+
+      <div className="mt-8">
+        <AccountSection user={user} />
       </div>
     </main>
   );
