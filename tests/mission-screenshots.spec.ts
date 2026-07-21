@@ -64,9 +64,30 @@ async function zipformRequest<T>(path: string, token: string, init?: RequestInit
   return payload.data;
 }
 
+const MISSION_PATTERN = /Misión:\s*(ELS-\d{4})/i;
+
+async function resolveMissionId(token: string): Promise<string> {
+  const prBody = process.env.PR_BODY;
+  if (prBody) {
+    const match = prBody.match(MISSION_PATTERN);
+    if (match) {
+      const displayId = match[1];
+      console.log(`Resolving display ID: ${displayId}`);
+      const detail = await zipformRequest<{ id: string }>(
+        `/api/v1/missions/${encodeURIComponent(displayId)}`,
+        token,
+      );
+      console.log(`Resolved ${displayId} → ${detail.id}`);
+      return detail.id;
+    }
+    console.log("PR body present but no mission ID pattern found; falling back to TLOZ_MISSION_ID");
+  }
+  return requiredEnv("TLOZ_MISSION_ID");
+}
+
 async function publishCaptures(files: LocalCapture[]) {
   const token = requiredEnv("ZIPFORM_TOKEN");
-  const missionId = requiredEnv("TLOZ_MISSION_ID");
+  const missionId = await resolveMissionId(token);
   const prNumber = requiredEnv("PR_NUMBER");
   const sourceRevision = requiredEnv("SOURCE_REVISION");
 
