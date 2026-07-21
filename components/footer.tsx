@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";
+import { isNavigationItemActive, primaryNavigation } from "@/lib/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -23,15 +24,16 @@ export default function Footer() {
               className="footer-logo block h-auto w-[190px] object-contain"
             />
           </div>
+          <nav className="footer-col" aria-label="Navegación del pie">
+            <strong>Navegación</strong>
+            {primaryNavigation.map(({ href, label }) => (
+              <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined}>{label}</Link>
+            ))}
+          </nav>
           <div className="footer-col">
-            <strong>Instituto</strong>
-            <Link href="/nosotros">Quiénes somos</Link>
-            <Link href="/contacto">Contacto</Link>
-          </div>
-          <div className="footer-col">
-            <strong>Academia</strong>
-            <Link href="/cursos">Cursos</Link>
-            <Link href="/login">Ingresar</Link>
+            <strong>Cuenta</strong>
+            <Link href="/login" aria-current={pathname === "/login" ? "page" : undefined}>Iniciar sesión</Link>
+            <Link href="/register" aria-current={pathname === "/register" ? "page" : undefined}>Crear cuenta</Link>
           </div>
           <div className="footer-col footer-col-contact">
             <strong>Contacto</strong>
