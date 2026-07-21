@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: mission-screenshots-${{ github.event.pull_request.number }}
@@ -39,3 +40,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run screenshots:publish
+
+      - name: Comment mission URL on PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DISPLAY_ID=$(echo "$PR_BODY" | grep -oP 'Misión:\s*\K(ELS-\d{4})' || true)
+          if [ -n "$DISPLAY_ID" ]; then
+            MISSION_URL="https://zipform.zivelo.dev/missions/$DISPLAY_ID"
+            gh pr comment "$PR_NUMBER" --body "📸 Capturas publicadas en la misión **$DISPLAY_ID**: [$MISSION_URL]($MISSION_URL)"
+          else
+            gh pr comment "$PR_NUMBER" --body "📸 Capturas publicadas automáticamente."
+          fi
