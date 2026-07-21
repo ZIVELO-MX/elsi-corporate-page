@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { TableSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 export default function AdminSales() {
@@ -74,12 +76,12 @@ export default function AdminSales() {
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
       ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
+        <div className="admin-table-scroll">
+          <table className="admin-table" style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
                 {["Usuario", "Curso", "Monto", "Fecha"].map(h => (
-                  <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                  <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: h === "Monto" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -87,17 +89,21 @@ export default function AdminSales() {
               {sales.map(s => (
                 <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
                   <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{s.userName}</td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.courseName}</td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
-                    {s.amount === 0 ? <span style={{ color: "var(--leaf)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
+                  <td className="admin-cell-truncate" title={s.courseName} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.courseName}</td>
+                  <td className="admin-num" style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
+                    {s.amount === 0 ? <span style={{ color: "var(--moss)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
                   </td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.soldAt}</td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>{s.soldAt}</td>
                 </tr>
               ))}
               {sales.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: "2.5rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                    Aún no hay ventas registradas. Usa el formulario para registrar la primera.
+                  <td colSpan={4} style={{ padding: 0 }}>
+                    <EmptyState
+                      icon={<Receipt size={20} aria-hidden="true" />}
+                      title="Sin ventas todavía"
+                      hint="Registra la primera venta con el formulario de arriba."
+                    />
                   </td>
                 </tr>
               )}

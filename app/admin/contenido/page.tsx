@@ -21,7 +21,7 @@ export default function AdminContent() {
             padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)",
             border: "1px solid var(--border)",
             opacity: s.active ? 1 : 0.5,
-            transition: "opacity var(--motion-fast)",
+            transition: "opacity var(--motion-fast) var(--ease-out)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -35,12 +35,12 @@ export default function AdminContent() {
                 style={{
                   position: "relative", width: "2.5rem", height: "1.5rem", borderRadius: "1rem",
                   background: s.active ? "var(--primary)" : "var(--border)",
-                  border: "none", cursor: "pointer", transition: "background var(--motion-fast)",
+                  border: "none", cursor: "pointer", transition: "background var(--motion-fast) var(--ease-out)",
                   flexShrink: 0,
                 }} aria-label={`${s.active ? "Desactivar" : "Activar"} sección ${s.label}`}>
                 <span style={{
                   display: "block", width: "1.125rem", height: "1.125rem", borderRadius: "50%",
-                  background: "var(--card)", transition: "transform var(--motion-fast)",
+                  background: "var(--card)", transition: "transform var(--motion-fast) var(--ease-out)",
                   transform: s.active ? "translateX(1.25rem)" : "translateX(0.1875rem)",
                 }} />
               </button>

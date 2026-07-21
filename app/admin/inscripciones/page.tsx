@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Upload, CheckCircle2, Search } from "lucide-react";
+import { Upload, CheckCircle2, Search, SearchX, ClipboardList } from "lucide-react";
 import { useAdminData, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todas" | "en-curso" | "realizado";
@@ -253,11 +254,11 @@ export default function AdminEnrollments() {
         <TableSkeleton rows={6} widths={["1.5rem", "9rem", "12rem", "6rem", "6rem", "6rem", "8rem"]} />
       ) : (
       <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", minWidth: "44rem", borderCollapse: "collapse" }}>
+        <div className="admin-table-scroll">
+          <table className="admin-table" style={{ width: "100%", minWidth: "44rem", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-                <th style={{ padding: "0.75rem 1rem", width: "2.5rem" }}>
+                <th scope="col" style={{ padding: "0.75rem 1rem", width: "2.5rem" }}>
                   <input
                     type="checkbox"
                     aria-label="Seleccionar todas las inscripciones en curso"
@@ -268,7 +269,7 @@ export default function AdminEnrollments() {
                   />
                 </th>
                 {["Usuario", "Curso", "Origen", "Estado", "Fecha de inscripción", ""].map(h => (
-                  <th key={h} style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                  <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -287,7 +288,7 @@ export default function AdminEnrollments() {
                     )}
                   </td>
                   <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{e.userName}</td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.courseName}</td>
+                  <td className="admin-cell-truncate" title={e.courseName} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.courseName}</td>
                   <td style={{ padding: "0.75rem 1rem" }}><SourceBadge source={e.source} /></td>
                   <td style={{ padding: "0.75rem 1rem" }}><StatusCell enrollment={e} /></td>
                   <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.enrolledAt}</td>
@@ -326,10 +327,20 @@ export default function AdminEnrollments() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ padding: "2rem 1rem", textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                    {enrollments.length === 0
-                      ? "Todavía no hay inscripciones registradas."
-                      : "Ninguna inscripción coincide con los filtros actuales."}
+                  <td colSpan={7} style={{ padding: 0 }}>
+                    {enrollments.length === 0 ? (
+                      <EmptyState
+                        icon={<ClipboardList size={20} aria-hidden="true" />}
+                        title="Sin inscripciones todavía"
+                        hint="Registra la primera inscripción con el formulario de arriba."
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={<SearchX size={20} aria-hidden="true" />}
+                        title="Sin coincidencias"
+                        hint="Ninguna inscripción coincide con los filtros actuales. Ajusta la búsqueda, el estado o el origen."
+                      />
+                    )}
                   </td>
                 </tr>
               )}
