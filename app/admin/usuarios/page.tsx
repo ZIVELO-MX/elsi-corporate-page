@@ -8,6 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 
+const dialogAvatarStyle: React.CSSProperties = { width: "2.5rem", height: "2.5rem", borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "1rem", color: "var(--secondary-foreground)", flexShrink: 0 };
+const enrollmentListStyle: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "16rem", overflowY: "auto" };
+const rowBtnStyle: React.CSSProperties = { width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" };
+
 function SourceBadge({ source }: { source: "interna" | "externa" }) {
   return (
     <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.6875rem" }}>
@@ -27,11 +31,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
           <>
             <DialogHeader>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <div style={{
-                  width: "2.5rem", height: "2.5rem", borderRadius: "50%", background: "var(--primary-light)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "1rem", color: "var(--secondary-foreground)", flexShrink: 0,
-                }}>
+                <div style={dialogAvatarStyle}>
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -59,7 +59,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
                 Este usuario todavía no tiene inscripciones.
               </p>
             ) : (
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "16rem", overflowY: "auto" }}>
+              <ul style={enrollmentListStyle}>
                 {userEnrollments.map(e => (
                   <li key={e.id} style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem",
@@ -138,10 +138,7 @@ export default function AdminUsers() {
                       type="button"
                       onClick={() => setSelected(u)}
                       className="admin-user-row-btn"
-                      style={{
-                        width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500,
-                        background: "transparent", border: "none", cursor: "pointer", color: "var(--text)",
-                      }}
+                      style={rowBtnStyle}
                     >
                       {u.name}
                     </button>

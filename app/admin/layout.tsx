@@ -19,6 +19,23 @@ const NAV_ITEMS = [
   { href: "/admin/contenido", label: "Contenido", Icon: FileText },
 ];
 
+const mobileBarBtnStyle: React.CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "center",
+  width: "2.25rem", height: "2.25rem", padding: 0,
+  background: "transparent", border: "1px solid var(--border)",
+  borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text)",
+};
+const avatarChipStyle: React.CSSProperties = {
+  width: "2rem", height: "2rem", borderRadius: "50%", background: "var(--primary-light)",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "var(--secondary-foreground)",
+};
+const logoutBtnStyle: React.CSSProperties = {
+  width: "100%", padding: "0.5rem", fontSize: "0.8125rem",
+  background: "transparent", border: "1px solid var(--border)",
+  borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text-muted)",
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
@@ -75,12 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           aria-controls="admin-sidebar"
           aria-label={sidebarOpen ? "Cerrar menú de administración" : "Abrir menú de administración"}
           onClick={() => setSidebarOpen(v => !v)}
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            width: "2.25rem", height: "2.25rem", padding: 0,
-            background: "transparent", border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text)",
-          }}
+          style={mobileBarBtnStyle}
         >
           {sidebarOpen ? <X size={18} strokeWidth={2} aria-hidden="true" /> : <Menu size={18} strokeWidth={2} aria-hidden="true" />}
         </button>
@@ -123,11 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
           <div style={{ padding: "1rem 1.25rem 0", borderTop: "1px solid var(--border)", marginTop: "auto" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-              <div style={{
-                width: "2rem", height: "2rem", borderRadius: "50%", background: "var(--primary-light)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "var(--secondary-foreground)",
-              }}>
+              <div style={avatarChipStyle}>
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -135,13 +143,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-muted)" }}>{user.email}</p>
               </div>
             </div>
-            <button onClick={logout} style={{
-              width: "100%", padding: "0.5rem", fontSize: "0.8125rem",
-              background: "transparent", border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", cursor: "pointer",
-              color: "var(--text-muted)", transition: "color var(--motion-fast)",
-            }} onMouseOver={e => e.currentTarget.style.color = "var(--destructive)"}
-               onMouseOut={e => e.currentTarget.style.color = "var(--text-muted)"}>
+            <button type="button" onClick={logout} className="admin-logout-btn" style={logoutBtnStyle}>
               Cerrar sesión
             </button>
           </div>

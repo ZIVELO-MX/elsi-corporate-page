@@ -16,13 +16,14 @@ type LoadState = "loading" | "error" | "ready";
 
 /* --- Presentational pieces (ported from the approved ELS-0020 wireframe) --- */
 
+const STATUS_TONES = {
+  teal: "bg-[var(--primary-light)] text-[var(--primary-hover)]",
+  green: "bg-[#edf3e8] text-[var(--moss)]",
+  purple: "bg-[var(--accent-light)] text-[var(--accent)]",
+};
+
 function Status({ children, tone = "teal" }: { children: React.ReactNode; tone?: "teal" | "green" | "purple" }) {
-  const colors = {
-    teal: "bg-[var(--primary-light)] text-[var(--primary-hover)]",
-    green: "bg-[#edf3e8] text-[var(--moss)]",
-    purple: "bg-[var(--accent-light)] text-[var(--accent)]",
-  };
-  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-extrabold ${colors[tone]}`}>{children}</span>;
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-extrabold ${STATUS_TONES[tone]}`}>{children}</span>;
 }
 
 function Metric({ value, label }: { value: number; label: string }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Search, SearchX, ChevronRight } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
@@ -38,14 +38,28 @@ const emptyForm = (): CourseForm => ({
 
 const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" };
 const fieldInputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" };
+const fieldGridStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" };
+const rowBtnStyle: React.CSSProperties = { width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" };
+
+// Pairs a label with its control via a generated id, so screen readers announce
+// them together (fixes label-has-associated-control / control-has-associated-label).
+function Field({ label, children }: { label: string; children: (id: string) => React.ReactNode }) {
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={id} style={fieldLabelStyle}>{label}</label>
+      {children(id)}
+    </div>
+  );
+}
 
 export default function AdminCourses() {
   const { loading, courses, addCourse, updateCourse, toggleCourse } = useAdminData();
   const { toast } = useToast();
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<CourseForm>(emptyForm());
-  const [initialForm, setInitialForm] = useState<CourseForm>(emptyForm());
+  const [form, setForm] = useState<CourseForm>(() => emptyForm());
+  const [initialForm, setInitialForm] = useState<CourseForm>(() => emptyForm());
   const [discardOpen, setDiscardOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
@@ -164,84 +178,58 @@ export default function AdminCourses() {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div>
-                <label style={fieldLabelStyle}>Título</label>
-                <input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={fieldInputStyle} />
+              <Field label="Título">{id => <input id={id} required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={fieldInputStyle} />}</Field>
+              <div style={fieldGridStyle}>
+                <Field label="Categoría">{id => <input id={id} required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={fieldInputStyle} />}</Field>
+                <Field label="Slug">{id => <input id={id} required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} style={fieldInputStyle} />}</Field>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
-                <div>
-                  <label style={fieldLabelStyle}>Categoría</label>
-                  <input required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={fieldInputStyle} />
-                </div>
-                <div>
-                  <label style={fieldLabelStyle}>Slug</label>
-                  <input required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} style={fieldInputStyle} />
-                </div>
-              </div>
-              <div>
-                <label style={fieldLabelStyle}>Sinopsis</label>
-                <textarea required rows={3} value={form.synopsis} onChange={e => setForm({ ...form, synopsis: e.target.value })}
+              <Field label="Sinopsis">{id => (
+                <textarea id={id} required rows={3} value={form.synopsis} onChange={e => setForm({ ...form, synopsis: e.target.value })}
                   placeholder="Resumen breve del curso para el listado público."
                   style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+              )}</Field>
+              <div style={fieldGridStyle}>
+                <Field label="Duración">{id => <input id={id} required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" style={fieldInputStyle} />}</Field>
+                <Field label="Precio">{id => <input id={id} type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} style={fieldInputStyle} />}</Field>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
-                <div>
-                  <label style={fieldLabelStyle}>Duración</label>
-                  <input required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" style={fieldInputStyle} />
-                </div>
-                <div>
-                  <label style={fieldLabelStyle}>Precio</label>
-                  <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} style={fieldInputStyle} />
-                </div>
-              </div>
-              <div>
-                <label style={fieldLabelStyle}>Público objetivo</label>
-                <input required value={form.targetAudience} onChange={e => setForm({ ...form, targetAudience: e.target.value })}
+              <Field label="Público objetivo">{id => (
+                <input id={id} required value={form.targetAudience} onChange={e => setForm({ ...form, targetAudience: e.target.value })}
                   placeholder="Ej. Docentes y promotores comunitarios" style={fieldInputStyle} />
-              </div>
-              <div>
-                <label style={fieldLabelStyle}>Temario (temas y subtemas)</label>
-                <textarea rows={5} value={form.curriculum} onChange={e => setForm({ ...form, curriculum: e.target.value })}
+              )}</Field>
+              <Field label="Temario (temas y subtemas)">{id => (
+                <textarea id={id} rows={5} value={form.curriculum} onChange={e => setForm({ ...form, curriculum: e.target.value })}
                   placeholder={"Un tema por línea. Antecede subtemas con \"- \".\nEj.\nIntroducción\n- Objetivos\n- Alcance"}
                   style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
-              </div>
-              <div>
-                <label style={fieldLabelStyle}>Modalidad</label>
-                <select value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} className="admin-select" style={{ width: "100%" }}>
+              )}</Field>
+              <Field label="Modalidad">{id => (
+                <select id={id} value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} className="admin-select" style={{ width: "100%" }}>
                   <option value="online">En línea</option>
                   <option value="presencial">Presencial</option>
                 </select>
-              </div>
+              )}</Field>
               {form.modality === "online" ? (
-                <div>
-                  <label style={fieldLabelStyle}>Enlace de acceso en línea</label>
-                  <input value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />
-                </div>
+                <Field label="Enlace de acceso en línea">{id => <input id={id} value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />}</Field>
               ) : (
                 <>
-                  <div>
-                    <label style={fieldLabelStyle}>Lugar</label>
-                    <input required value={form.presencialLocation} onChange={e => setForm({ ...form, presencialLocation: e.target.value })}
+                  <Field label="Lugar">{id => (
+                    <input id={id} required value={form.presencialLocation} onChange={e => setForm({ ...form, presencialLocation: e.target.value })}
                       placeholder="Ej. Campus Central ELSI, Auditorio B" style={fieldInputStyle} />
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" }}>
-                    <div>
-                      <label style={fieldLabelStyle}>Fecha</label>
-                      <input required value={form.presencialDate} onChange={e => setForm({ ...form, presencialDate: e.target.value })}
+                  )}</Field>
+                  <div style={fieldGridStyle}>
+                    <Field label="Fecha">{id => (
+                      <input id={id} required value={form.presencialDate} onChange={e => setForm({ ...form, presencialDate: e.target.value })}
                         placeholder="Ej. 2025-08-14" style={fieldInputStyle} />
-                    </div>
-                    <div>
-                      <label style={fieldLabelStyle}>Hora</label>
-                      <input required value={form.presencialTime} onChange={e => setForm({ ...form, presencialTime: e.target.value })}
+                    )}</Field>
+                    <Field label="Hora">{id => (
+                      <input id={id} required value={form.presencialTime} onChange={e => setForm({ ...form, presencialTime: e.target.value })}
                         placeholder="Ej. 09:00 - 13:00" style={fieldInputStyle} />
-                    </div>
+                    )}</Field>
                   </div>
-                  <div>
-                    <label style={fieldLabelStyle}>Información general</label>
-                    <textarea rows={2} value={form.presencialInfo} onChange={e => setForm({ ...form, presencialInfo: e.target.value })}
+                  <Field label="Información general">{id => (
+                    <textarea id={id} rows={2} value={form.presencialInfo} onChange={e => setForm({ ...form, presencialInfo: e.target.value })}
                       placeholder="Cupo, requisitos de acceso, recomendaciones para asistentes."
                       style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
-                  </div>
+                  )}</Field>
                 </>
               )}
             </div>
@@ -274,7 +262,7 @@ export default function AdminCourses() {
                     type="button"
                     onClick={() => startEdit(c)}
                     className="admin-user-row-btn"
-                    style={{ width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" }}
+                    style={rowBtnStyle}
                   >
                     {c.title}
                   </button>
