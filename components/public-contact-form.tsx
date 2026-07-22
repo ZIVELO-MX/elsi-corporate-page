@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ export function PublicContactForm({
   const [values, setValues] = useState<ContactValues>({ name: "", email: "", message: defaultMessage });
   const [errors, setErrors] = useState<ContactErrors>({});
   const [sent, setSent] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const updateValue = (field: ContactField, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -43,8 +44,7 @@ export function PublicContactForm({
     setErrors((current) => ({ ...current, [field]: validateContactField(field, value) }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = () => {
     const nextErrors = Object.fromEntries(
       fields.map((field) => [field, validateContactField(field, values[field])]),
     ) as ContactErrors;
@@ -52,14 +52,14 @@ export function PublicContactForm({
 
     const firstInvalid = fields.find((field) => nextErrors[field]);
     if (firstInvalid) {
-      (event.currentTarget.elements.namedItem(firstInvalid) as HTMLElement | null)?.focus();
+      (formRef.current?.elements.namedItem(firstInvalid) as HTMLElement | null)?.focus();
       return;
     }
     setSent(true);
   };
 
   return (
-    <form className={className} onSubmit={handleSubmit} noValidate aria-label="Solicitud de información">
+    <form ref={formRef} className={className} action={handleSubmit} noValidate aria-label="Solicitud de información">
       <Field data-invalid={Boolean(errors.name)}>
         <Label htmlFor={`${idPrefix}-name`}>Nombre</Label>
         <Input

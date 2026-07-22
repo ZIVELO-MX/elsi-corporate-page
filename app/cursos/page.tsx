@@ -60,11 +60,11 @@ export default function CursosPage() {
                   </div>
                   <CardHeader>
                     <div className="catalog-course-meta">
-                      <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".07em" }}>{course.catLabel}</Badge>
+                      <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 12, textTransform: "uppercase", letterSpacing: ".07em" }}>{course.catLabel}</Badge>
                       <span>{course.status === "Publicado" ? "Disponible" : "Próximamente"}</span>
                     </div>
                     <CardTitle style={{ fontSize: 14, lineHeight: 1.3 }}>{course.title}</CardTitle>
-                    <CardDescription style={{ fontSize: 11.5 }}>{course.modules} módulos</CardDescription>
+                    <CardDescription style={{ fontSize: 12 }}>{course.modules} módulos</CardDescription>
                   </CardHeader>
                   <CardContent style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 14.5, color: "var(--primary)" }}>{money(course.price)}</span>

@@ -82,7 +82,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn("text-lg leading-none font-bold", className)}
-      style={{ fontFamily: "'Sora',sans-serif" }}
+      style={{ fontFamily: "var(--font-sora), sans-serif" }}
       {...props}
     />
   )

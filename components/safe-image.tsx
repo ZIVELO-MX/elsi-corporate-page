@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 type SafeImageProps = {
@@ -11,9 +12,10 @@ type SafeImageProps = {
   height?: number;
   loading?: "eager" | "lazy";
   fetchPriority?: "high" | "low" | "auto";
+  sizes?: string;
 };
 
-export function SafeImage({ src, alt, className, style, width, height, loading = "lazy", fetchPriority = "auto" }: SafeImageProps) {
+export function SafeImage({ src, alt, className, style, width = 1600, height = 900, loading = "lazy", fetchPriority = "auto", sizes }: SafeImageProps) {
   const [hidden, setHidden] = useState(false);
   if (hidden) {
     return (
@@ -28,7 +30,7 @@ export function SafeImage({ src, alt, className, style, width, height, loading =
     );
   }
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={className}
@@ -37,7 +39,7 @@ export function SafeImage({ src, alt, className, style, width, height, loading =
       height={height}
       loading={loading}
       fetchPriority={fetchPriority}
-      decoding={loading === "eager" ? "sync" : "async"}
+      sizes={sizes}
       onError={() => setHidden(true)}
     />
   );

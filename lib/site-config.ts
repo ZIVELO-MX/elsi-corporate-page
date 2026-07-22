@@ -7,10 +7,3 @@ export const siteConfig = {
   prototypeMessage:
     "Prototipo de validación · La navegación está disponible; inscripciones y envíos permanecen desactivados.",
 } as const;
-
-export const canonicalRoutes = {
-  catalog: "/cursos",
-  checkout: "/finalizar-compra",
-  account: "/profile",
-  login: "/login",
-} as const;

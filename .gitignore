@@ -10,6 +10,7 @@ blob-report/
 tsconfig.tsbuildinfo
 .DS_Store
 raw_images/
+/import/
 public/images/
 !public/images/
 public/images/*

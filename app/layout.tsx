@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Manrope, Sora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -7,6 +8,18 @@ import { AuthProvider } from "@/components/auth-context";
 import { PrototypeNotice } from "@/components/prototype-notice";
 import { siteConfig } from "@/lib/site-config";
 
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "ELSI | Educación y soluciones ambientales",
   description: "Environment Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.",
@@ -14,12 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="es" className={`${manrope.variable} ${sora.variable}`}>
       <body data-section-labels={siteConfig.sectionLabels ? "true" : undefined}>
         <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
         <AuthProvider>
