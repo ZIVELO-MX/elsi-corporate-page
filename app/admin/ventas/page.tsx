@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ export default function AdminSales() {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [amount, setAmount] = useState(0);
+  const selectableUsers = useMemo(() => users.filter((user) => user.role === "user"), [users]);
+  const activeCourses = useMemo(() => courses.filter((course) => course.status === "active"), [courses]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +49,7 @@ export default function AdminSales() {
           <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
-            {users.filter(u => u.role === "user").map(u => (
+            {selectableUsers.map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
             ))}
           </select>
@@ -57,7 +59,7 @@ export default function AdminSales() {
           <select id="sale-curso" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
-            {courses.filter(c => c.status === "active").map(c => (
+            {activeCourses.map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
             ))}
           </select>

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   AlertCircle, BookOpen, CalendarDays, CheckCircle2, Download, FileClock,
   GraduationCap, LoaderCircle, Mail, MapPin, TicketCheck,
@@ -191,7 +190,6 @@ function AccountSection({ user }: { user: User }) {
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
-  const router = useRouter();
   const [data, setData] = useState<ProfilePayload | null>(null);
   const [state, setState] = useState<LoadState>("loading");
 
@@ -205,16 +203,21 @@ export default function ProfilePage() {
       .catch(() => setState("error"));
   }, []);
 
-  // Redirect to login when the profile is visited without a session.
   useEffect(() => {
-    if (!user) { router.replace("/login"); return; }
-    load();
-  }, [user, router, load]);
+    if (user) load();
+  }, [user, load]);
 
   if (!user) {
     return (
       <main className="mx-auto max-w-md px-4 py-24 text-center">
-        <p className="text-[13px] text-[var(--text-muted)]">Redirigiendo al inicio de sesión…</p>
+        <h1 className="font-heading text-xl font-bold text-[var(--text)]">Inicia sesión para ver tu perfil</h1>
+        <p className="mt-2 text-[13px] leading-6 text-[var(--text-muted)]">Tu perfil, cursos y constancias aparecen después de identificarte.</p>
+        <Link
+          href="/login"
+          className="mt-5 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 text-[12px] font-extrabold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--primary-hover)] pointer-fine:hover:text-white"
+        >
+          Ir a iniciar sesión
+        </Link>
       </main>
     );
   }

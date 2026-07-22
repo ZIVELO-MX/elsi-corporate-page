@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX, ChevronRight } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { Button } from "@/components/ui/button";
@@ -59,12 +59,10 @@ export default function AdminCourses() {
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CourseForm>(() => emptyForm());
-  const [initialForm, setInitialForm] = useState<CourseForm>(() => emptyForm());
+  const initialFormRef = useRef<CourseForm | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-
-  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -79,13 +77,15 @@ export default function AdminCourses() {
     setShowForm(false);
     setEditing(null);
     setForm(emptyForm());
-    setInitialForm(emptyForm());
+    initialFormRef.current = null;
   };
 
   // Guard against losing edits: only prompt when the form actually changed.
   // The form modal steps aside for the confirm (single modal at a time) but keeps
   // its state, so "Seguir editando" can reopen it exactly where it was left.
   const requestClose = () => {
+    const isDirty = initialFormRef.current !== null
+      && JSON.stringify(form) !== JSON.stringify(initialFormRef.current);
     if (isDirty) {
       setShowForm(false);
       setDiscardOpen(true);
@@ -121,14 +121,15 @@ export default function AdminCourses() {
     };
     setEditing(c.id);
     setForm(next);
-    setInitialForm(next);
+    initialFormRef.current = next;
     setShowForm(true);
   };
 
   const startCreate = () => {
+    const next = emptyForm();
     setEditing(null);
-    setForm(emptyForm());
-    setInitialForm(emptyForm());
+    setForm(next);
+    initialFormRef.current = next;
     setShowForm(true);
   };
 
@@ -269,7 +270,7 @@ export default function AdminCourses() {
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.category}</td>
                 <td style={{ padding: "0.75rem 1rem" }}>
-                  <Badge variant="outline" style={{ fontSize: "0.6875rem" }}>{c.modality === "online" ? "En línea" : "Presencial"}</Badge>
+                  <Badge variant="outline" style={{ fontSize: "0.75rem" }}>{c.modality === "online" ? "En línea" : "Presencial"}</Badge>
                 </td>
                 <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.duration}</td>
                 <td style={{ padding: "0.75rem 1rem" }}>
