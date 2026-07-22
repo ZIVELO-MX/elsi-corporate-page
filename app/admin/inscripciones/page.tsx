@@ -23,7 +23,7 @@ const thStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.75r
 
 function SourceBadge({ source }: { source: EnrollmentSource }) {
   return (
-    <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.6875rem" }}>
+    <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.75rem" }}>
       {source === "interna" ? "Sitio ELSI" : "Plataforma externa"}
     </Badge>
   );
@@ -31,13 +31,13 @@ function SourceBadge({ source }: { source: EnrollmentSource }) {
 
 function StatusCell({ enrollment }: { enrollment: Enrollment }) {
   if (enrollment.status === "en-curso") {
-    return <Badge variant="secondary" style={{ fontSize: "0.6875rem" }}>En curso</Badge>;
+    return <Badge variant="secondary" style={{ fontSize: "0.75rem" }}>En curso</Badge>;
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", alignItems: "flex-start" }}>
-      <Badge variant="default" style={{ fontSize: "0.6875rem" }}>Realizado</Badge>
+      <Badge variant="default" style={{ fontSize: "0.75rem" }}>Realizado</Badge>
       {enrollment.certificateStatus && (
-        <span style={{ fontSize: "0.6875rem", color: "var(--text-muted)" }}>
+        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
           {enrollment.certificateStatus === "disponible" ? "Constancia disponible" : "Constancia pendiente de publicación"}
         </span>
       )}
@@ -138,8 +138,13 @@ export default function AdminEnrollments() {
     });
   }, [enrollments, query, statusFilter, sourceFilter]);
 
+  const selectableUsers = useMemo(() => users.filter((user) => user.role === "user"), [users]);
+  const activeCourses = useMemo(() => courses.filter((course) => course.status === "active"), [courses]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-  const pendingIds = filtered.filter(e => e.status === "en-curso").map(e => e.id);
+  const pendingIds = useMemo(
+    () => filtered.flatMap((enrollment) => enrollment.status === "en-curso" ? [enrollment.id] : []),
+    [filtered],
+  );
   const allPendingSelected = pendingIds.length > 0 && pendingIds.every(id => selectedSet.has(id));
 
   const toggleSelectAll = () => {
@@ -180,7 +185,7 @@ export default function AdminEnrollments() {
           <select id="enr-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
-            {users.filter(u => u.role === "user").map(u => (
+            {selectableUsers.map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
             ))}
           </select>
@@ -190,7 +195,7 @@ export default function AdminEnrollments() {
           <select id="enr-curso" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
-            {courses.filter(c => c.status === "active").map(c => (
+            {activeCourses.map(c => (
               <option key={c.id} value={c.id}>{c.title}</option>
             ))}
           </select>

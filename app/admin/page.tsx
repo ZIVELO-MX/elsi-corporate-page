@@ -97,7 +97,7 @@ export default function AdminDashboard() {
           ) : recentCourses.map(c => (
             <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", borderBottom: "1px solid var(--border)" }}>
               <span style={{ fontSize: "0.8125rem", fontWeight: 500 }}>{c.title}</span>
-              <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ fontSize: "0.6875rem" }}>
+              <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
                 {c.status === "active" ? "Activo" : "Inactivo"}
               </Badge>
             </div>

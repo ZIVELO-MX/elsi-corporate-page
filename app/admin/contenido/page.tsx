@@ -36,7 +36,7 @@ export default function AdminContent() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "0.875rem", fontWeight: 700, margin: 0 }}>{s.label}</h2>
-                <Badge variant={s.active ? "default" : "secondary"} style={{ fontSize: "0.6875rem" }}>
+                <Badge variant={s.active ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
                   {s.active ? "Activo" : "Inactivo"}
                 </Badge>
               </div>

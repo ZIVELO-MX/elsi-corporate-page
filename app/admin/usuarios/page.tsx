@@ -14,7 +14,7 @@ const rowBtnStyle: React.CSSProperties = { width: "100%", textAlign: "left", pad
 
 function SourceBadge({ source }: { source: "interna" | "externa" }) {
   return (
-    <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.6875rem" }}>
+    <Badge variant={source === "interna" ? "secondary" : "outline"} style={{ fontSize: "0.75rem" }}>
       {source === "interna" ? "Sitio ELSI" : "Plataforma externa"}
     </Badge>
   );
@@ -42,7 +42,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
             </DialogHeader>
 
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
-              <Badge variant={user.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.6875rem" }}>
+              <Badge variant={user.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
                 {user.role === "admin" ? "Admin" : "Usuario"}
               </Badge>
               <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>
@@ -145,7 +145,7 @@ export default function AdminUsers() {
                   </td>
                   <td className="admin-cell-truncate" title={u.email} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{u.email}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>
-                    <Badge variant={u.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.6875rem" }}>
+                    <Badge variant={u.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
                       {u.role === "admin" ? "Admin" : "Usuario"}
                     </Badge>
                   </td>
