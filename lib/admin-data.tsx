@@ -202,7 +202,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const completeEnrollmentsBulk = useCallback((ids: string[]) => {
-    setEnrollments(prev => prev.map(e => ids.includes(e.id)
+    const idSet = new Set(ids);
+    setEnrollments(prev => prev.map(e => idSet.has(e.id)
       ? { ...e, status: "realizado", certificateStatus: "pendiente" }
       : e));
   }, []);

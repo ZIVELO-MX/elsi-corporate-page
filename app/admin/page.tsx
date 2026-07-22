@@ -13,6 +13,7 @@ function EmptyRow({ label }: { label: string }) {
 }
 
 const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
+const kpiIconStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2rem", height: "2rem", borderRadius: "var(--radius-sm)", background: "var(--primary-light)", color: "var(--secondary-foreground)", flexShrink: 0 };
 
 export default function AdminDashboard() {
   const { loading, courses, users, enrollments, sales } = useAdminData();
@@ -78,7 +79,7 @@ export default function AdminDashboard() {
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.5rem" }}>
               <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{card.label}</p>
-              <span aria-hidden="true" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2rem", height: "2rem", borderRadius: "var(--radius-sm)", background: "var(--primary-light)", color: "var(--secondary-foreground)", flexShrink: 0 }}>
+              <span aria-hidden="true" style={kpiIconStyle}>
                 <card.Icon size={16} strokeWidth={2} />
               </span>
             </div>

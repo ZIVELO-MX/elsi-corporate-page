@@ -8,6 +8,8 @@ import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
+const adminFormStyle: React.CSSProperties = { display: "flex", gap: "0.75rem", alignItems: "flex-end", padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap" };
+
 export default function AdminSales() {
   const { loading, courses, users, sales, addSale } = useAdminData();
   const { toast } = useToast();
@@ -39,11 +41,7 @@ export default function AdminSales() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{
-        display: "flex", gap: "0.75rem", alignItems: "flex-end",
-        padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)",
-        border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap",
-      }}>
+      <form onSubmit={handleSubmit} style={adminFormStyle}>
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label htmlFor="sale-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required

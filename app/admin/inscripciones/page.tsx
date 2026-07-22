@@ -15,6 +15,11 @@ type StatusFilter = "todas" | "en-curso" | "realizado";
 type SourceFilter = "todas" | EnrollmentSource;
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
+const certListStyle: React.CSSProperties = { listStyle: "none", margin: "0 0 1rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem", maxHeight: "10rem", overflowY: "auto" };
+const uploadLabelStyle: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", padding: "1.5rem", border: "1px dashed var(--input)", borderRadius: "var(--radius-sm)", cursor: "pointer", marginBottom: "1.25rem" };
+const adminFormStyle: React.CSSProperties = { display: "flex", gap: "0.75rem", alignItems: "flex-end", padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap" };
+const bulkBannerStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.75rem 1.25rem", background: "var(--primary-light)", borderRadius: "var(--radius)", marginBottom: "1rem" };
+const thStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", whiteSpace: "nowrap" };
 
 function SourceBadge({ source }: { source: EnrollmentSource }) {
   return (
@@ -65,18 +70,14 @@ function CertificateDialog({
         </DialogHeader>
 
         {isBulk && (
-          <ul style={{ listStyle: "none", margin: "0 0 1rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem", maxHeight: "10rem", overflowY: "auto" }}>
+          <ul style={certListStyle}>
             {enrollments.map(e => (
               <li key={e.id} style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.userName} · {e.courseName}</li>
             ))}
           </ul>
         )}
 
-        <label style={{
-          display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem",
-          padding: "1.5rem", border: "1px dashed var(--input)", borderRadius: "var(--radius-sm)",
-          cursor: "pointer", marginBottom: "1.25rem",
-        }}>
+        <label style={uploadLabelStyle}>
           <Upload size={20} color="var(--text-muted)" />
           <span style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>
             {isBulk ? "Arrastra los archivos o hacé click para elegirlos" : "Arrastra el archivo o hacé click para elegirlo"}
@@ -137,8 +138,9 @@ export default function AdminEnrollments() {
     });
   }, [enrollments, query, statusFilter, sourceFilter]);
 
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const pendingIds = filtered.filter(e => e.status === "en-curso").map(e => e.id);
-  const allPendingSelected = pendingIds.length > 0 && pendingIds.every(id => selectedIds.includes(id));
+  const allPendingSelected = pendingIds.length > 0 && pendingIds.every(id => selectedSet.has(id));
 
   const toggleSelectAll = () => {
     setSelectedIds(allPendingSelected ? [] : pendingIds);
@@ -172,11 +174,7 @@ export default function AdminEnrollments() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{
-        display: "flex", gap: "0.75rem", alignItems: "flex-end",
-        padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)",
-        border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap",
-      }}>
+      <form onSubmit={handleSubmit} style={adminFormStyle}>
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label htmlFor="enr-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select id="enr-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
@@ -233,17 +231,13 @@ export default function AdminEnrollments() {
       </div>
 
       {selectedIds.length > 0 && (
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem",
-          padding: "0.75rem 1.25rem", background: "var(--primary-light)", borderRadius: "var(--radius)",
-          marginBottom: "1rem",
-        }}>
+        <div style={bulkBannerStyle}>
           <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--primary)" }}>
             {selectedIds.length} seleccionado{selectedIds.length > 1 ? "s" : ""}
           </span>
           <Button
             type="button" variant="primary" size="sm"
-            onClick={() => setCertificateTarget(enrollments.filter(e => selectedIds.includes(e.id)))}
+            onClick={() => setCertificateTarget(enrollments.filter(e => selectedSet.has(e.id)))}
           >
             <Upload size={14} /> Cargar constancias
           </Button>
@@ -269,7 +263,7 @@ export default function AdminEnrollments() {
                   />
                 </th>
                 {["Usuario", "Curso", "Origen", "Estado", "Fecha de inscripción", ""].map(h => (
-                  <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} scope="col" style={thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -281,7 +275,7 @@ export default function AdminEnrollments() {
                       <input
                         type="checkbox"
                         aria-label={`Seleccionar inscripción de ${e.userName}`}
-                        checked={selectedIds.includes(e.id)}
+                        checked={selectedSet.has(e.id)}
                         onChange={() => toggleSelect(e.id)}
                         className="admin-checkbox"
                       />
