@@ -5,16 +5,12 @@ import { resolve } from "node:path";
 
 const read = (path) => readFileSync(resolve(process.cwd(), path), "utf8");
 
-test("provider and shared UI avoid unstable values and index keys", () => {
+test("provider and shared fields avoid unstable values and index keys", () => {
   const auth = read("components/auth-context.tsx");
-  const carousel = read("components/ui/carousel.tsx");
   const field = read("components/ui/field.tsx");
 
   assert.match(auth, /const value = useMemo/);
   assert.match(auth, /<AuthContext\.Provider value=\{value\}>/);
-  assert.match(carousel, /const contextValue = React\.useMemo/);
-  assert.match(carousel, /<CarouselContext\.Provider value=\{contextValue\}>/);
-  assert.doesNotMatch(carousel, /setApi/);
   assert.match(field, /key=\{error\.message\}/);
   assert.doesNotMatch(field, /key=\{index\}/);
 });
@@ -47,4 +43,5 @@ test("generated Design Canvas runtime and unused components stay out of source",
   assert.equal(existsSync(resolve(process.cwd(), "import/support.js")), false);
   assert.equal(existsSync(resolve(process.cwd(), "components/section-label-toggle.tsx")), false);
   assert.equal(existsSync(resolve(process.cwd(), "components/ui/accordion.tsx")), false);
+  assert.equal(existsSync(resolve(process.cwd(), "components/ui/carousel.tsx")), false);
 });

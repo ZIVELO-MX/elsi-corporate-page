@@ -1,14 +1,11 @@
-"use client";
-
-import { ArrowRight, Building2, GraduationCap, Sprout } from "lucide-react";
 import Link from "next/link";
-import { solutions } from "@/lib/solutions";
+import { ArrowDown, ArrowRight, Building2, GraduationCap, Sprout, type LucideIcon } from "lucide-react";
+import { solutions, type Solution } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const serviceIcons = {
+const solutionIcons: Record<Solution["slug"], LucideIcon> = {
   capacitacion: GraduationCap,
   "soluciones-ambientales": Building2,
   "educacion-universitaria": Sprout,
@@ -17,52 +14,117 @@ const serviceIcons = {
 export default function SolucionesPage() {
   return (
     <main>
-      <section className="section-shell solutions-section" data-section-label="Soluciones / Servicios">
-        <span className="eyebrow">Lo que hacemos</span>
-        <h1 className="solutions-title">Soluciones que hacen accesible el conocimiento ambiental.</h1>
-        <p className="solutions-lede">
-          Conectamos pedagogía, experiencia técnica y cercanía para generar cambios que sí permanecen.
-        </p>
+      <section className="solutions-editorial-hero" data-section-label="Soluciones / Introducción">
+        <div className="shell solutions-editorial-hero-grid">
+          <div>
+            <p className="home-kicker">Soluciones ELSI</p>
+            <h1>Tres formas de convertir el conocimiento ambiental en una ruta de trabajo.</h1>
+          </div>
+          <div className="solutions-editorial-lede">
+            <p>
+              Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias.
+            </p>
+            <a href="#indice-soluciones" className="home-text-link">Comparar las rutas <ArrowDown aria-hidden="true" /></a>
+          </div>
+        </div>
+      </section>
 
-        <div className="solutions-grid">
-          {solutions.map(({ slug, title, description, items }) => {
-            const Icon = serviceIcons[slug];
-            const image = solutionImages[slug];
+      <nav id="indice-soluciones" className="solutions-editorial-index" aria-label="Índice de soluciones">
+        <ol className="shell">
+          {solutions.map((solution, index) => (
+            <li key={solution.slug}>
+              <a href={`#${solution.slug}`}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{solution.title}</strong>
+                <small>{solution.audience}</small>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
 
-            return (
-              <Link key={slug} href={`/soluciones/${slug}`} className="solution-card-link">
-                <Card className="solution-card">
-                  {image && (
-                    <div className="featured-course-media solution-card-media">
-                      <SafeImage src={image.src} alt={image.alt} loading="lazy" />
+      <div className="solution-chapters">
+        {solutions.map((solution, index) => {
+          const Icon = solutionIcons[solution.slug];
+          const image = solutionImages[solution.slug];
+          const titleId = `${solution.slug}-title`;
+
+          return (
+            <section
+              key={solution.slug}
+              id={solution.slug}
+              className="solution-chapter"
+              data-layout={solution.layout}
+              aria-labelledby={titleId}
+              data-section-label={`Soluciones / ${solution.title}`}
+            >
+              <div className="shell solution-chapter-grid">
+                <div className="solution-chapter-copy">
+                  <div className="solution-chapter-heading">
+                    <span className="solution-chapter-icon" aria-hidden="true"><Icon /></span>
+                    <div>
+                      <p className="solution-chapter-number">{String(index + 1).padStart(2, "0")} · {solution.eyebrow}</p>
+                      <h2 id={titleId}>{solution.title}</h2>
                     </div>
-                  )}
-                  <CardHeader className="solution-card-header">
-                    <div className="solution-card-icon">
-                      <Icon aria-hidden="true" />
+                  </div>
+
+                  <p className="solution-chapter-intro">{solution.intro}</p>
+
+                  <dl className="solution-chapter-facts">
+                    <div>
+                      <dt>Para quién</dt>
+                      <dd>{solution.audience}</dd>
                     </div>
-                    <CardTitle className="solution-card-title">{title}</CardTitle>
-                    <CardDescription className="solution-card-description">{description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="solution-card-content">
-                    <ul className="solution-card-list">
-                      {items.map((item) => (
+                    <div>
+                      <dt>Cómo se trabaja</dt>
+                      <dd>{solution.approach}</dd>
+                    </div>
+                  </dl>
+
+                  <div className="solution-chapter-scope">
+                    <h3>Líneas de trabajo</h3>
+                    <ul>
+                      {solution.items.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
-                    <span className="solution-card-cta">
-                      Leer más <ArrowRight aria-hidden="true" />
-                    </span>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+                  </div>
 
-        <div className="solutions-contact">
+                  <p className="solution-chapter-note">{solution.delivery}</p>
+
+                  <Button asChild variant={solution.layout === "technical" ? "inverse" : "primary"}>
+                    <Link
+                      href={`/soluciones/${solution.slug}`}
+                      style={solution.layout === "technical" ? { color: "var(--primary-hover)" } : undefined}
+                    >
+                      Conocer {solution.title.toLocaleLowerCase("es-MX")} <ArrowRight data-icon="inline-end" />
+                    </Link>
+                  </Button>
+                </div>
+
+                <figure className="solution-chapter-media">
+                  <SafeImage
+                    src={image.src}
+                    alt={image.alt}
+                    width={1200}
+                    height={700}
+                    sizes="(max-width: 800px) 100vw, 52vw"
+                  />
+                  <figcaption>Archivo ELSI · {solution.imageCaption}</figcaption>
+                </figure>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      <section className="solutions-editorial-contact" data-section-label="Soluciones / Contacto">
+        <div className="shell">
+          <p className="home-kicker">¿No sabes cuál elegir?</p>
+          <h2>Describe el contexto y definamos el punto de partida.</h2>
+          <p>La primera conversación sirve para orientar la ruta; no sustituye la definición de alcance de una propuesta.</p>
           <Button asChild size="lg">
-            <Link href="/contacto">Solicita información <ArrowRight data-icon="inline-end" /></Link>
+            <Link href="/contacto">Solicitar información <ArrowRight data-icon="inline-end" /></Link>
           </Button>
         </div>
       </section>

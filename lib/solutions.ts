@@ -1,8 +1,26 @@
+type SolutionDefinition = {
+  slug: "capacitacion" | "soluciones-ambientales" | "educacion-universitaria";
+  title: string;
+  eyebrow: string;
+  description: string;
+  audience: string;
+  imageCaption: string;
+  layout: "learning" | "technical" | "campus";
+  items: readonly string[];
+  intro: string;
+  approach: string;
+  delivery: string;
+};
+
 export const solutions = [
   {
     slug: "capacitacion",
     title: "Capacitación",
+    eyebrow: "Aprender para actuar",
     description: "Programas prácticos para equipos, comunidades y jóvenes.",
+    audience: "Equipos, comunidades y jóvenes",
+    imageCaption: "Jornada de aprendizaje práctico con voluntariado universitario.",
+    layout: "learning",
     items: [
       "Talleres presenciales y en línea",
       "Formación de facilitadores ambientales",
@@ -16,7 +34,11 @@ export const solutions = [
   {
     slug: "soluciones-ambientales",
     title: "Soluciones ambientales",
+    eyebrow: "Ordenar el reto",
     description: "Acompañamiento para convertir retos ambientales en planes claros.",
+    audience: "Organizaciones e instituciones",
+    imageCaption: "Recorrido técnico en instalaciones industriales.",
+    layout: "technical",
     items: [
       "Diagnóstico y evaluación ambiental",
       "Planes de manejo de residuos",
@@ -30,7 +52,11 @@ export const solutions = [
   {
     slug: "educacion-universitaria",
     title: "Educación universitaria",
+    eyebrow: "Activar la comunidad",
     description: "Talleres y experiencias que despiertan una participación activa.",
+    audience: "Instituciones y comunidades universitarias",
+    imageCaption: "Comunidad universitaria durante un programa de liderazgo.",
+    layout: "campus",
     items: [
       "Conferencias y talleres en campus",
       "Programas de liderazgo ambiental",
@@ -41,7 +67,7 @@ export const solutions = [
     approach: "Diseñamos la experiencia con la institución y el grupo participante, conectando el tema ambiental con actividades que puedan llevarse al campus o a la comunidad.",
     delivery: "El formato puede adaptarse a conferencia, taller o programa. La disponibilidad y los resultados esperados se confirman con cada institución.",
   },
-] as const;
+] as const satisfies readonly SolutionDefinition[];
 
 export type Solution = (typeof solutions)[number];
 
