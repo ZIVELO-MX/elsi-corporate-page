@@ -30,13 +30,13 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               <div className="curso-detail-hero">
                 <SafeImage src={image.src} alt={image.alt} width={1200} height={800} />
               </div>
-              <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 11, textTransform: "uppercase", letterSpacing: ".08em" }}>{course.catLabel}</Badge>
+              <Badge variant="outline" style={{ borderColor: "var(--primary)", color: "var(--primary)", fontSize: 12, textTransform: "uppercase", letterSpacing: ".08em" }}>{course.catLabel}</Badge>
               <h1 className="curso-detail-h1">{course.title}</h1>
               <p className="curso-detail-desc">{course.description}</p>
             </div>
             <Card className="curso-sidebar" style={{ boxShadow: "none" }}>
               <CardContent style={{ padding: 28 }}>
-                <strong style={{ fontFamily: "'Sora',sans-serif", fontSize: 30, color: "var(--primary)", display: "block", marginBottom: 6 }}>{money(course.price)}</strong>
+                <strong style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: 30, color: "var(--primary)", display: "block", marginBottom: 6 }}>{money(course.price)}</strong>
                 <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{course.modules} módulos · programa propuesto</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 22 }}>
                   <Button asChild variant="primary" style={{ width: "100%" }}>
@@ -46,7 +46,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                     <Link href="/cursos">Volver al catálogo</Link>
                   </Button>
                 </div>
-                <p style={{ margin: "16px 0 0", fontSize: 11.5, color: "var(--text-light)", lineHeight: 1.5 }}>La inscripción automatizada y el checkout no forman parte de esta fase corporativa.</p>
+                <p style={{ margin: "16px 0 0", fontSize: 12, color: "var(--text-light)", lineHeight: 1.5 }}>La inscripción automatizada y el checkout no forman parte de esta fase corporativa.</p>
               </CardContent>
             </Card>
             <div className="curso-detail-program">

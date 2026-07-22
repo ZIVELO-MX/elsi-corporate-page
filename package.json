@@ -15,8 +15,6 @@
     "screenshots:publish": "PUBLISH_MISSION_SCREENSHOTS=1 pnpm screenshots:capture"
   },
   "dependencies": {
-    "@radix-ui/react-accordion": "latest",
-    "@radix-ui/react-slot": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
     "embla-carousel-react": "^8.6.0",

@@ -50,7 +50,7 @@ export default function NosotrosPage() {
             ].map((item) => (
               <Card key={item.title} style={{ boxShadow: "none", border: "none", background: "transparent", borderTop: "3px solid var(--primary)", borderRadius: 0, paddingTop: 20 }}>
                 <CardContent style={{ padding: 0 }}>
-                  <strong style={{ fontSize: 19, fontFamily: "'Sora',sans-serif" }}>{item.title}</strong>
+                  <strong style={{ fontSize: 19, fontFamily: "var(--font-sora), sans-serif" }}>{item.title}</strong>
                   <p style={{ margin: "10px 0 0", fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{item.text}</p>
                 </CardContent>
               </Card>
