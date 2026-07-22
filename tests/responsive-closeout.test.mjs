@@ -59,7 +59,7 @@ test("responsive audit supports 200 percent zoom and narrow reflow fixes", () =>
   assert.match(audit, /AUDIT_ZOOM/);
   assert.match(audit, /Math\.round\(width \/ zoom\)/);
   assert.match(styles, /@media \(max-width: 240px\)/);
-  assert.match(styles, /\.servicio-card \{ min-width: 0; \}/);
+  assert.match(styles, /\.home-course-row \{ grid-template-columns: minmax\(0, 1fr\); \}/);
   assert.match(styles, /\.skip-link \{ max-width: calc\(100vw - 16px\)/);
 });
 

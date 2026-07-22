@@ -10,20 +10,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
         primary:
-          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm hover:-translate-y-0.5 hover:border-[#242650] hover:bg-[#242650] hover:text-white hover:shadow-md",
+          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-white pointer-fine:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-[var(--primary)] bg-transparent text-[var(--primary-hover)] shadow-xs hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] hover:shadow-sm dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-[var(--primary)] bg-transparent text-[var(--primary-hover)] shadow-xs pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:bg-[var(--primary-light)] pointer-fine:hover:text-[var(--primary-hover)] pointer-fine:hover:shadow-sm dark:border-input dark:bg-input/30 dark:pointer-fine:hover:bg-input/50",
         secondary:
-          "border border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:-translate-y-0.5 hover:border-[var(--primary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)]",
+          "border border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[var(--primary)] pointer-fine:hover:bg-[var(--primary-light)] pointer-fine:hover:text-[var(--primary-hover)]",
         inverse:
-          "border border-white bg-white text-[var(--primary-hover)] shadow-sm hover:-translate-y-0.5 hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] hover:shadow-md",
+          "border border-white bg-white text-[var(--primary-hover)] shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:bg-[var(--primary-light)] pointer-fine:hover:text-[var(--primary-hover)] pointer-fine:hover:shadow-md",
         ghost:
-          "text-foreground hover:bg-[var(--primary-light)] hover:text-[var(--primary-hover)] dark:hover:bg-accent/50",
-        link: "h-auto rounded-none px-0 py-0 text-[var(--primary-hover)] underline-offset-4 hover:text-[var(--accent)] hover:underline",
+          "text-foreground pointer-fine:hover:bg-[var(--primary-light)] pointer-fine:hover:text-[var(--primary-hover)] dark:pointer-fine:hover:bg-accent/50",
+        link: "h-auto rounded-none px-0 py-0 text-[var(--primary-hover)] underline-offset-4 pointer-fine:hover:text-[var(--accent)] pointer-fine:hover:underline",
       },
       size: {
         default: "h-11 px-4 py-2 has-[>svg]:px-3",

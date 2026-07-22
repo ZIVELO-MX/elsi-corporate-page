@@ -1,178 +1,195 @@
 import Link from "next/link";
-import { GraduationCap, Building2, Users2, Mic, Wrench, Leaf } from "lucide-react";
+import { ArrowRight, BookOpen, Leaf } from "lucide-react";
 import { getAllCourses, money } from "@/lib/courses";
+import { solutions } from "@/lib/solutions";
 import { SafeImage } from "@/components/safe-image";
-import { courseImages } from "@/lib/image-assets";
+import { courseImages, siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PublicContactForm } from "@/components/public-contact-form";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
-const allCourses = getAllCourses();
-const featuredCourses = allCourses.slice(0, 3);
+const featuredCourses = getAllCourses().slice(0, 3);
+const [primaryCourse, ...secondaryCourses] = featuredCourses;
 
-const STORY_PREVIEW = [
-  { num: "2019", label: "Bee Blue", desc: "Iniciativa estudiantil enfocada en educación ambiental." },
-  { num: "UG", label: "Comunidad universitaria", desc: "Conferencias, talleres y eventos en Guanajuato." },
-  { num: "Aula", label: "Experiencias formativas", desc: "Actividades para acercar el aprendizaje ambiental a la práctica." },
-  { num: "ELSI", label: "Instituto", desc: "La iniciativa evoluciona hacia capacitación y soluciones ambientales." },
-];
-
-const servicios = [
-  { Icon: GraduationCap, title: "Capacitación Ambiental", text: "Programas de formación práctica y medible para equipos." },
-  { Icon: Building2, title: "Consultoría Ambiental", text: "Diagnóstico, cumplimiento normativo y sostenibilidad." },
-  { Icon: Users2, title: "Programas Universitarios", text: "Experiencias formativas para estudiantes." },
-  { Icon: Mic, title: "Conferencias", text: "Charlas que despiertan conciencia ambiental." },
-  { Icon: Wrench, title: "Talleres", text: "Sesiones prácticas para escuelas y empresas." },
-  { Icon: Leaf, title: "Proyectos de Sostenibilidad", text: "Acompañamiento de largo plazo." },
-];
+const homeFaqs = [
+  {
+    question: "¿Qué tipo de acompañamiento ofrece ELSI?",
+    answer: "ELSI trabaja con capacitación, soluciones ambientales y experiencias universitarias. Cada ruta parte del contexto y del objetivo de la organización o comunidad.",
+  },
+  {
+    question: "¿Cómo se define un programa?",
+    answer: "Antes de iniciar se acuerdan alcance, modalidad, calendario y entregables. La propuesta distingue con claridad qué está incluido y qué requiere una definición adicional.",
+  },
+  {
+    question: "¿Dónde puedo revisar la oferta formativa?",
+    answer: "El catálogo reúne los cursos disponibles y permite consultar su descripción y temario antes de solicitar información.",
+  },
+] as const;
 
 export default function Home() {
   return (
     <main>
-      {/* ===== HERO ===== */}
-      <section className="hero" data-section-label="Home / Hero">
-        <SafeImage
-          src="/hero-bg.jpg"
-          alt="Participantes en una actividad de educacion ambiental"
-          className="hero-bg"
-          width={1600}
-          height={900}
-          loading="eager"
-          fetchPriority="high"
-        />
-        <div className="hero-overlay" />
-        <div className="shell hero-grid">
-          <div className="reveal">
-            <p className="hero-eyebrow">Instituto de educación y soluciones ambientales</p>
-            <h1>Impulsamos una cultura ambiental que transforma personas, instituciones e industrias.</h1>
-            <p>En ELSI desarrollamos programas de capacitación, consultoría y educación ambiental para organizaciones, instituciones educativas y jóvenes que buscan generar un impacto positivo.</p>
-            <div className="hero-actions">
-              <Button asChild variant="inverse" size="lg" className="hero-action-primary">
-                <Link href="/cursos">Conoce nuestros cursos</Link>
+      <section className="home-hero" data-section-label="Home / Hero editorial">
+        <div className="shell home-hero-grid">
+          <div className="home-hero-copy">
+            <p className="home-kicker">Instituto de educación y soluciones ambientales</p>
+            <h1>Conocimiento ambiental para aprender, decidir y actuar.</h1>
+            <p className="home-hero-lede">
+              ELSI crea rutas de formación y acompañamiento para organizaciones, comunidades e instituciones educativas.
+            </p>
+            <div className="home-hero-actions">
+              <Button asChild size="lg">
+                <Link href="/soluciones">Explorar soluciones <ArrowRight data-icon="inline-end" /></Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="hero-action-secondary">
-                <Link href="/contacto">Solicita información</Link>
-              </Button>
+              <Link href="/cursos" className="home-text-link">Ver cursos</Link>
             </div>
           </div>
-          <div style={{ display: "none" }} />
+
+          <figure className="home-hero-media">
+            <SafeImage
+              src="/hero-bg.jpg"
+              alt="Paisaje boscoso junto a un lago, territorio natural que enmarca el trabajo ambiental de ELSI"
+              width={1600}
+              height={900}
+              loading="eager"
+              fetchPriority="high"
+              sizes="(max-width: 800px) 100vw, 54vw"
+            />
+            <figcaption>El territorio como punto de partida para aprender y actuar.</figcaption>
+          </figure>
         </div>
       </section>
 
-      {/* ===== HISTORIA RESUMIDA ===== */}
-      <section className="historia-resumida" data-section-label="Home / Historia resumida">
-        <div className="shell">
-          <div style={{ marginBottom: 30 }}>
-            <span className="section-kicker">Nuestra historia</span>
-            <h2 className="section-title">De Bee Blue a una plataforma de aprendizaje ambiental</h2>
-            <p className="section-lede" style={{ marginTop: 12 }}>Home solo muestra los hitos esenciales. La línea completa vive en Nosotros para que la narrativa pueda crecer sin saturar la conversión principal.</p>
-          </div>
-          <div className="timeline-grid">
-            {STORY_PREVIEW.map((step) => (
-              <div key={step.num} className="timeline-step">
-                <div className="timeline-num">{step.num}</div>
-                <strong>{step.label}</strong>
-                <span>{step.desc}</span>
-              </div>
+      <section className="home-solutions" data-section-label="Home / Índice de soluciones">
+        <div className="shell home-solutions-layout">
+          <header className="home-section-intro">
+            <p className="home-kicker">Tres rutas, un propósito</p>
+            <h2>La forma de avanzar depende del reto.</h2>
+            <p>Compara el enfoque de cada solución y entra sólo al capítulo que corresponde a tu contexto.</p>
+          </header>
+
+          <ol className="home-solutions-index">
+            {solutions.map((solution, index) => (
+              <li key={solution.slug} className="home-solution-index-item" data-layout={solution.layout}>
+                <Link href={`/soluciones/${solution.slug}`}>
+                  <span className="home-solution-number">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="home-solution-index-copy">
+                    <span>{solution.eyebrow}</span>
+                    <strong>{solution.title}</strong>
+                    <small>{solution.audience}</small>
+                  </span>
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </li>
             ))}
-          </div>
-          <Button asChild variant="link" className="story-link">
-            <Link href="/nosotros">Seguir viendo en Nosotros →</Link>
-          </Button>
+          </ol>
         </div>
       </section>
 
-      {/* ===== SERVICIOS GALERIA ===== */}
-      <section className="servicios-galeria" data-section-label="Home / Servicios carrusel">
-        <div className="shell">
-          <div className="section-heading-row">
-            <div>
-              <span className="section-kicker">¿Qué hacemos?</span>
-              <h2 className="section-title">Soluciones para cada tipo de organización</h2>
-            </div>
-          </div>
-          <Carousel
-            opts={{ align: "start", loop: true }}
-            className="service-carousel"
-          >
-            <CarouselContent className="-ml-4">
-              {servicios.map((svc) => (
-                <CarouselItem key={svc.title} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="servicio-card">
-                    <CardHeader>
-                      <div className="service-mark"><svc.Icon size={20} strokeWidth={2} aria-hidden="true" /></div>
-                      <CardTitle className="service-title">{svc.title}</CardTitle>
-                      <CardDescription className="service-copy">{svc.text}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="service-carousel-button" />
-            <CarouselNext className="service-carousel-button" />
-          </Carousel>
-        </div>
-      </section>
+      <section className="home-story" data-section-label="Home / Historia documental">
+        <div className="shell home-story-grid">
+          <figure className="home-story-media">
+            <SafeImage
+              src={siteImages.story.src}
+              alt={siteImages.story.alt}
+              width={800}
+              height={600}
+              sizes="(max-width: 800px) 100vw, 48vw"
+            />
+            <figcaption>Archivo ELSI · Bee Blue, origen estudiantil del instituto.</figcaption>
+          </figure>
 
-      {/* ===== CURSOS DESTACADOS ===== */}
-      <section className="cursos-seccion" data-section-label="Home / Cursos destacados">
-        <div className="shell">
-          <div className="cursos-header">
-            <div>
-              <span className="section-kicker">Aprende a tu ritmo</span>
-              <h2 className="section-title" style={{ margin: 0 }}>Cursos destacados</h2>
-              <p className="section-lede">Explora programas ambientales y revisa su temario antes de solicitar información.</p>
-            </div>
-            <Button asChild variant="link">
-              <Link href="/cursos">Ver catálogo completo →</Link>
+          <div className="home-story-copy">
+            <div className="home-story-mark" aria-hidden="true"><Leaf /></div>
+            <p className="home-kicker">Una historia que nace en comunidad</p>
+            <h2>De una iniciativa estudiantil a una práctica ambiental compartida.</h2>
+            <p>
+              Bee Blue reunió educación ambiental, participación universitaria y trabajo de campo. ELSI continúa esa trayectoria mediante experiencias que conectan conocimiento y contexto.
+            </p>
+            <Button asChild variant="link" className="home-inline-action">
+              <Link href="/nosotros">Conocer la historia <ArrowRight data-icon="inline-end" /></Link>
             </Button>
           </div>
-          <div className="cursos-grid">
-            {featuredCourses.map((course, index) => (
-              <Link key={course.id} href={`/cursos/${course.slug}`} className="featured-course-link">
-                <article className="featured-course-card">
-                  <div className="featured-course-media">
-                    <SafeImage
-                      src={courseImages[course.slug].src}
-                      alt={courseImages[course.slug].alt}
-                      width={900}
-                      height={600}
-                    />
-                    <span className="featured-course-number">0{index + 1}</span>
+        </div>
+      </section>
+
+      <section className="home-courses" data-section-label="Home / Cursos destacados">
+        <div className="shell">
+          <header className="home-courses-header">
+            <div>
+              <p className="home-kicker">Aprendizaje disponible</p>
+              <h2>Cursos para pasar del interés a la práctica.</h2>
+            </div>
+            <Link href="/cursos" className="home-text-link">Ver catálogo completo</Link>
+          </header>
+
+          {primaryCourse ? (
+            <div className="home-courses-layout">
+              <Link href={`/cursos/${primaryCourse.slug}`} className="home-course-feature">
+                <div className="home-course-feature-media">
+                  <SafeImage
+                    src={courseImages[primaryCourse.slug].src}
+                    alt={courseImages[primaryCourse.slug].alt}
+                    width={900}
+                    height={600}
+                    sizes="(max-width: 800px) 100vw, 58vw"
+                  />
+                </div>
+                <div className="home-course-feature-body">
+                  <Badge variant="outline">{primaryCourse.catLabel}</Badge>
+                  <h3>{primaryCourse.title}</h3>
+                  <p>{primaryCourse.description}</p>
+                  <div>
+                    <span>{primaryCourse.duration} · {primaryCourse.modules} módulos</span>
+                    <strong>{money(primaryCourse.price)}</strong>
                   </div>
-                  <div className="featured-course-body">
-                    <div className="featured-course-meta">
-                      <Badge variant="outline" className="featured-course-badge">{course.catLabel}</Badge>
-                      <span>{course.modules} módulos</span>
-                    </div>
-                    <h3>{course.title}</h3>
-                    <p>{course.description}</p>
-                    <div className="featured-course-footer">
-                      <strong>{money(course.price)}</strong>
-                      <span>Ver curso</span>
-                    </div>
-                  </div>
-                </article>
+                  <span className="home-course-action">Ver curso <ArrowRight aria-hidden="true" /></span>
+                </div>
               </Link>
+
+              <nav className="home-course-list" aria-label="Más cursos destacados">
+                {secondaryCourses.map((course) => (
+                  <Link key={course.id} href={`/cursos/${course.slug}`} className="home-course-row">
+                    <span className="home-course-row-icon" aria-hidden="true"><BookOpen /></span>
+                    <span className="home-course-row-copy">
+                      <small>{course.catLabel}</small>
+                      <strong>{course.title}</strong>
+                      <span>{course.duration} · {course.modules} módulos</span>
+                    </span>
+                    <span className="home-course-row-price">{money(course.price)}</span>
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="home-faq" data-section-label="Home / Preguntas frecuentes">
+        <div className="shell home-faq-grid">
+          <header className="home-section-intro">
+            <p className="home-kicker">Antes de comenzar</p>
+            <h2>Una ruta clara desde la primera conversación.</h2>
+            <p>Estas respuestas describen el proceso general. El alcance específico se confirma en cada propuesta.</p>
+          </header>
+          <div className="home-faq-list">
+            {homeFaqs.map((item) => (
+              <details key={item.question} className="home-faq-item">
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
-      <section className="cta-section" data-section-label="Home / CTA formulario">
+      <section className="cta-section home-contact" data-section-label="Home / Contacto integrado">
         <div className="shell cta-grid">
           <div className="cta-copy">
-            <h2>Encuentra el curso o programa ambiental adecuado.</h2>
-            <p>Comparte tus datos y te contactaremos para orientar la ruta de aprendizaje, capacitación o consultoría más útil para tu organización.</p>
+            <p className="home-kicker home-kicker-inverse">El siguiente paso</p>
+            <h2>Conversemos sobre el reto que quieres atender.</h2>
+            <p>Comparte tus datos y el contexto general. ELSI podrá orientar la solución, curso o programa adecuado.</p>
           </div>
           <PublicContactForm
             className="cta-form"

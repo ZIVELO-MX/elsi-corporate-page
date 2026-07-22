@@ -33,15 +33,15 @@ async function prepareAdminDashboard(page: Page) {
 }
 
 export const captureTargets: CaptureTarget[] = [
-  { key: "home-hero", title: "Home — Hero", path: "/", selector: section("Home / Hero") },
-  { key: "home-story", title: "Home — Historia resumida", path: "/", selector: section("Home / Historia resumida") },
-  { key: "home-services", title: "Home — Servicios", path: "/", selector: section("Home / Servicios carrusel") },
+  { key: "home-hero", title: "Home — Hero", path: "/", selector: section("Home / Hero editorial") },
+  { key: "home-story", title: "Home — Historia documental", path: "/", selector: section("Home / Historia documental") },
+  { key: "home-services", title: "Home — Índice de soluciones", path: "/", selector: section("Home / Índice de soluciones") },
   { key: "home-featured-courses", title: "Home — Cursos destacados", path: "/", selector: section("Home / Cursos destacados") },
-  { key: "home-contact", title: "Home — Contacto", path: "/", selector: section("Home / CTA formulario") },
+  { key: "home-contact", title: "Home — Contacto", path: "/", selector: section("Home / Contacto integrado") },
   { key: "privacy-notice", title: "Legal — Aviso de privacidad", path: "/aviso-de-privacidad", selector: section("Legal / Aviso de privacidad") },
   { key: "courses-catalog", title: "Cursos — Catálogo", path: "/cursos", selector: section("Cursos / Catálogo") },
   { key: "course-detail-fundamentals", title: "Curso — Fundamentos de Educación Ambiental", path: "/cursos/fundamentos-de-educacion-ambiental", selector: section("Detalle curso / Contenido") },
-  { key: "solutions-overview", title: "Soluciones — Servicios", path: "/soluciones", selector: section("Soluciones / Servicios") },
+  { key: "solutions-overview", title: "Soluciones — Introducción", path: "/soluciones", selector: section("Soluciones / Introducción") },
   { key: "solution-detail-environmental", title: "Solución — Soluciones ambientales", path: "/soluciones/soluciones-ambientales", selector: section("Soluciones / Soluciones ambientales") },
   { key: "about-timeline", title: "Nosotros — Línea de tiempo", path: "/nosotros", selector: section("Nosotros / Línea de tiempo") },
   { key: "about-values", title: "Nosotros — Misión, visión y valores", path: "/nosotros", selector: section("Nosotros / Misión visión valores") },
