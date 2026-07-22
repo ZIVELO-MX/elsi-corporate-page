@@ -9,8 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, Shield, UserRound, X } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { useAuth } from "@/components/auth-context";
-
-const navigation = [["/", "Inicio"], ["/nosotros", "Quiénes somos"], ["/soluciones", "Soluciones"], ["/cursos", "Cursos"], ["/contacto", "Contacto"]] as const;
+import { isNavigationItemActive, primaryNavigation } from "@/lib/navigation";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -49,7 +48,9 @@ export default function Header() {
           <SafeImage src="/logos/elsi-wordmark.png" alt="ELSI" className="header-logo-img" width={123} height={70} />
         </Link>
         <nav className="header-nav" aria-label="Navegación principal">
-          {navigation.map(([href, label]) => <Link href={href} key={href}>{label}</Link>)}
+          {primaryNavigation.map(({ href, label }) => (
+            <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined}>{label}</Link>
+          ))}
         </nav>
         <div className={`header-actions${user ? " header-actions-authenticated" : ""}`}>
           {user ? (
@@ -118,7 +119,11 @@ export default function Header() {
       </div>
       <div className="mobile-nav-backdrop" data-open={menuOpen} aria-hidden="true" onClick={() => setMenuOpen(false)} />
       <div id="mobile-navigation" ref={menuRef} className="mobile-navigation" data-open={menuOpen} aria-label="Navegación móvil">
-        <nav aria-label="Navegación principal móvil">{navigation.map(([href, label]) => <Link href={href} key={href} onClick={() => setMenuOpen(false)}>{label}</Link>)}</nav>
+        <nav aria-label="Navegación principal móvil">
+          {primaryNavigation.map(({ href, label }) => (
+            <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{label}</Link>
+          ))}
+        </nav>
         <div className="mobile-navigation-actions">
           {user ? (
             <>

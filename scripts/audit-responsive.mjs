@@ -6,6 +6,11 @@ import { join } from "node:path";
 const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const origin = process.env.AUDIT_ORIGIN ?? "http://127.0.0.1:3011";
 const screenshotDir = process.env.AUDIT_SCREENSHOT_DIR;
+// Browser page zoom reduces the available CSS viewport while keeping the
+// physical target width. Model that reflow directly so 200% text checks stay
+// deterministic in headless Chrome.
+const zoom = Number(process.env.AUDIT_ZOOM ?? "1");
+if (!Number.isFinite(zoom) || zoom < 1) throw new Error("AUDIT_ZOOM must be a number greater than or equal to 1");
 const widths = (process.env.AUDIT_WIDTHS ?? "390,768,1024,1440")
   .split(",")
   .map(Number)
@@ -86,8 +91,9 @@ await send("Runtime.enable", {}, sessionId);
 const results = [];
 if (screenshotDir) await mkdir(screenshotDir, { recursive: true });
 for (const width of widths) {
+  const cssViewportWidth = Math.max(1, Math.round(width / zoom));
   await send("Emulation.setDeviceMetricsOverride", {
-    width,
+    width: cssViewportWidth,
     height: 900,
     deviceScaleFactor: 1,
     mobile: width <= 480,
@@ -119,6 +125,23 @@ for (const width of widths) {
           .filter((item) => item.width > 1 && (item.left < -1 || item.right > viewportWidth + 1))
           .sort((a, b) => Math.max(b.right - viewportWidth, -b.left) - Math.max(a.right - viewportWidth, -a.left))
           .slice(0, 8);
+        // Collect the heavier per-element scroll diagnostics only when the
+        // page actually exceeds its viewport; successful runs stay compact.
+        const scrollContainers = overflow > 0 ? [...document.querySelectorAll('body *')]
+          .map((element) => {
+            const style = getComputedStyle(element);
+            return {
+              tag: element.tagName.toLowerCase(),
+              className: typeof element.className === 'string' ? element.className.slice(0, 100) : '',
+              clientWidth: element.clientWidth,
+              scrollWidth: element.scrollWidth,
+              overflowX: style.overflowX,
+              contain: style.contain,
+            };
+          })
+          .filter((item) => item.scrollWidth > item.clientWidth + 1)
+          .sort((a, b) => (b.scrollWidth - b.clientWidth) - (a.scrollWidth - a.clientWidth))
+          .slice(0, 8) : [];
         return {
           title: document.title,
           path: location.pathname,
@@ -126,10 +149,11 @@ for (const width of widths) {
           documentWidth: document.documentElement.scrollWidth,
           overflow,
           offenders: overflow > 0 ? offenders : [],
+          scrollContainers: overflow > 0 ? scrollContainers : [],
         };
       })()`,
     }, sessionId);
-    results.push({ width, ...result.value });
+    results.push({ width, zoom, cssViewportWidth, ...result.value });
 
     if (screenshotDir) {
       const { data } = await send("Page.captureScreenshot", {
@@ -138,7 +162,7 @@ for (const width of widths) {
         fromSurface: true,
       }, sessionId);
       const slug = route === "/" ? "home" : route.replace(/^\//, "").replaceAll("/", "-");
-      await writeFile(join(screenshotDir, `${slug}-${width}.png`), Buffer.from(data, "base64"));
+      await writeFile(join(screenshotDir, `${slug}-${width}-zoom-${zoom}.png`), Buffer.from(data, "base64"));
     }
   }
 }

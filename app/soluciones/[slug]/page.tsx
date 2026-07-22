@@ -6,6 +6,7 @@ import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 type SolutionDetailPageProps = {
   params: Promise<{
@@ -49,6 +50,7 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
     <main>
       <section className="solution-article" data-section-label={`Soluciones / ${solution.title}`}>
         <div className="shell solution-article-shell">
+          <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Soluciones", href: "/soluciones" }, { label: solution.title }]} />
           <Link href="/soluciones" className="solution-back-link">
             <ArrowLeft aria-hidden="true" />
             Volver a soluciones
