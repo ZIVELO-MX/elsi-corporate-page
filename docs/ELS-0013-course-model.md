@@ -32,25 +32,31 @@ Origen del dato: **✅ confirmado** (decisión de cliente / ya en producto) ·
 | `id` | string | R | ✅ | `"c1"` | Identificador interno estable. |
 | `slug` | string (kebab, único) | R | ✅ | `"fundamentos-de-educacion-ambiental"` | URL pública del detalle. |
 | `title` | string | R | ✅ | `"Fundamentos de Educación Ambiental"` | |
-| `category` | string | R | ✅ | `"Sostenibilidad"` | Catálogo de categorías: 🔵 definir lista cerrada. |
+| `category` | string (ref a categoría) | R | ✅ | `"Sostenibilidad"` | **No es lista fija:** el admin gestiona las categorías (agregar / editar / eliminar). Implica un CRUD de categorías (ver §8). |
 | `synopsis` | string (≤160) | R | ✅ | "Bases de la educación ambiental…" | Resumen para tarjeta/listado (unifica `description`+`synopsis`). |
-| `objectives` | string[] | O | 🔵 | `["Diseñar mensajes que cambian comportamientos"]` | No existe hoy en datos; ¿los cursos tienen objetivos explícitos? |
-| `targetAudience` | string | O | ✅ | `"Docentes y promotores comunitarios"` | En `AdminCourse`. |
-| `requirements` | string[] | O | 🔵 | `["Sin requisitos previos"]` | No existe hoy; a confirmar. |
-| `instructor` | { name, bio? } | O | 🔵 | `{ name: "…" }` | No existe hoy; a confirmar si se muestra. |
+| `objectives` | string[] | O | ✅ | `["Diseñar mensajes que cambian comportamientos"]` | **El detalle muestra todo lo que incluye el curso** → se exponen cuando existan. |
+| `targetAudience` | **string[]** | O | ✅ | `["Ingeniería Ambiental", "Carreras afines"]` | **Es un arreglo** (curso real DC-3, §9). Se muestra en el detalle. |
+| `requirements` | string[] | O | ✅ | `["Sin requisitos previos"]` | Se muestran en el detalle. |
+| `instructor` | { name, bio? } | O | ✅ | `{ name: "…" }` | Se muestra en el detalle. |
 | `modality` | `"online" \| "presencial"` | R | ✅ | `"presencial"` | |
-| `duration` | string | R | ✅ | `"6 módulos"` / `"8 horas"` | 🔵 unificar a una convención (p.ej. duración en horas + nº de módulos aparte). |
-| `curriculum` | Topic[] (tema → subtemas[]) | R | ✅ | ver §2.1 | Unifica `moduleList[]` y `curriculum` texto. |
-| `price` | number (entero menor) | R | ✅ | `0` | En centavos o unidad — 🔵 confirmar. Hoy todos `0`. |
-| `currency` | `"MXN"` | R | 🔵 | `"MXN"` | No existe hoy; asumir MXN — confirmar. |
-| `capacity` | number | O | 🔵 | `30` | Solo presencial; no existe hoy. |
-| `place` | string | P(presencial) | ✅ | `"Campus Central ELSI, Auditorio B"` | `presencialLocation`. |
-| `date` | string | P(presencial) | ✅ | `"2025-08-14"` / `"Por confirmar"` | `presencialDate`. |
-| `time` | string | P(presencial) | ✅ | `"09:00 - 13:00"` | `presencialTime`. |
+| `durationType` | `"time" \| "modules"` | R | ✅ | `"modules"` | **Lo decide el admin por curso.** Determina si se muestra avance (§5). |
+| `duration` | string | R | ✅ | `"8 horas"` / `"6 módulos"` | Cadena de despliegue coherente con `durationType`. |
+| `curriculum` | Topic[] (tema → subtemas[]) | R | ✅ | ver §2.1 | Unifica `moduleList[]` y `curriculum` texto. En cursos `durationType:"modules"`, cada tema = un módulo. |
+| `price.amount` | number (MXN, entero) | R | ✅ | `0` / `550` | **Habrá cursos gratuitos y de pago.** `0` = gratis. |
+| `price.currency` | `"MXN"` | R | ✅ | `"MXN"` | Confirmado MXN. |
+| `price.label` | string | O | ✅ | `"Recuperación"` | Etiqueta del costo (curso real DC-3, §9). |
+| `capacity` | number | O | ✅ | `30` | Sobre todo presencial. Al llenarse → estado `closed` + captura de interés (§3). |
+| `schedule.date` | string | O | ✅ | `"29 de julio"` | **Aplica a online en vivo Y presencial** (curso real DC-3 es Online con horario). |
+| `schedule.time` | string | O | ✅ | `"12:00 - 16:00"` | Horario de la sesión. |
+| `place` | string | P(presencial) | ✅ | `"Campus Central ELSI, Auditorio B"` | Solo presencial (`presencialLocation`). |
 | `generalInfo` | string | O | ✅ | "Cupo, requisitos de acceso…" | `presencialInfo`. |
 | `externalUrl` | string (url) | P(online) | ✅ | `"https://elsyacademy.me"` | **Nunca se muestra en catálogo/detalle/perfil**; solo se envía por correo (§4). |
 | `publishState` | enum (§3) | R | ✅ | `"published"` | Reemplaza `"Publicado"` y `"active"/"inactive"`. |
-| `includesCertificate` | boolean | O | 🔵 | `true` | ¿El detalle indica si el curso da constancia? A confirmar. |
+| `includesCertificate` | boolean | R | ✅ | `true` | **Constante = `true`: todos incluyen constancia.** |
+| `certificateType` | string | R | ✅ | `"DC-3"` | **Tipo oficial de la constancia** (p.ej. DC-3 de STPS). El detalle lo indica. |
+| `registration.hasQrCode` | boolean | O | ✅ | `true` | La inscripción puede incluir **código QR** (curso real DC-3, §9). Ver §8. |
+| `registration.cta` | string | O | ✅ | `"¡Inscríbete ya!"` | Texto del CTA de inscripción. |
+| `organization` | string (const) | R | ✅ | `"ELSI"` | Constante institucional. |
 | `students` | number | O | 🟡 | `184` | Contador mock; real cuando exista backend. |
 
 ### 2.1 Estructura académica (`curriculum`)
@@ -80,7 +86,7 @@ Enum canónico `publishState` (reemplaza `"Publicado"` y `"active"/"inactive"`):
 | `draft` | Borrador, no publicado | No | — (solo admin) |
 | `published` | Publicado y disponible | Sí | **Inscribirme** (o **Explorar** si gratuito) |
 | `upcoming` | Publicado, fecha futura (presencial) | Sí | **Reservar lugar** / **Inscribirme** |
-| `closed` | Cupo lleno o fecha pasada | Sí (marcado) | **Curso cerrado** (deshabilitado) + "Avísame" 🔵 |
+| `closed` | Cupo lleno o fecha pasada | Sí (marcado) | **Curso cerrado** + **"Avísame si reabre"** (captura de interés, §5.1) |
 | `pending_info` | Publicado con datos por confirmar (p.ej. fecha "Por confirmar") | Sí | **Más información** |
 
 - **Gratuito** no es un estado, es `price === 0` → la tarjeta/CTA muestran "Gratis".
@@ -105,34 +111,92 @@ Enum canónico `publishState` (reemplaza `"Publicado"` y `"active"/"inactive"`):
 
 ## 5. Finalización, progreso y certificados — **decisiones confirmadas**
 
-- La **carga de constancia** (individual o masiva) marca el curso como **realizado**
-  para los alumnos correspondientes.
+- La **carga de constancia** (individual o masiva) marca el curso como **realizado**.
 - Un **botón manual** permite marcar realizado para casos excepcionales.
 - **No hay "marcar asistencia";** la evidencia de finalización es la constancia.
-- **Constancia:** estados `pendiente` (cargada, sin publicar) y `disponible`
-  (publicada y descargable).
-- **Progreso académico:** 🔵 **Recomendación** — NO mostrar avance porcentual ni
-  unidades internas (el contenido vive en la plataforma externa). El "progreso"
-  visible es el ciclo de inscripción: *Próximo → Realizado*. (Consistente con el
-  wireframe del perfil, ELS-0020: "no mostrar avances académicos".)
+- **Constancia:** estados `pendiente` (cargada, sin publicar) y `disponible`.
+  **Todos los cursos incluyen constancia**, y tiene un **tipo oficial**
+  (`certificateType`, p.ej. **DC-3** — Constancia de Habilidades DC-3 de STPS).
+  El detalle indica el tipo.
+- **Progreso:** se muestra **solo en cursos por módulos** (`durationType:"modules"`)
+  → avance = módulos completados. En cursos por **tiempo** no se muestra avance; solo
+  el ciclo *Próximo → Realizado*. 🔵 **Fuente por definir con backend:** el contenido
+  es externo, así que el avance por módulo debe alimentarse desde la plataforma externa
+  o marcarse en el admin (definir en ELS-0037).
+
+### 5.1 Captura de interés (cupo lleno)
+
+Al llegar a `closed`, se ofrece **"Avísame si reabre"** para registrar interés y decidir
+si se reabre. Requiere almacenar contactos interesados por curso (feature nueva, §8).
 
 ## 6. Datos confirmados vs mock vs pendiente
 
-- **✅ Confirmados (decisión de cliente):** estados de inscripción (No pagado/Pagado),
-  liga solo por correo, finalización mediante constancia, sin marcar asistencia.
-- **🟡 Mock (placeholder en código):** los 6 cursos de ejemplo, `students`, `price: 0`,
-  fechas, `externalUrl`. Se reemplazan cuando exista backend (ELS-0037).
-- **🔵 Pendiente de confirmar con ELSI:** ver §7.
+- **✅ Confirmados:** estados de inscripción (No pagado/Pagado), liga solo por correo,
+  finalización mediante constancia (con tipo), sin marcar asistencia, precio en MXN
+  (gratis y de pago), categorías gestionadas por el admin, progreso solo por módulos,
+  y la **estructura real de ficha** (ver §9, curso oficial DC-3).
+- **🟡 Mock (placeholder en código):** los 6 cursos de `data/courses.json`, `students`,
+  `price: 0`, `externalUrl`. Se reemplazan con datos reales + backend (ELS-0037).
+- **🔵 Pendiente:** la **fuente del avance por módulo** (§5), a definir con el backend.
 
-## 7. Preguntas abiertas para validación con ELSI (gatea ELS-0019)
+## 7. Validación con ELSI — **resuelto** (2026-07-21)
 
-1. **Categorías:** ¿lista cerrada de categorías? ¿cuáles?
-2. **Precio y moneda:** ¿MXN? ¿entero/centavos? ¿habrá cursos de pago o todos gratuitos por ahora?
-3. **Campos opcionales:** ¿los cursos exponen **objetivos**, **requisitos**, **instructor**, **capacidad**? ¿se muestran en el detalle?
-4. **Duración:** ¿unificamos a horas + nº de módulos por separado?
-5. **Certificado:** ¿el detalle indica si el curso incluye constancia?
-6. **Estado "cerrado":** ¿ofrecemos "avísame cuando reabra"?
-7. **Progreso:** ¿se confirma NO mostrar avance académico (solo ciclo de inscripción)?
+| # | Pregunta | Decisión |
+| --- | --- | --- |
+| 1 | Categorías | El admin las gestiona (agregar/editar/eliminar); no es lista fija. |
+| 2 | Precio/moneda | **MXN**; habrá cursos **gratuitos y de pago** (`price.amount` + `price.label`). |
+| 3 | Objetivos/requisitos/instructor/capacidad | El detalle **muestra todo** lo que incluye el curso. |
+| 4 | Duración | Por **tiempo o módulos**, a criterio del admin (`durationType`). |
+| 5 | Constancia | **Todos** incluyen constancia, con **tipo** (p.ej. DC-3). |
+| 6 | Estado cerrado | Sí: capturar interés ("avísame si reabre"). |
+| 7 | Progreso | Solo en cursos por **módulos**. |
 
-Estas respuestas deben confirmarse antes de iniciar los wireframes dependientes
-(ELS-0019).
+Modelo validado → **ELS-0019 (wireframes) queda desbloqueado.**
+
+## 8. Features derivadas (nuevas, fuera de ELS-0013)
+
+Las decisiones implican trabajo nuevo a agendar como misiones aparte:
+
+- **CRUD de categorías** en el admin (hoy la categoría es texto libre en el formulario).
+- **Registro con QR** (`registration.hasQrCode`) para la inscripción.
+- **Captura de interés** para cursos cerrados (§5.1).
+- **Fuente de avance por módulo** para cursos `durationType:"modules"` (§5, con backend).
+
+## 9. Ejemplo real — curso oficial ELSI (validado por el cliente)
+
+Curso real usado para validar la estructura de la ficha. `durationType: "time"`
+(4 horas), online **con horario en vivo**, de pago (MXN, etiqueta "Recuperación"),
+constancia oficial **DC-3**, inscripción con **QR**.
+
+```json
+{
+  "title": "Manejo Integral de Residuos",
+  "organization": "ELSI",
+  "synopsis": "Manejo integral de residuos, marco legal, clasificación, economía circular y planes de manejo, con constancia DC-3.",
+  "modality": "online",
+  "durationType": "time",
+  "duration": "4 Horas",
+  "schedule": { "date": "29 de julio", "time": "12:00 - 16:00" },
+  "price": { "amount": 550, "currency": "MXN", "label": "Recuperación" },
+  "certificateType": "DC-3",
+  "includesCertificate": true,
+  "curriculum": [
+    { "title": "Marco Legal" }, { "title": "Distribución de Competencias" },
+    { "title": "Clasificación de los Residuos" }, { "title": "Manejo Integral de los Residuos" },
+    { "title": "Plan de Manejo" }, { "title": "Economía Circular" }, { "title": "Sanciones" }
+  ],
+  "targetAudience": [
+    "Estudiantes de licenciatura", "Estudiantes de posgrado", "Ingeniería Ambiental",
+    "Ingeniería Hidráulica", "Ingeniería Química", "Ingeniería Civil", "Carreras afines"
+  ],
+  "instructor": {
+    "name": "Q.F.B. Gabriela Núñez Torres",
+    "bio": "Egresada de la Facultad de Ciencias Químicas; inspectora y subdelegada de auditoría ambiental en PROFEPA; asesora y consultora ambiental; agente capacitador por STPS; jefa de impuestos ecológicos en SATEG."
+  },
+  "registration": { "hasQrCode": true, "cta": "¡Inscríbete ya!" }
+}
+```
+
+Diferencias notables vs los cursos mock de `data/courses.json`: `targetAudience` es
+arreglo; el costo trae etiqueta; hay horario aunque sea online; la constancia tiene tipo
+oficial (DC-3); y la inscripción incluye QR. La ficha canónica (§2) ya refleja esto.
