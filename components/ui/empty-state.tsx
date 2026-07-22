@@ -12,8 +12,8 @@ export function EmptyState({ icon, title, hint }: { icon: ReactNode; title: stri
       <span aria-hidden="true" style={chipStyle}>
         {icon}
       </span>
-      <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 600, color: "var(--text)" }}>{title}</p>
-      {hint && <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-muted)", maxWidth: "24rem", lineHeight: 1.5 }}>{hint}</p>}
+      <p className="m-0 text-sm font-semibold text-[var(--text)]">{title}</p>
+      {hint && <p className="m-0 max-w-96 text-[13px] leading-6 text-[var(--text-muted)]">{hint}</p>}
     </div>
   );
 }
