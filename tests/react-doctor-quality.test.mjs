@@ -14,6 +14,7 @@ test("the screenshot workflow exposes Zipform credentials only to publication", 
   );
 
   assert.doesNotMatch(jobConfiguration, /ZIPFORM_TOKEN/);
+  assert.match(workflow, /contains\(github\.event\.pull_request\.body, 'ELS-'\)/);
   assert.match(publishStep, /ZIPFORM_TOKEN: \$\{\{ secrets\.ZIPFORM_TOKEN \}\}/);
   assert.ok(workflow.indexOf("pnpm install --frozen-lockfile") < workflow.indexOf("ZIPFORM_TOKEN"));
 });

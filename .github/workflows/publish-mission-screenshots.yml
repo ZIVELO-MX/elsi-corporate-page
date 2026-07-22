@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   screenshots:
-    if: github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.body, 'Misión:')
+    if: github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.body, 'Misión:') && contains(github.event.pull_request.body, 'ELS-')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
