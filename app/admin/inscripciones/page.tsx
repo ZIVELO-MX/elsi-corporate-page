@@ -178,8 +178,8 @@ export default function AdminEnrollments() {
         border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap",
       }}>
         <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
-          <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
+          <label htmlFor="enr-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
+          <select id="enr-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
@@ -188,8 +188,8 @@ export default function AdminEnrollments() {
           </select>
         </div>
         <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
-          <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
+          <label htmlFor="enr-curso" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
+          <select id="enr-curso" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
@@ -198,8 +198,8 @@ export default function AdminEnrollments() {
           </select>
         </div>
         <div style={{ minWidth: "10rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Origen</label>
-          <select value={source} onChange={e => setSource(e.target.value as EnrollmentSource)}
+          <label htmlFor="enr-origen" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Origen</label>
+          <select id="enr-origen" value={source} onChange={e => setSource(e.target.value as EnrollmentSource)}
             className="admin-select" style={{ width: "100%" }}>
             <option value="interna">Sitio ELSI</option>
             <option value="externa">Plataforma externa</option>

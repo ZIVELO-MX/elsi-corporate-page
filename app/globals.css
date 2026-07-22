@@ -880,6 +880,14 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-num { text-align: right; font-variant-numeric: tabular-nums; }
 .admin-cell-truncate { max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Logout: color feedback via CSS so keyboard users get it too (no JS mouse-only
+   handlers). Hover gated to a precise pointer; focus mirrors it. */
+.admin-logout-btn { transition: color var(--motion-fast) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .admin-logout-btn:hover { color: var(--destructive); }
+}
+.admin-logout-btn:focus-visible { color: var(--destructive); }
+
 .admin-checkbox {
   width: 1.5rem;
   height: 1.5rem;

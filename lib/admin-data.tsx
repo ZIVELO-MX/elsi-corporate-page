@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
 
 export type CourseModality = "online" | "presencial";
 
@@ -230,8 +230,13 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     return INITIAL_COURSES.find(c => c.id === id)?.title ?? "Desconocido";
   }, []);
 
+  const value = useMemo(
+    () => ({ loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }),
+    [loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName],
+  );
+
   return (
-    <AdminDataContext.Provider value={{ loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }}>
+    <AdminDataContext.Provider value={value}>
       {children}
     </AdminDataContext.Provider>
   );

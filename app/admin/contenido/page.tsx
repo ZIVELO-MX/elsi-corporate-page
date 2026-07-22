@@ -3,6 +3,16 @@
 import { useAdminData } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 
+const toggleBtnStyle: React.CSSProperties = {
+  position: "relative", width: "2.5rem", height: "1.5rem", borderRadius: "1rem",
+  border: "none", cursor: "pointer", transition: "background var(--motion-fast) var(--ease-out)", flexShrink: 0,
+};
+const sectionTextareaStyle: React.CSSProperties = {
+  width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)",
+  borderRadius: "var(--radius-sm)", fontSize: "0.875rem", resize: "vertical",
+  background: "var(--paper)", color: "var(--text)", fontFamily: "inherit", lineHeight: 1.5,
+};
+
 export default function AdminContent() {
   const { sections, updateSection } = useAdminData();
 
@@ -30,14 +40,10 @@ export default function AdminContent() {
                   {s.active ? "Activo" : "Inactivo"}
                 </Badge>
               </div>
-              <button onClick={() => updateSection(s.id, { active: !s.active })}
+              <button type="button" onClick={() => updateSection(s.id, { active: !s.active })}
                 role="switch" aria-checked={s.active}
-                style={{
-                  position: "relative", width: "2.5rem", height: "1.5rem", borderRadius: "1rem",
-                  background: s.active ? "var(--primary)" : "var(--border)",
-                  border: "none", cursor: "pointer", transition: "background var(--motion-fast) var(--ease-out)",
-                  flexShrink: 0,
-                }} aria-label={`${s.active ? "Desactivar" : "Activar"} sección ${s.label}`}>
+                style={{ ...toggleBtnStyle, background: s.active ? "var(--primary)" : "var(--border)" }}
+                aria-label={`${s.active ? "Desactivar" : "Activar"} sección ${s.label}`}>
                 <span style={{
                   display: "block", width: "1.125rem", height: "1.125rem", borderRadius: "50%",
                   background: "var(--card)", transition: "transform var(--motion-fast) var(--ease-out)",
@@ -48,11 +54,7 @@ export default function AdminContent() {
             <textarea value={s.content} onChange={e => updateSection(s.id, { content: e.target.value })}
               rows={3}
               aria-label={`Contenido de la sección ${s.label}`}
-              style={{
-                width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)",
-                borderRadius: "var(--radius-sm)", fontSize: "0.875rem", resize: "vertical",
-                background: "var(--paper)", color: "var(--text)", fontFamily: "inherit", lineHeight: 1.5,
-              }} />
+              style={sectionTextareaStyle} />
           </div>
         ))}
       </div>

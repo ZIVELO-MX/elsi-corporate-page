@@ -45,8 +45,8 @@ export default function AdminSales() {
         border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap",
       }}>
         <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
-          <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
+          <label htmlFor="sale-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
+          <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar usuario</option>
             {users.filter(u => u.role === "user").map(u => (
@@ -55,8 +55,8 @@ export default function AdminSales() {
           </select>
         </div>
         <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
-          <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
+          <label htmlFor="sale-curso" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
+          <select id="sale-curso" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
             className="admin-select" style={{ width: "100%" }}>
             <option value="">Seleccionar curso</option>
             {courses.filter(c => c.status === "active").map(c => (
@@ -65,8 +65,8 @@ export default function AdminSales() {
           </select>
         </div>
         <div style={{ minWidth: "8rem" }}>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Monto</label>
-          <input type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)}
+          <label htmlFor="sale-monto" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Monto</label>
+          <input id="sale-monto" type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)}
             style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }} />
         </div>
         <Button type="submit" variant="primary">Registrar venta</Button>
