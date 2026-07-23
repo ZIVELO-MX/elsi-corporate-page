@@ -10,6 +10,7 @@ import { PublicContactForm } from "@/components/public-contact-form";
 
 const featuredCourses = getAllCourses().slice(0, 3);
 const [primaryCourse, ...secondaryCourses] = featuredCourses;
+const primaryImage = primaryCourse ? courseImages[primaryCourse.slug] : undefined;
 
 const homeFaqs = [
   {
@@ -127,13 +128,17 @@ export default function Home() {
             <div className="home-courses-layout">
               <Link href={`/cursos/${primaryCourse.slug}`} className="home-course-feature">
                 <div className="home-course-feature-media">
-                  <SafeImage
-                    src={courseImages[primaryCourse.slug].src}
-                    alt={courseImages[primaryCourse.slug].alt}
-                    width={900}
-                    height={600}
-                    sizes="(max-width: 800px) 100vw, 58vw"
-                  />
+                  {primaryImage ? (
+                    <SafeImage
+                      src={primaryImage.src}
+                      alt={primaryImage.alt}
+                      width={900}
+                      height={600}
+                      sizes="(max-width: 800px) 100vw, 58vw"
+                    />
+                  ) : (
+                    <div className="image-fallback" role="img" aria-label={primaryCourse.title} />
+                  )}
                 </div>
                 <div className="home-course-feature-body">
                   <Badge variant="outline">{primaryCourse.catLabel}</Badge>
