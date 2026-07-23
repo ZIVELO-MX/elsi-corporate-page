@@ -76,6 +76,17 @@ type MockGatewayOptions = {
 const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 
+const PAYMENT_AMOUNT_FORMATTERS: Record<
+  CheckoutCourse["currency"],
+  Intl.NumberFormat
+> = {
+  MXN: new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 0,
+  }),
+};
+
 export const CHECKOUT_COURSE: CheckoutCourse = {
   id: "manejo-integral-residuos-dc3",
   slug: "manejo-integral-de-residuos",
@@ -92,11 +103,7 @@ export function formatPaymentAmount(
   amount: number,
   currency: CheckoutCourse["currency"],
 ): string {
-  return new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-  }).format(amount / 100);
+  return PAYMENT_AMOUNT_FORMATTERS[currency].format(amount / 100);
 }
 
 export function normalizeBuyer(input: PaymentBuyer): PaymentBuyer {

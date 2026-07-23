@@ -56,7 +56,7 @@ test("legacy public routes resolve to one canonical experience", () => {
   for (const [source, destination] of [
     ["/shop", "/cursos"],
     ["/tienda", "/cursos"],
-    ["/checkout", "/finalizar-compra"],
+    ["/finalizar-compra", "/checkout"],
     ["/account", "/profile"],
     ["/mi-cuenta", "/profile"],
   ]) {

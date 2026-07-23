@@ -15,7 +15,7 @@ const widths = (process.env.AUDIT_WIDTHS ?? "390,768,1024,1440")
   .split(",")
   .map(Number)
   .filter(Number.isFinite);
-const routes = (process.env.AUDIT_ROUTES ?? "/,/soluciones,/soluciones/capacitacion,/cursos,/cursos/fundamentos-de-educacion-ambiental,/finalizar-compra,/nosotros,/contacto,/login,/register,/profile,/profile/wireframes,/aviso-de-privacidad")
+const routes = (process.env.AUDIT_ROUTES ?? "/,/soluciones,/soluciones/capacitacion,/cursos,/cursos/fundamentos-de-educacion-ambiental,/checkout,/nosotros,/contacto,/login,/register,/profile,/profile/wireframes,/aviso-de-privacidad")
   .split(",")
   .filter(Boolean);
 

@@ -2,7 +2,7 @@
 
 ## Alcance de esta entrega
 
-`/finalizar-compra` implementa el shell visual, la captura de comprador y todos
+`/checkout` implementa el shell visual, la captura de comprador y todos
 los estados del flujo con un adaptador mock determinista. No crea órdenes, no
 carga el script de Conekta y no acepta datos reales de tarjeta.
 
@@ -45,7 +45,7 @@ presentan dos acciones primarias.
 
 1. `POST /api/payments/conekta/checkout` con `courseId` y comprador.
 2. Backend crea la orden con llave privada y devuelve la sesión canónica.
-3. Frontend carga el script sólo en `/finalizar-compra`.
+3. Frontend carga el script sólo en `/checkout`.
 4. Frontend monta Checkout Component dentro de `providerArea` usando la llave
    pública y `checkoutRequestId`.
 5. Callbacks del componente actualizan feedback inmediato.
