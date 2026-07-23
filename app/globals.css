@@ -28,8 +28,8 @@
   --secondary: #EAF4F5;
   --secondary-foreground: #2A6B73;
   --destructive: #9F2F32;
-  --button-primary: var(--primary);
-  --button-primary-foreground: var(--text);
+  --button-primary: var(--primary-hover);
+  --button-primary-foreground: #fff;
   --accent-foreground: #fff;
   --primary-hover: #4A7A7E;
   --muted: #F1EFE7;
@@ -186,9 +186,9 @@ body[data-section-labels="true"] section[data-section-label]::before {
 
 [data-slot="button"][data-variant="primary"],
 [data-slot="button"][data-variant="default"] {
-  border-color: var(--primary) !important;
-  background: var(--primary) !important;
-  color: var(--text) !important;
+  border-color: var(--primary-hover) !important;
+  background: var(--primary-hover) !important;
+  color: #fff !important;
 }
 
 [data-slot="button"][data-variant="inverse"] {
@@ -200,8 +200,8 @@ body[data-section-labels="true"] section[data-section-label]::before {
 @media (hover: hover) and (pointer: fine) {
   [data-slot="button"][data-variant="primary"]:hover,
   [data-slot="button"][data-variant="default"]:hover {
-    border-color: var(--primary-hover) !important;
-    background: var(--primary-hover) !important;
+    border-color: color-mix(in oklab, var(--primary-hover), #000 14%) !important;
+    background: color-mix(in oklab, var(--primary-hover), #000 14%) !important;
     color: #fff !important;
   }
   [data-slot="button"][data-variant="inverse"]:hover {
