@@ -103,3 +103,13 @@ prototipo. Ningún resultado mock se persiste como venta o inscripción real.
 - [Apple Pay en checkout embebido](https://developers.conekta.com/v2.3.0/docs/aceptar-pagos-con-apple-pay-en-checkout-embebido)
 - [Apple HIG — Apple Pay](https://developer.apple.com/design/human-interface-guidelines/apple-pay)
 - [Apple Pay on the Web](https://developer.apple.com/documentation/applepayontheweb)
+
+## Verificación local
+
+- `pnpm lint`: 0 errores.
+- `pnpm test`: 32 pruebas aprobadas.
+- Playwright: flujo aprobado y rechazo recuperable, 2 pruebas aprobadas.
+- `pnpm build`: compilación y generación estática aprobadas.
+- React Doctor 0.8.1 sobre el diff: 100/100, sin hallazgos.
+- Responsive: 390, 768, 1024 y 1440 px sin overflow.
+- Reflow equivalente a 200 % en los cuatro anchos: sin overflow.
