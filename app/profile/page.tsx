@@ -108,7 +108,7 @@ function CertificateCard({ c }: { c: ProfileCertificate }) {
       <button
         type="button"
         aria-label={`Descargar constancia de ${c.course}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-[var(--text)] transition-transform active:scale-95"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] text-white transition-transform active:scale-95"
       >
         <Download size={16} aria-hidden="true" />
       </button>
@@ -174,7 +174,7 @@ function AccountSection({ user }: { user: User }) {
             />
           </label>
           <div className="flex gap-2">
-            <button type="submit" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 text-[12px] font-extrabold text-[var(--text)] transition-transform active:scale-95">Guardar</button>
+            <button type="submit" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Guardar</button>
             <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Cancelar</button>
           </div>
           <p className="text-[11px] text-[var(--text-muted)]">Prototipo: por ahora los cambios no se guardan.</p>
@@ -214,7 +214,7 @@ export default function ProfilePage() {
         <p className="mt-2 text-[13px] leading-6 text-[var(--text-muted)]">Tu perfil, cursos y constancias aparecen después de identificarte.</p>
         <Link
           href="/login"
-          className="mt-5 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 text-[12px] font-extrabold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--primary-hover)] pointer-fine:hover:text-white"
+          className="mt-5 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-4 text-[12px] font-extrabold text-white transition-colors pointer-fine:hover:bg-[color-mix(in_oklab,var(--primary-hover),#000_14%)] pointer-fine:hover:text-white"
         >
           Ir a iniciar sesión
         </Link>
@@ -321,7 +321,7 @@ export default function ProfilePage() {
             <Mail className="text-[var(--primary)]" size={22} aria-hidden="true" />
             <h2 id="help-title" className="mt-3 font-heading text-[15px] font-bold text-[var(--text)]">¿Necesitas ayuda?</h2>
             <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">Para dudas sobre inscripciones, acceso o constancias, escribe al canal de soporte.</p>
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 text-[12px] font-extrabold text-[var(--text)] transition-transform active:scale-95">Enviar correo</a>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Enviar correo</a>
           </section>
         </div>
       )}

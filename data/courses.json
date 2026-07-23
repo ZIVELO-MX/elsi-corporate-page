@@ -1,5 +1,31 @@
 [
   {
+    "id": "dc3",
+    "slug": "manejo-integral-de-residuos",
+    "title": "Manejo Integral de Residuos",
+    "category": "Habilidades ambientales",
+    "cat": "hab",
+    "catLabel": "Habilidades ambientales",
+    "duration": "4 horas",
+    "durationType": "time",
+    "modules": 7,
+    "status": "Próximo",
+    "publishState": "upcoming",
+    "modality": "online",
+    "schedule": { "date": "29 de julio", "time": "12:00 – 16:00" },
+    "students": 0,
+    "price": 550,
+    "priceLabel": "Recuperación",
+    "certificateType": "DC-3",
+    "featured": true,
+    "instructor": { "name": "Q.F.B. Gabriela Núñez Torres", "bio": "Inspectora y subdelegada de auditoría ambiental en PROFEPA; consultora ambiental; agente capacitador por STPS; jefa de impuestos ecológicos en SATEG." },
+    "targetAudience": ["Estudiantes de licenciatura", "Estudiantes de posgrado", "Ingeniería Ambiental", "Ingeniería Química", "Ingeniería Civil", "Carreras afines"],
+    "objectives": ["Aplicar el marco legal del manejo de residuos", "Elaborar un plan de manejo", "Incorporar principios de economía circular"],
+    "requirements": ["Sin requisitos previos"],
+    "description": "Marco legal, clasificación, economía circular y elaboración de planes de manejo, con constancia oficial DC-3.",
+    "moduleList": ["Marco Legal", "Distribución de Competencias", "Clasificación de los Residuos", "Manejo Integral de los Residuos", "Plan de Manejo", "Economía Circular", "Sanciones"]
+  },
+  {
     "id": "c1",
     "slug": "fundamentos-de-educacion-ambiental",
     "title": "Fundamentos de Educación Ambiental",
@@ -7,19 +33,17 @@
     "cat": "sost",
     "catLabel": "Sostenibilidad",
     "duration": "6 módulos",
+    "durationType": "modules",
     "modules": 6,
     "status": "Publicado",
+    "publishState": "published",
+    "modality": "online",
     "students": 184,
     "price": 0,
+    "certificateType": "Constancia de participación",
+    "targetAudience": ["Docentes", "Promotores comunitarios", "Estudiantes"],
     "description": "Bases de la educación y concientización ambiental: cómo diseñar mensajes y actividades que realmente cambian comportamientos.",
-    "moduleList": [
-      "Por qué la mayoría de las campañas ambientales fallan",
-      "Diseña un mensaje que sí cambie comportamientos",
-      "Planea un taller que la gente termine",
-      "Comunica el impacto para que se entienda en 10 segundos",
-      "Mide si tu programa realmente funcionó",
-      "Presenta tu proyecto final y recibe retroalimentación"
-    ]
+    "moduleList": ["Por qué la mayoría de las campañas ambientales fallan", "Diseña un mensaje que sí cambie comportamientos", "Planea un taller que la gente termine", "Comunica el impacto para que se entienda en 10 segundos", "Mide si tu programa realmente funcionó", "Presenta tu proyecto final y recibe retroalimentación"]
   },
   {
     "id": "c2",
@@ -29,21 +53,18 @@
     "cat": "norm",
     "catLabel": "Normatividad",
     "duration": "8 módulos",
+    "durationType": "modules",
     "modules": 8,
     "status": "Publicado",
+    "publishState": "published",
+    "modality": "online",
     "students": 126,
-    "price": 0,
+    "price": 1200,
+    "priceLabel": "Inscripción",
+    "certificateType": "Constancia de habilidades",
+    "targetAudience": ["Responsables ambientales", "Gerentes de operación", "Consultores"],
     "description": "Marco legal ambiental aplicable a la industria y cómo construir un plan de cumplimiento sólido.",
-    "moduleList": [
-      "Ubica qué normas aplican a tu empresa",
-      "Haz tu propia auditoría interna en un día",
-      "Reduce riesgo en el manejo de residuos",
-      "Controla emisiones y descargas de agua",
-      "Anticipa riesgos antes de la sanción",
-      "Construye tu plan de acción paso a paso",
-      "Arma reportes que un auditor apruebe a la primera",
-      "Prepárate para tu certificación"
-    ]
+    "moduleList": ["Ubica qué normas aplican a tu empresa", "Haz tu propia auditoría interna en un día", "Reduce riesgo en el manejo de residuos", "Controla emisiones y descargas de agua", "Anticipa riesgos antes de la sanción", "Construye tu plan de acción paso a paso", "Arma reportes que un auditor apruebe a la primera", "Prepárate para tu certificación"]
   },
   {
     "id": "c3",
@@ -53,17 +74,18 @@
     "cat": "hab",
     "catLabel": "Habilidades ambientales",
     "duration": "4 módulos",
+    "durationType": "modules",
     "modules": 4,
     "status": "Publicado",
+    "publishState": "published",
+    "modality": "presencial",
+    "place": "Campus Central ELSI, Auditorio B",
     "students": 92,
     "price": 0,
+    "certificateType": "Constancia de participación",
+    "targetAudience": ["Estudiantes universitarios", "Líderes estudiantiles"],
     "description": "Programa gratuito para estudiantes que quieren liderar iniciativas ambientales en su comunidad universitaria.",
-    "moduleList": [
-      "Diagnostica el problema real de tu comunidad",
-      "Diseña una campaña que la gente sí note",
-      "Arma un equipo que termine lo que empieza",
-      "Presenta tu proyecto y consigue apoyo"
-    ]
+    "moduleList": ["Diagnostica el problema real de tu comunidad", "Diseña una campaña que la gente sí note", "Arma un equipo que termine lo que empieza", "Presenta tu proyecto y consigue apoyo"]
   },
   {
     "id": "c4",
@@ -73,18 +95,18 @@
     "cat": "sost",
     "catLabel": "Sostenibilidad",
     "duration": "5 módulos",
+    "durationType": "modules",
     "modules": 5,
-    "status": "Borrador",
-    "students": 0,
-    "price": 0,
+    "status": "Cupo lleno",
+    "publishState": "closed",
+    "modality": "presencial",
+    "place": "Planta industrial ELSI, Zona Norte",
+    "students": 40,
+    "price": 1500,
+    "priceLabel": "Inscripción",
+    "certificateType": "Constancia de habilidades",
     "description": "Estrategias prácticas para reducir, reciclar y gestionar residuos en procesos industriales.",
-    "moduleList": [
-      "Diagnostica dónde se genera más residuo",
-      "Reduce residuo desde el origen",
-      "Diseña tu logística inversa",
-      "Define los indicadores que sí importan",
-      "Aplica un caso de éxito real a tu planta"
-    ]
+    "moduleList": ["Diagnostica dónde se genera más residuo", "Reduce residuo desde el origen", "Diseña tu logística inversa", "Define los indicadores que sí importan", "Aplica un caso de éxito real a tu planta"]
   },
   {
     "id": "c5",
@@ -94,19 +116,16 @@
     "cat": "norm",
     "catLabel": "Normatividad",
     "duration": "6 módulos",
+    "durationType": "modules",
     "modules": 6,
-    "status": "Borrador",
+    "status": "Próximo",
+    "publishState": "upcoming",
+    "modality": "online",
     "students": 0,
     "price": 0,
+    "certificateType": "Constancia de participación",
     "description": "Todo lo que una organización necesita saber para tramitar y mantener sus permisos ambientales.",
-    "moduleList": [
-      "Identifica qué permisos necesitas",
-      "Redacta tu manifiesto de impacto",
-      "Evita los errores más comunes en trámites",
-      "Planea tus renovaciones a tiempo",
-      "Anticipa los riesgos que retrasan un permiso",
-      "Verifica tu expediente con un checklist final"
-    ]
+    "moduleList": ["Identifica qué permisos necesitas", "Redacta tu manifiesto de impacto", "Evita los errores más comunes en trámites", "Planea tus renovaciones a tiempo", "Anticipa los riesgos que retrasan un permiso", "Verifica tu expediente con un checklist final"]
   },
   {
     "id": "c6",
@@ -116,16 +135,15 @@
     "cat": "hab",
     "catLabel": "Habilidades ambientales",
     "duration": "4 módulos",
+    "durationType": "modules",
     "modules": 4,
-    "status": "Borrador",
+    "status": "Fecha por confirmar",
+    "publishState": "pending",
+    "modality": "online",
     "students": 0,
     "price": 0,
+    "certificateType": "Constancia de participación",
     "description": "Cómo comunicar los esfuerzos de sostenibilidad de tu organización de forma clara y creíble.",
-    "moduleList": [
-      "Cuenta tu historia de sostenibilidad sin sonar falso",
-      "Escribe un reporte que la gente lea completo",
-      "Diseña campañas para redes que generen confianza",
-      "Evita las señales de greenwashing en tu comunicación"
-    ]
+    "moduleList": ["Cuenta tu historia de sostenibilidad sin sonar falso", "Escribe un reporte que la gente lea completo", "Diseña campañas para redes que generen confianza", "Evita las señales de greenwashing en tu comunicación"]
   }
 ]
