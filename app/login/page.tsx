@@ -127,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--primary)] bg-[var(--primary)] px-4 text-[12px] font-extrabold text-[var(--text)] transition-[background-color,border-color,color,transform] duration-[var(--motion-fast)] pointer-fine:hover:border-[var(--accent)] pointer-fine:hover:bg-[var(--accent)] pointer-fine:hover:text-white active:scale-[.98] disabled:cursor-wait disabled:opacity-60"
+          className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--primary-hover)] bg-[var(--primary-hover)] px-4 text-[12px] font-extrabold text-white transition-[background-color,border-color,color,transform] duration-[var(--motion-fast)] pointer-fine:hover:border-[var(--accent)] pointer-fine:hover:bg-[var(--accent)] pointer-fine:hover:text-white active:scale-[.98] disabled:cursor-wait disabled:opacity-60"
           type="submit"
           disabled={loading}
         >
