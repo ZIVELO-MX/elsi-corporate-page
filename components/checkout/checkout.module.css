@@ -1,0 +1,793 @@
+.checkoutPage {
+  min-width: 0;
+  background: var(--bg);
+  padding: clamp(2rem, 5vw, 4.5rem) 1.25rem clamp(4rem, 8vw, 7rem);
+}
+
+.checkoutShell {
+  width: min(100%, 68rem);
+  margin-inline: auto;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.backLink {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.backLink svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pageHeading {
+  max-width: 40rem;
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.pageHeading h1 {
+  margin: 0;
+  font-size: clamp(2rem, 1.6rem + 1.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.pageHeading p {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.checkoutGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  grid-template-areas: "summary payment";
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+.summaryCard,
+.paymentCard {
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.summaryCard {
+  position: sticky;
+  top: calc(var(--header-height) + 1.5rem);
+  grid-area: summary;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.summaryTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.summaryTopline svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--primary-hover);
+}
+
+.summaryCard h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 1rem + 0.45vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+}
+
+.courseMeta {
+  margin: 0.4rem 0 1.4rem;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.courseDetails {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem 0;
+  border-block: 1px solid var(--border);
+}
+
+.courseDetails div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.courseDetails dt,
+.courseDetails dd {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.courseDetails dt {
+  color: var(--text-muted);
+}
+
+.courseDetails dd {
+  font-weight: 800;
+  text-align: right;
+}
+
+.totalBlock {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 0;
+}
+
+.totalBlock > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.totalBlock span {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.totalBlock small {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+}
+
+.totalBlock strong {
+  font-family: var(--font-sora), sans-serif;
+  font-size: 1.65rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.securityNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  color: var(--secondary-foreground);
+}
+
+.securityNote svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1rem;
+  flex: none;
+}
+
+.securityNote p {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.paymentCard {
+  grid-area: payment;
+  min-height: 32rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.statePanel,
+.resultPanel {
+  animation: state-appear 180ms var(--ease-out) both;
+}
+
+.panelHeading {
+  margin-bottom: 1.75rem;
+}
+
+.stepLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 900;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.panelHeading h2,
+.resultPanel h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 1.15rem + 0.6vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+}
+
+.panelHeading p,
+.resultPanel > p {
+  max-width: 31rem;
+  margin: 0.6rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.buyerForm {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field label,
+.demoControls label {
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.field input,
+.demoControls select {
+  width: 100%;
+  min-height: 2.85rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+
+.field input[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+.fieldHint,
+.fieldError {
+  min-height: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.fieldHint {
+  color: var(--text-muted);
+}
+
+.fieldError {
+  color: var(--destructive);
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  min-height: 2.85rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 850;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out),
+    color 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out),
+    transform 100ms var(--ease-out);
+}
+
+.primaryAction {
+  width: 100%;
+  margin-top: 0.4rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0.4rem 1rem rgba(43, 45, 98, 0.14);
+}
+
+.primaryAction svg,
+.secondaryAction svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.primaryAction:active,
+.secondaryAction:active,
+.backLink:active {
+  transform: scale(0.98);
+}
+
+.primaryAction:disabled,
+.secondaryAction:disabled {
+  cursor: wait;
+  opacity: 0.64;
+}
+
+.secondaryAction {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.waitingState {
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--muted);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 750;
+}
+
+.waitingState svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--primary-hover);
+}
+
+.providerArea {
+  display: grid;
+  gap: 1rem;
+}
+
+.providerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.providerHeader > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.providerName {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 850;
+}
+
+.providerName svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--primary-hover);
+}
+
+.providerHeader small {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+}
+
+.demoBadge {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.providerPlaceholder {
+  padding: 1rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.providerMethod {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.providerMethod > svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--primary-hover);
+}
+
+.providerMethod > svg:last-child {
+  width: 1rem;
+  height: 1rem;
+  color: var(--leaf);
+}
+
+.providerMethod div {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.providerMethod strong {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.providerMethod span,
+.providerPlaceholder > p {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.providerPlaceholder > p {
+  margin: 1rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.demoControls {
+  border-block: 1px solid var(--border);
+}
+
+.demoControls summary {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  cursor: pointer;
+  list-style: none;
+}
+
+.demoControls summary::-webkit-details-marker {
+  display: none;
+}
+
+.demoControls summary svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 160ms var(--ease-out);
+}
+
+.demoControls[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.demoControls > div {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 1rem;
+}
+
+.providerActions,
+.resultActions {
+  display: grid;
+  grid-template-columns: auto minmax(12rem, 1fr);
+  gap: 0.75rem;
+}
+
+.providerActions .primaryAction,
+.providerActions .secondaryAction,
+.resultActions .primaryAction,
+.resultActions .secondaryAction {
+  width: auto;
+  margin: 0;
+}
+
+.resultPanel {
+  display: flex;
+  min-height: 27rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.resultIcon {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-hover);
+}
+
+.resultIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.resultPanel[data-result="declined"] .resultIcon,
+.resultPanel[data-result="unavailable"] .resultIcon {
+  background: #fdf2f2;
+  color: var(--destructive);
+}
+
+.orderReference {
+  display: grid;
+  width: 100%;
+  gap: 0.2rem;
+  margin-top: 1.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+}
+
+.orderReference span {
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.orderReference code {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.resultActions {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+@keyframes state-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .backLink:hover {
+    color: var(--primary-hover) !important;
+    transform: translateX(-0.18rem);
+  }
+
+  .primaryAction:hover {
+    border-color: #1e1f45;
+    background: #1e1f45;
+    box-shadow: 0 0.55rem 1.25rem rgba(43, 45, 98, 0.2);
+  }
+
+  .secondaryAction:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary-hover);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .checkoutPage {
+    padding-top: 2rem;
+  }
+
+  .pageHeading {
+    margin-bottom: 1.5rem;
+  }
+
+  .checkoutGrid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "summary"
+      "payment";
+    gap: 1rem;
+  }
+
+  .summaryCard {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.2rem 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .summaryTopline {
+    grid-column: 1 / -1;
+    margin-bottom: 0.65rem;
+  }
+
+  .summaryCard h2 {
+    grid-column: 1;
+  }
+
+  .courseMeta {
+    grid-column: 1;
+    margin: 0.15rem 0 0;
+  }
+
+  .courseDetails {
+    display: none;
+  }
+
+  .totalBlock {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    padding: 0;
+  }
+
+  .totalBlock > div {
+    display: none;
+  }
+
+  .securityNote {
+    grid-column: 1 / -1;
+    margin-top: 0.75rem;
+    padding-block: 0.65rem;
+  }
+}
+
+@media (max-width: 34rem) {
+  .checkoutPage {
+    padding-top: 1.25rem;
+    padding-inline: 1rem;
+  }
+
+  .backLink {
+    min-height: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pageHeading {
+    margin-bottom: 1.25rem;
+  }
+
+  .pageHeading h1 {
+    font-size: 1.85rem;
+  }
+
+  .pageHeading p {
+    margin-top: 0.45rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .summaryCard {
+    gap: 0.1rem 0.75rem;
+    padding: 1rem;
+  }
+
+  .summaryTopline {
+    margin-bottom: 0.5rem;
+  }
+
+  .summaryCard h2 {
+    font-size: 1rem;
+  }
+
+  .courseMeta {
+    font-size: 0.75rem;
+  }
+
+  .totalBlock strong {
+    font-size: 1.35rem;
+  }
+
+  .securityNote {
+    display: none;
+  }
+
+  .paymentCard {
+    min-height: 0;
+    padding: 1.25rem;
+  }
+
+  .panelHeading {
+    margin-bottom: 1.25rem;
+  }
+
+  .panelHeading p,
+  .resultPanel > p {
+    margin-top: 0.35rem;
+  }
+
+  .buyerForm {
+    gap: 0.75rem;
+  }
+
+  .providerActions,
+  .resultActions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .providerActions .secondaryAction {
+    order: 2;
+  }
+
+  .totalBlock {
+    align-items: baseline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statePanel,
+  .resultPanel {
+    animation: none;
+  }
+
+  .backLink,
+  .primaryAction,
+  .secondaryAction,
+  .demoControls summary svg {
+    transition-duration: 0.01ms;
+  }
+
+  .primaryAction:active,
+  .secondaryAction:active,
+  .backLink:active {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .summaryCard,
+  .paymentCard,
+  .providerPlaceholder,
+  .field input,
+  .demoControls select {
+    border-color: var(--text-muted);
+  }
+
+  .securityNote,
+  .resultIcon {
+    outline: 1px solid currentColor;
+  }
+}

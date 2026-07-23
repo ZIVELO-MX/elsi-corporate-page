@@ -5,7 +5,7 @@ import { captureTargets, prepareCapture } from "./mission-screenshot-targets";
 
 const API_ORIGIN = "https://zipform.zivelo.dev";
 const MAX_FILE_SIZE = 6_291_456;
-const EXPECTED_CAPTURE_COUNT = 16;
+const EXPECTED_CAPTURE_COUNT = 17;
 
 type LocalCapture = {
   key: string;

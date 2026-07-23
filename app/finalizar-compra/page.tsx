@@ -1,25 +1,12 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+import { CheckoutExperience } from "@/components/checkout/checkout-experience";
+import { CHECKOUT_COURSE } from "@/lib/payments";
 
-export default function CheckoutUnavailablePage() {
-  return (
-    <main className="unavailable-state">
-      <div className="unavailable-state-card">
-        <span className="section-kicker">Inscripción</span>
-        <h1>La compra en línea aún no está disponible.</h1>
-        <p>
-          Puedes revisar el programa de cada curso y escribirnos para confirmar disponibilidad.
-        </p>
-        <div className="unavailable-state-actions">
-          <Button asChild variant="primary">
-            <Link href="/cursos">Explorar cursos</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/contacto">Solicitar información <ArrowRight data-icon="inline-end" /></Link>
-          </Button>
-        </div>
-      </div>
-    </main>
-  );
+export const metadata: Metadata = {
+  title: "Finalizar inscripción | ELSI",
+  description: "Confirma tu inscripción y continúa al pago seguro.",
+};
+
+export default function CheckoutPage() {
+  return <CheckoutExperience course={CHECKOUT_COURSE} />;
 }
