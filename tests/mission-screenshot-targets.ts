@@ -47,6 +47,7 @@ export const captureTargets: CaptureTarget[] = [
   { key: "about-values", title: "Nosotros — Misión, visión y valores", path: "/nosotros", selector: section("Nosotros / Misión visión valores") },
   { key: "contact-form", title: "Contacto — Formulario", path: "/contacto", selector: section("Contacto / Formulario") },
   { key: "login", title: "Autenticación — Inicio de sesión", path: "/login", selector: "main" },
+  { key: "checkout-payment", title: "Pago — Checkout Conekta", path: "/checkout", selector: section("Pago / Checkout Conekta") },
   { key: "profile-admin", title: "Perfil — Administrador autenticado", selector: "main", prepare: prepareAdminProfile },
   { key: "admin-dashboard", title: "Administración — Dashboard", selector: "main", prepare: prepareAdminDashboard },
 ];

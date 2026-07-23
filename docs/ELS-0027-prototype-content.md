@@ -32,7 +32,7 @@ Los archivos fuente de `raw_images/` permanecen ignorados. Sólo los derivados W
 | Alias | Canónica | Comportamiento |
 | --- | --- | --- |
 | `/shop`, `/tienda` | `/cursos` | Redirect permanente |
-| `/checkout` | `/finalizar-compra` | Redirect permanente a un estado honesto y recuperable |
+| `/finalizar-compra` | `/checkout` | Redirect permanente al checkout canónico |
 | `/account`, `/mi-cuenta` | `/profile` | Redirect permanente |
 | `/login` | `/login` | Acceso canónico |
 

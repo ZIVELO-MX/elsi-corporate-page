@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/shop", destination: "/cursos", permanent: true },
       { source: "/tienda", destination: "/cursos", permanent: true },
-      { source: "/checkout", destination: "/finalizar-compra", permanent: true },
+      { source: "/finalizar-compra", destination: "/checkout", permanent: true },
       { source: "/account", destination: "/profile", permanent: true },
       { source: "/mi-cuenta", destination: "/profile", permanent: true },
     ];
