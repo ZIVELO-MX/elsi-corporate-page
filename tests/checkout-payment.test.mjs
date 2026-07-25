@@ -93,6 +93,19 @@ test("checkout UI keeps sensitive fields outside ELSI and announces states", () 
   assert.doesNotMatch(styles, /transition:\s*all|ease-in|scale\(0\)|bounce|confetti/i);
   assert.match(handoff, /useExternalSubmit/);
   assert.match(handoff, /webhook firmado e idempotente/);
+  assert.match(
+    handoff,
+    /"allowed_payment_methods": \["card", "apple_pay"\]/,
+  );
+  assert.match(handoff, /El enum confirmado es `apple_pay`/);
+  assert.match(handoff, /no representa precio, fecha, disponibilidad ni/i);
+  assert.match(handoff, /WebKit no equivale a Safari con VoiceOver/);
+  assert.match(styles, /animation: state-appear 180ms var\(--ease-out\)/);
+  assert.match(styles, /transform 100ms var\(--ease-out\)/);
+  assert.match(
+    styles,
+    /from \{\s+opacity: 0;\s+transform: translateY\(0\.25rem\)/,
+  );
   assert.doesNotMatch(
     `${checkout}\n${handoff}`,
     /(?:private|secret)[_-]?key\s*[:=]\s*["'][^"']+/i,
