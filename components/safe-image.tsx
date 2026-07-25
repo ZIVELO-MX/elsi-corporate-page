@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 type SafeImageProps = {
   src: string;
@@ -13,11 +13,14 @@ type SafeImageProps = {
   loading?: "eager" | "lazy";
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
+  fallback?: ReactNode;
 };
 
-export function SafeImage({ src, alt, className, style, width = 1600, height = 900, loading = "lazy", fetchPriority = "auto", sizes }: SafeImageProps) {
+export function SafeImage({ src, alt, className, style, width = 1600, height = 900, loading = "lazy", fetchPriority = "auto", sizes, fallback }: SafeImageProps) {
   const [hidden, setHidden] = useState(false);
   if (hidden) {
+    if (fallback) return fallback;
+
     return (
       <div
         className={["image-fallback", className].filter(Boolean).join(" ")}

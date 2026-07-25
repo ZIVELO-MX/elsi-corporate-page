@@ -25,7 +25,7 @@ test("user menu motion stays anchored, symmetric, and reduced-motion safe", () =
   assert.match(styles, /transform-origin: var\(--radix-dropdown-menu-content-transform-origin\)/);
   assert.match(styles, /header-user-menu-in 200ms/);
   assert.match(styles, /header-user-menu-out 140ms/);
-  assert.match(styles, /\.mobile-navigation-actions \.mobile-navigation-cta \{ background: var\(--primary\)/);
+  assert.match(styles, /\.mobile-navigation-actions \.mobile-navigation-cta \{ background: var\(--primary-hover\)/);
   assert.match(styles, /@keyframes header-user-menu-in[\s\S]*translateY\(-5px\) scale\(\.96\)[\s\S]*translateY\(0\) scale\(1\)/);
   assert.match(styles, /@keyframes header-user-menu-out[\s\S]*translateY\(0\) scale\(1\)[\s\S]*translateY\(-5px\) scale\(\.96\)/);
   assert.match(styles, /prefers-reduced-motion: reduce[\s\S]*\.header-user-popover\[data-state\] \{ animation: none; \}/);

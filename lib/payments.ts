@@ -31,6 +31,7 @@ export type CheckoutCourse = {
   amount: number;
   currency: "MXN";
   priceLabel: string;
+  contentStatus: "fixture";
 };
 
 export type PaymentBuyer = {
@@ -97,7 +98,14 @@ export const CHECKOUT_COURSE: CheckoutCourse = {
   amount: 55_000,
   currency: "MXN",
   priceLabel: "Recuperación",
+  contentStatus: "fixture",
 };
+
+export function getCheckoutCourseBySlug(
+  slug: string | undefined,
+): CheckoutCourse | null {
+  return slug === CHECKOUT_COURSE.slug ? CHECKOUT_COURSE : null;
+}
 
 export function formatPaymentAmount(
   amount: number,

@@ -11,6 +11,7 @@ const {
   PAYMENT_STATES,
   createMockPaymentGateway,
   formatPaymentAmount,
+  getCheckoutCourseBySlug,
   validateBuyer,
 } = await import("../lib/payments.ts");
 
@@ -28,7 +29,14 @@ test("payment contract exposes every checkout state and canonical amount", () =>
   ]);
   assert.equal(CHECKOUT_COURSE.amount, 55_000);
   assert.equal(CHECKOUT_COURSE.currency, "MXN");
+  assert.equal(CHECKOUT_COURSE.contentStatus, "fixture");
   assert.match(formatPaymentAmount(CHECKOUT_COURSE.amount, "MXN"), /550/);
+  assert.equal(
+    getCheckoutCourseBySlug("manejo-integral-de-residuos"),
+    CHECKOUT_COURSE,
+  );
+  assert.equal(getCheckoutCourseBySlug(undefined), null);
+  assert.equal(getCheckoutCourseBySlug("curso-no-existente"), null);
 });
 
 test("buyer validation normalizes valid data and rejects invalid fields", () => {
@@ -75,6 +83,8 @@ test("checkout UI keeps sensitive fields outside ELSI and announces states", () 
   assert.match(checkout, /aria-live="polite"/);
   assert.match(checkout, /aria-invalid=/);
   assert.match(checkout, /Prototipo visual · no realiza cargos/);
+  assert.match(checkout, /Aún no seleccionas un curso/);
+  assert.match(checkout, /fixtures de integración/);
   assert.match(checkout, /No ingreses datos reales/);
   assert.doesNotMatch(checkout, /name="(?:card|pan|cvc|expiry)"/i);
   assert.doesNotMatch(checkout, /ApplePay|apple-pay-button|/);
