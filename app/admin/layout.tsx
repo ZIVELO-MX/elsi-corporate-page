@@ -7,7 +7,7 @@ import { AdminDataProvider } from "@/lib/admin-data";
 import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Menu, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Inbox, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/admin/inscripciones", label: "Inscripciones", Icon: ClipboardList },
   { href: "/admin/ventas", label: "Ventas", Icon: Receipt },
   { href: "/admin/contenido", label: "Contenido", Icon: FileText },
+  { href: "/admin/contacto", label: "Contacto", Icon: Inbox },
 ];
 
 const mobileBarBtnStyle: React.CSSProperties = {

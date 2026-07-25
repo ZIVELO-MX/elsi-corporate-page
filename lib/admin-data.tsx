@@ -68,6 +68,19 @@ export type PageSection = {
   active: boolean;
 };
 
+export type LeadStatus = "nuevo" | "atendido";
+
+export type Lead = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  courseSlug?: string;
+  createdAt: string;
+  status: LeadStatus;
+};
+
 const INITIAL_COURSES: AdminCourse[] = [
   { id: "c1", title: "Fundamentos de Educación Ambiental", category: "Sostenibilidad", slug: "fundamentos-de-educacion-ambiental", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 184, createdAt: "2025-01-15",
     synopsis: "Introducción a los principios de la educación ambiental aplicada a contextos comunitarios y escolares.",
@@ -136,6 +149,13 @@ const INITIAL_SECTIONS: PageSection[] = [
   { id: "sec-7", label: "CTA final", key: "cta", content: "Únete a la comunidad de líderes ambientales.", active: true },
 ];
 
+// Example fixtures (validation prototype) — not real submissions.
+const INITIAL_LEADS: Lead[] = [
+  { id: "l1", name: "Laura Méndez", email: "laura.mendez@example.com", phone: "477-123-4567", message: "Me interesa el curso DC-3 para mi equipo de planta. ¿Tienen fechas en agosto?", courseSlug: "manejo-integral-de-residuos", createdAt: "2026-07-22", status: "nuevo" },
+  { id: "l2", name: "Diego Ramírez", email: "diego.ramirez@example.com", phone: "477-987-6543", message: "Quisiera información sobre cupos y modalidad de los cursos en línea.", createdAt: "2026-07-20", status: "nuevo" },
+  { id: "l3", name: "Sofía Herrera", email: "sofia.herrera@example.com", phone: "461-222-3344", message: "¿El curso de comunicación de sostenibilidad entrega constancia?", courseSlug: "comunicacion-de-sostenibilidad", createdAt: "2026-07-18", status: "atendido" },
+];
+
 type AdminData = {
   loading: boolean;
   courses: AdminCourse[];
@@ -143,6 +163,7 @@ type AdminData = {
   enrollments: Enrollment[];
   sales: Sale[];
   sections: PageSection[];
+  leads: Lead[];
   addCourse: (c: Omit<AdminCourse, "id" | "students" | "createdAt">) => void;
   updateCourse: (id: string, data: Partial<AdminCourse>) => void;
   toggleCourse: (id: string) => void;
@@ -152,6 +173,7 @@ type AdminData = {
   markCertificateAvailable: (id: string) => void;
   addSale: (userId: string, courseId: string, amount: number) => void;
   updateSection: (id: string, data: Partial<PageSection>) => void;
+  markLeadAttended: (id: string) => void;
   getUserName: (id: string) => string;
   getCourseName: (id: string) => string;
 };
@@ -164,6 +186,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
   const [sales, setSales] = useState<Sale[]>(INITIAL_SALES);
   const [sections, setSections] = useState<PageSection[]>(INITIAL_SECTIONS);
+  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
   // Simulated initial fetch: the provider mounts once for the whole panel, so the
   // skeleton shows on first entry and navigation stays instant afterward. When the
   // Supabase data layer lands, this flag becomes the real query loading state.
@@ -223,6 +246,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     setSections(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   }, []);
 
+  const markLeadAttended = useCallback((id: string) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "atendido" } : l));
+  }, []);
+
   const getUserName = useCallback((id: string) => {
     return INITIAL_USERS.find(u => u.id === id)?.name ?? "Desconocido";
   }, []);
@@ -232,8 +259,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName }),
-    [loading, courses, users, enrollments, sales, sections, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, getUserName, getCourseName],
+    () => ({ loading, courses, users, enrollments, sales, sections, leads, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, getUserName, getCourseName }),
+    [loading, courses, users, enrollments, sales, sections, leads, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, getUserName, getCourseName],
   );
 
   return (
