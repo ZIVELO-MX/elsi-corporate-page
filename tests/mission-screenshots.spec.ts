@@ -12,7 +12,7 @@ import {
 } from "./mission-screenshot-targets";
 
 const API_ORIGIN = "https://zipform.zivelo.dev";
-const SCREENSHOT_GROUP_PREFIX = "elsi-pr";
+const SCREENSHOT_GROUP_KEY = "Screenshots";
 const MAX_FILE_SIZE = 6_291_456;
 
 type LocalCapture = {
@@ -85,15 +85,13 @@ async function resolveMissionId(token: string): Promise<string> {
 async function publishCaptures(files: LocalCapture[]) {
   const token = requiredEnv("ZIPFORM_TOKEN");
   const missionId = await resolveMissionId(token);
-  const prNumber = requiredEnv("PR_NUMBER");
   const sourceRevision = requiredEnv("SOURCE_REVISION");
 
-  if (!/^\d+$/.test(prNumber)) throw new Error("PR_NUMBER must contain only digits");
   if (!/^[0-9a-fA-F]{40}$/.test(sourceRevision)) {
     throw new Error("SOURCE_REVISION must be the full 40-character commit SHA");
   }
 
-  const groupKey = `${SCREENSHOT_GROUP_PREFIX}-${prNumber}`;
+  const groupKey = SCREENSHOT_GROUP_KEY;
   const endpoint = `/api/v1/missions/${encodeURIComponent(missionId)}/attachments`;
   const prepared = await zipformRequest<PreparedBatch>(endpoint, token, {
     method: "POST",

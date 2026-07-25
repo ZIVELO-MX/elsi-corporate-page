@@ -18,7 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PR_NUMBER: ${{ github.event.pull_request.number }}
       SOURCE_REVISION: ${{ github.event.pull_request.head.sha }}
     steps:
       - uses: actions/checkout@v4

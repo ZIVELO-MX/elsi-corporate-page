@@ -41,12 +41,12 @@ test("the screenshot workflow uses structured PR metadata and idempotent comment
   assert.doesNotMatch(workflow, /TLOZ_MISSION_ID/);
 });
 
-test("screenshot storage uses a descriptive PR group and respects Zipform's file limit", () => {
+test("screenshot storage uses the generic group and respects Zipform's file limit", () => {
   const spec = read("tests/mission-screenshots.spec.ts");
   const targets = read("tests/mission-screenshot-targets.ts");
 
-  assert.match(spec, /SCREENSHOT_GROUP_PREFIX = "elsi-pr"/);
-  assert.match(spec, /const groupKey = `\$\{SCREENSHOT_GROUP_PREFIX\}-\$\{prNumber\}`/);
+  assert.match(spec, /SCREENSHOT_GROUP_KEY = "Screenshots"/);
+  assert.match(spec, /const groupKey = SCREENSHOT_GROUP_KEY/);
   assert.match(targets, /MAX_CAPTURE_COUNT = 20/);
   assert.match(spec, /toBeLessThanOrEqual\(MAX_CAPTURE_COUNT\)/);
 });
