@@ -7,10 +7,12 @@ import {
   captureProfiles,
   getCaptureProfiles,
   getCaptureTargets,
+  MAX_CAPTURE_COUNT,
   prepareCapture,
 } from "./mission-screenshot-targets";
 
 const API_ORIGIN = "https://zipform.zivelo.dev";
+const SCREENSHOT_GROUP_PREFIX = "elsi-pr";
 const MAX_FILE_SIZE = 6_291_456;
 
 type LocalCapture = {
@@ -91,7 +93,7 @@ async function publishCaptures(files: LocalCapture[]) {
     throw new Error("SOURCE_REVISION must be the full 40-character commit SHA");
   }
 
-  const groupKey = `pr-${prNumber}`;
+  const groupKey = `${SCREENSHOT_GROUP_PREFIX}-${prNumber}`;
   const endpoint = `/api/v1/missions/${encodeURIComponent(missionId)}/attachments`;
   const prepared = await zipformRequest<PreparedBatch>(endpoint, token, {
     method: "POST",
@@ -174,6 +176,7 @@ test("capture and optionally publish the TLOZ mission screenshot snapshot", asyn
 
   expect(captureProfileNames).toEqual(["public", "account", "admin"]);
   expect(captureTargets).toHaveLength(expectedCaptureCount);
+  expect(captureTargets.length).toBeLessThanOrEqual(MAX_CAPTURE_COUNT);
   expect(new Set(keys).size).toBe(expectedCaptureCount);
 
   const outputDirectory = testInfo.outputPath("screenshots");

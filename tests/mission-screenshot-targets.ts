@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 export const CAPTURE_PROFILE_VERSION = 1;
+export const MAX_CAPTURE_COUNT = 20;
 export const captureProfileNames = ["public", "account", "admin"] as const;
 
 export type CaptureProfileName = (typeof captureProfileNames)[number];

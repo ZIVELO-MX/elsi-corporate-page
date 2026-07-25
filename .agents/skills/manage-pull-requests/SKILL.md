@@ -28,6 +28,7 @@ Make exactly one decision before finalizing the PR description:
 - When the change belongs to a mission, document it as `Misión ID: ELS-XXXX`.
 - For relevant UI changes, check `Requiere capturas`, provide the mission ID, and list one or more profiles: `public`, `account`, or `admin`.
 - For changes without relevant UI evidence, check `No requiere capturas`. Keep the mission reference when one exists.
+- Keep the selected capture set at or below the Zipform limit of 20 files. Published PR groups use the stable name `elsi-pr-{PR_NUMBER}`.
 
 Select exactly one screenshot checkbox. After creating or editing the PR, read the persisted body and confirm that the workflow will take the intended path.
 

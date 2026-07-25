@@ -41,6 +41,16 @@ test("the screenshot workflow uses structured PR metadata and idempotent comment
   assert.doesNotMatch(workflow, /TLOZ_MISSION_ID/);
 });
 
+test("screenshot storage uses a descriptive PR group and respects Zipform's file limit", () => {
+  const spec = read("tests/mission-screenshots.spec.ts");
+  const targets = read("tests/mission-screenshot-targets.ts");
+
+  assert.match(spec, /SCREENSHOT_GROUP_PREFIX = "elsi-pr"/);
+  assert.match(spec, /const groupKey = `\$\{SCREENSHOT_GROUP_PREFIX\}-\$\{prNumber\}`/);
+  assert.match(targets, /MAX_CAPTURE_COUNT = 20/);
+  assert.match(spec, /toBeLessThanOrEqual\(MAX_CAPTURE_COUNT\)/);
+});
+
 test("basic CI validates every pull request without forcing a screenshot build", () => {
   const workflow = read(".github/workflows/ci.yml");
 
