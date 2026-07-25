@@ -81,6 +81,16 @@ export type Lead = {
   status: LeadStatus;
 };
 
+export type Testimonial = {
+  id: string;
+  authorName: string;
+  authorRole: string;
+  quote: string;
+  avatarUrl?: string;
+  courseId?: string;
+  active: boolean;
+};
+
 const INITIAL_COURSES: AdminCourse[] = [
   { id: "c1", title: "Fundamentos de Educación Ambiental", category: "Sostenibilidad", slug: "fundamentos-de-educacion-ambiental", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 184, createdAt: "2025-01-15",
     synopsis: "Introducción a los principios de la educación ambiental aplicada a contextos comunitarios y escolares.",
@@ -156,6 +166,13 @@ const INITIAL_LEADS: Lead[] = [
   { id: "l3", name: "Sofía Herrera", email: "sofia.herrera@example.com", phone: "461-222-3344", message: "¿El curso de comunicación de sostenibilidad entrega constancia?", courseSlug: "comunicacion-de-sostenibilidad", createdAt: "2026-07-18", status: "atendido" },
 ];
 
+// Example fixtures (validation prototype) — placeholder, NOT real reviews (ELS-0024).
+const INITIAL_TESTIMONIALS: Testimonial[] = [
+  { id: "t1", authorName: "Ejemplo · Docente", authorRole: "Docente de secundaria", quote: "Testimonio de ejemplo: el taller me dio herramientas concretas para llevar la educación ambiental al aula.", courseId: "c1", active: true },
+  { id: "t2", authorName: "Ejemplo · Responsable ambiental", authorRole: "Responsable de cumplimiento", quote: "Testimonio de ejemplo: entendimos qué normas aplican a la empresa y cómo documentarlas.", courseId: "c2", active: true },
+  { id: "t3", authorName: "Ejemplo · Estudiante", authorRole: "Estudiante universitario", quote: "Testimonio de ejemplo: pasé de la idea a un proyecto ambiental real en el campus.", active: false },
+];
+
 type AdminData = {
   loading: boolean;
   courses: AdminCourse[];
@@ -164,6 +181,7 @@ type AdminData = {
   sales: Sale[];
   sections: PageSection[];
   leads: Lead[];
+  testimonials: Testimonial[];
   addCourse: (c: Omit<AdminCourse, "id" | "students" | "createdAt">) => void;
   updateCourse: (id: string, data: Partial<AdminCourse>) => void;
   toggleCourse: (id: string) => void;
@@ -174,6 +192,10 @@ type AdminData = {
   addSale: (userId: string, courseId: string, amount: number) => void;
   updateSection: (id: string, data: Partial<PageSection>) => void;
   markLeadAttended: (id: string) => void;
+  addTestimonial: (t: Omit<Testimonial, "id">) => void;
+  updateTestimonial: (id: string, data: Partial<Testimonial>) => void;
+  toggleTestimonial: (id: string) => void;
+  deleteTestimonial: (id: string) => void;
   getUserName: (id: string) => string;
   getCourseName: (id: string) => string;
 };
@@ -187,6 +209,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [sales, setSales] = useState<Sale[]>(INITIAL_SALES);
   const [sections, setSections] = useState<PageSection[]>(INITIAL_SECTIONS);
   const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
   // Simulated initial fetch: the provider mounts once for the whole panel, so the
   // skeleton shows on first entry and navigation stays instant afterward. When the
   // Supabase data layer lands, this flag becomes the real query loading state.
@@ -250,6 +273,22 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "atendido" } : l));
   }, []);
 
+  const addTestimonial = useCallback((t: Omit<Testimonial, "id">) => {
+    setTestimonials(prev => [...prev, { ...t, id: "t" + Date.now() }]);
+  }, []);
+
+  const updateTestimonial = useCallback((id: string, data: Partial<Testimonial>) => {
+    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
+  }, []);
+
+  const toggleTestimonial = useCallback((id: string) => {
+    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, active: !t.active } : t));
+  }, []);
+
+  const deleteTestimonial = useCallback((id: string) => {
+    setTestimonials(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const getUserName = useCallback((id: string) => {
     return INITIAL_USERS.find(u => u.id === id)?.name ?? "Desconocido";
   }, []);
@@ -259,8 +298,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ loading, courses, users, enrollments, sales, sections, leads, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, getUserName, getCourseName }),
-    [loading, courses, users, enrollments, sales, sections, leads, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, getUserName, getCourseName],
+    () => ({ loading, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName }),
+    [loading, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName],
   );
 
   return (
