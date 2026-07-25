@@ -48,13 +48,12 @@ export default function Home() {
 
           <figure className="home-hero-media">
             <SafeImage
-              src="/hero-bg.jpg"
-              alt="Paisaje boscoso junto a un lago, territorio natural que enmarca el trabajo ambiental de ELSI"
-              width={1600}
-              height={900}
-              loading="eager"
-              fetchPriority="high"
-              sizes="(max-width: 800px) 100vw, 54vw"
+              src={siteImages.hero.src}
+              alt={siteImages.hero.alt}
+              width={siteImages.hero.width}
+              height={siteImages.hero.height}
+              preload
+              sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 54vw, 734px"
             />
             <figcaption>El territorio como punto de partida para aprender y actuar.</figcaption>
           </figure>
@@ -93,9 +92,9 @@ export default function Home() {
             <SafeImage
               src={siteImages.story.src}
               alt={siteImages.story.alt}
-              width={800}
-              height={600}
-              sizes="(max-width: 800px) 100vw, 48vw"
+              width={siteImages.story.width}
+              height={siteImages.story.height}
+              sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 48vw, 607px"
             />
             <figcaption>Archivo ELSI · Bee Blue, origen estudiantil del instituto.</figcaption>
           </figure>
@@ -131,7 +130,7 @@ export default function Home() {
                   <CourseMedia
                     course={primaryCourse}
                     variant="feature"
-                    sizes="(max-width: 800px) 100vw, 58vw"
+                    sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1024px) 60vw, 520px"
                   />
                 </div>
                 <div className="home-course-feature-body">

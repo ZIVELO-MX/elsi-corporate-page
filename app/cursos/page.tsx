@@ -34,7 +34,7 @@ function FeaturedCard({ course }: { course: Course }) {
         <CourseMedia
           course={course}
           variant="feature"
-          sizes="(max-width: 768px) 100vw, 52vw"
+          sizes="(max-width: 768px) calc(100vw - 40px), (max-width: 1440px) 52vw, 657px"
         />
       </div>
       <div className="flex min-w-0 flex-col p-5">
@@ -63,7 +63,7 @@ function FeaturedCard({ course }: { course: Course }) {
 
 function CompactRow({ course }: { course: Course }) {
   return (
-    <Link href={`/cursos/${course.slug}`} className="flex items-center gap-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 transition-colors hover:border-[var(--primary)]">
+    <Link href={`/cursos/${course.slug}`} className="flex items-center gap-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 transition-colors pointer-fine:hover:border-[var(--primary)] active:scale-[.99] motion-reduce:active:scale-100">
       <div className="size-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--muted)]">
         <CourseMedia course={course} variant="thumbnail" sizes="64px" />
       </div>
