@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, GraduationCap, MapPin, QrCode, UserRound } from "lucide-react";
-import { getCourseBySlug, getAllCourses, money, modalityLabel, stateMeta, publishState } from "@/lib/courses";
+import { getCourseBySlug, getAllCourses, money, modalityLabel, stateMeta, publishState, certType } from "@/lib/courses";
 import { SafeImage } from "@/components/safe-image";
 import { courseImages } from "@/lib/image-assets";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -14,7 +14,6 @@ const TONE: Record<string, string> = {
   teal: "bg-[var(--primary-light)] text-[var(--secondary-foreground)]",
   purple: "bg-[var(--accent-light)] text-[var(--accent)]",
   muted: "bg-[var(--muted)] text-[var(--text-muted)]",
-  green: "bg-[#edf3e8] text-[var(--moss)]",
 };
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -49,7 +48,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] ${TONE[m.tone]}`}>{m.label}</span>
-                {course.certificateType && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--accent)]"><GraduationCap size={11} aria-hidden="true" />Constancia {course.certificateType}</span>}
+                {course.certificateType && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--accent)]"><GraduationCap size={11} aria-hidden="true" />Constancia {certType(course)}</span>}
               </div>
               <h1 className="mt-2 font-heading text-[28px] font-bold leading-[1.08] text-[var(--text)]">{course.title}</h1>
               <p className="mt-2.5 text-[14px] leading-7 text-[var(--text-muted)] max-w-[65ch]">{course.description}</p>
@@ -68,11 +67,28 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               </dl>
 
               <Section title={course.durationType === "modules" ? "Temario" : "Contenido"}>
-                <ol className="grid gap-1.5 sm:grid-cols-2">
-                  {course.moduleList.map((t, i) => (
-                    <li key={t} className="flex items-baseline gap-2 text-[13px] text-[var(--text)]"><span className="font-heading text-[11px] font-bold text-[var(--primary-hover)]">{String(i + 1).padStart(2, "0")}</span>{t}</li>
-                  ))}
-                </ol>
+                {course.curriculum && course.curriculum.length > 0 ? (
+                  <ol className="grid gap-2.5">
+                    {course.curriculum.map((t, i) => (
+                      <li key={t.tema} className="text-[13px] text-[var(--text)]">
+                        <div className="flex items-baseline gap-2"><span className="font-heading text-[11px] font-bold text-[var(--primary-hover)]">{String(i + 1).padStart(2, "0")}</span><span className="font-semibold">{t.tema}</span></div>
+                        {t.subtemas && t.subtemas.length > 0 && (
+                          <ul className="mt-1 ml-6 grid gap-1">
+                            {t.subtemas.map((s) => (
+                              <li key={s} className="text-[12px] leading-5 text-[var(--text-muted)]">– {s}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <ol className="grid gap-1.5 sm:grid-cols-2">
+                    {course.moduleList.map((t, i) => (
+                      <li key={t} className="flex items-baseline gap-2 text-[13px] text-[var(--text)]"><span className="font-heading text-[11px] font-bold text-[var(--primary-hover)]">{String(i + 1).padStart(2, "0")}</span>{t}</li>
+                    ))}
+                  </ol>
+                )}
               </Section>
 
               {course.objectives && course.objectives.length > 0 && (
@@ -110,7 +126,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                 <QrCode size={30} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />
                 <p className="text-[11px] leading-4 text-[var(--text-muted)]">Inscripción rápida por código QR (te lo compartimos al confirmar).</p>
               </div>
-              {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {course.certificateType}</p>}
+              {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {certType(course)}</p>}
               <Link href="/cursos" style={{ color: "var(--primary-hover)" }} className="mt-4 block text-center text-[12px] font-extrabold">← Volver al catálogo</Link>
             </aside>
           </div>

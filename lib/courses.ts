@@ -1,5 +1,7 @@
 export type CourseModality = "online" | "presencial";
 export type PublishState = "draft" | "published" | "upcoming" | "closed" | "pending";
+// ELS-0013 §2.1: curriculum = tema → subtemas[]. Optional; falls back to moduleList[].
+export type CurriculumTopic = { tema: string; subtemas?: string[] };
 
 export type Course = {
   id: string;
@@ -15,6 +17,7 @@ export type Course = {
   price: number;
   description: string;
   moduleList: string[];
+  curriculum?: CurriculumTopic[];
   // Canonical model fields (ELS-0013). Optional so legacy entries still type-check.
   durationType?: "time" | "modules";
   publishState?: PublishState;
@@ -49,7 +52,7 @@ export function publishState(course: Course): PublishState {
 }
 
 // Badge label + primary CTA text per state (aligned to the approved wireframe).
-export function stateMeta(course: Course): { label: string; cta: string; tone: "teal" | "purple" | "muted" | "green" } {
+export function stateMeta(course: Course): { label: string; cta: string; tone: "teal" | "purple" | "muted" } {
   const state = publishState(course);
   const free = course.price === 0;
   switch (state) {
@@ -63,4 +66,11 @@ export function stateMeta(course: Course): { label: string; cta: string; tone: "
 
 export function modalityLabel(course: Course): string {
   return course.modality === "presencial" ? "Presencial" : "En línea";
+}
+
+// Certificate descriptor with any redundant leading "Constancia " stripped, so
+// "Constancia {certType()}" / "Incluye constancia {certType()}" never double the word.
+// Data is inconsistent: some entries store "DC-3", others "Constancia de participación".
+export function certType(course: Course): string {
+  return (course.certificateType ?? "").replace(/^constancia\s+/i, "");
 }

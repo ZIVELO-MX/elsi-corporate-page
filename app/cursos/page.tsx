@@ -19,7 +19,6 @@ const TONE: Record<string, string> = {
   teal: "bg-[var(--primary-light)] text-[var(--secondary-foreground)]",
   purple: "bg-[var(--accent-light)] text-[var(--accent)]",
   muted: "bg-[var(--muted)] text-[var(--text-muted)]",
-  green: "bg-[#edf3e8] text-[var(--moss)]",
 };
 
 function StateBadge({ course }: { course: Course }) {
