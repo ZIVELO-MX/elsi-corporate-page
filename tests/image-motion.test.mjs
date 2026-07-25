@@ -154,6 +154,7 @@ test("static surfaces stay still and loaders retain accessible status", () => {
 test("motion and surface roles preserve system preferences", () => {
   const styles = read("app/globals.css");
   const checkoutStyles = read("components/checkout/checkout.module.css");
+  const dialog = read("components/ui/dialog.tsx");
 
   assert.match(styles, /--surface-base:/);
   assert.match(styles, /--surface-editorial:/);
@@ -164,4 +165,10 @@ test("motion and surface roles preserve system preferences", () => {
   assert.match(styles, /@media \(prefers-reduced-transparency: reduce\)/);
   assert.match(styles, /@media \(prefers-contrast: more\)/);
   assert.match(checkoutStyles, /translateY\(0\.25rem\)/);
+  assert.equal(
+    dialog.match(
+      /duration-\[var\(--motion-exit\)\] data-\[state=open\]:duration-\[var\(--motion-med\)\]/g,
+    )?.length,
+    2,
+  );
 });
