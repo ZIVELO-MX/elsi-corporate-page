@@ -10,9 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
+          "border border-[var(--primary-hover)] bg-[var(--primary-hover)] text-white shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
         primary:
-          "border border-[var(--primary)] bg-[var(--primary)] text-[var(--text)] shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
+          "border border-[var(--primary-hover)] bg-[var(--primary-hover)] text-white shadow-sm pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:border-[#242650] pointer-fine:hover:bg-[#242650] pointer-fine:hover:text-white pointer-fine:hover:shadow-md",
         destructive:
           "bg-destructive text-white pointer-fine:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
