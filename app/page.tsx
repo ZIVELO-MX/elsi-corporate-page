@@ -3,14 +3,14 @@ import { ArrowRight, BookOpen, Leaf } from "lucide-react";
 import { getAllCourses, money } from "@/lib/courses";
 import { solutions } from "@/lib/solutions";
 import { SafeImage } from "@/components/safe-image";
-import { courseImages, siteImages } from "@/lib/image-assets";
+import { siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicContactForm } from "@/components/public-contact-form";
+import { CourseMedia } from "@/components/course-media";
 
 const featuredCourses = getAllCourses().slice(0, 3);
 const [primaryCourse, ...secondaryCourses] = featuredCourses;
-const primaryImage = primaryCourse ? courseImages[primaryCourse.slug] : undefined;
 
 const homeFaqs = [
   {
@@ -128,17 +128,11 @@ export default function Home() {
             <div className="home-courses-layout">
               <Link href={`/cursos/${primaryCourse.slug}`} className="home-course-feature">
                 <div className="home-course-feature-media">
-                  {primaryImage ? (
-                    <SafeImage
-                      src={primaryImage.src}
-                      alt={primaryImage.alt}
-                      width={900}
-                      height={600}
-                      sizes="(max-width: 800px) 100vw, 58vw"
-                    />
-                  ) : (
-                    <div className="image-fallback" role="img" aria-label={primaryCourse.title} />
-                  )}
+                  <CourseMedia
+                    course={primaryCourse}
+                    variant="feature"
+                    sizes="(max-width: 800px) 100vw, 58vw"
+                  />
                 </div>
                 <div className="home-course-feature-body">
                   <Badge variant="outline">{primaryCourse.catLabel}</Badge>

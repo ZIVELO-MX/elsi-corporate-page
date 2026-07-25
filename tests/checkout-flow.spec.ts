@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("checkout validates the buyer and completes the approved mock flow", async ({ page }) => {
-  await page.goto("/checkout");
+  await page.goto("/checkout?curso=manejo-integral-de-residuos");
 
   await expect(page.getByRole("heading", { name: "Finaliza tu inscripción" })).toBeVisible();
   await expect(page.getByText("Manejo Integral de Residuos", { exact: true })).toBeVisible();
@@ -32,7 +32,7 @@ test("checkout validates the buyer and completes the approved mock flow", async 
 });
 
 test("checkout exposes a recoverable declined state", async ({ page }) => {
-  await page.goto("/checkout");
+  await page.goto("/checkout?curso=manejo-integral-de-residuos");
   await page.getByLabel("Nombre completo").fill("Gabriela Núñez");
   await page.getByLabel("Correo electrónico").fill("gabriela@example.com");
   await page.getByLabel("Teléfono").fill("477 123 4567");
@@ -46,4 +46,15 @@ test("checkout exposes a recoverable declined state", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "No pudimos completar el pago" })).toBeFocused();
   await page.getByRole("button", { name: "Intentar nuevamente" }).click();
   await expect(page.getByRole("heading", { name: "Realiza tu pago" })).toBeVisible();
+});
+
+test("checkout keeps an empty selection recoverable", async ({ page }) => {
+  await page.goto("/checkout");
+
+  await expect(
+    page.getByRole("heading", { name: "Aún no seleccionas un curso" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: "Explorar cursos" }),
+  ).toHaveAttribute("href", "/cursos");
 });

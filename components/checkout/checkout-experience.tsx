@@ -9,6 +9,7 @@ import {
   Clock3,
   CreditCard,
   LockKeyhole,
+  PackageOpen,
   RotateCcw,
   ShieldCheck,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
   type RefObject,
 } from "react";
 import { useAuth } from "@/components/auth-context";
+import { PrototypeDataNote } from "@/components/prototype-data-note";
 import {
   createMockPaymentGateway,
   formatPaymentAmount,
@@ -37,7 +39,7 @@ import {
 import styles from "./checkout.module.css";
 
 type CheckoutExperienceProps = {
-  course: CheckoutCourse;
+  course: CheckoutCourse | null;
 };
 
 type StatusCopy = {
@@ -136,7 +138,7 @@ function OrderSummary({
   return (
     <aside className={styles.summaryCard} aria-labelledby="order-summary-title">
       <div className={styles.summaryTopline}>
-        <span>Resumen</span>
+        <span>Resumen · Datos de ejemplo</span>
         <ShieldCheck aria-hidden="true" />
       </div>
       <h2 id="order-summary-title">{course.title}</h2>
@@ -403,7 +405,44 @@ function CheckoutResult({
   );
 }
 
-export function CheckoutExperience({ course }: CheckoutExperienceProps) {
+function CheckoutEmptyState() {
+  return (
+    <main className={styles.checkoutPage}>
+      <section
+        className={styles.checkoutShell}
+        data-section-label="Pago / Sin curso seleccionado"
+        aria-labelledby="checkout-empty-title"
+      >
+        <Link
+          className={styles.backLink}
+          href="/cursos"
+          style={{ color: "var(--accent)" }}
+        >
+          <ArrowLeft aria-hidden="true" />
+          Volver a cursos
+        </Link>
+
+        <div className={styles.emptyCheckout}>
+          <div className={styles.emptyCheckoutIcon}>
+            <PackageOpen aria-hidden="true" />
+          </div>
+          <p className={styles.emptyCheckoutLabel}>Inscripción</p>
+          <h1 id="checkout-empty-title">Aún no seleccionas un curso</h1>
+          <p>
+            Explora la oferta de demostración y abre el detalle del curso antes
+            de continuar. La selección real se conectará cuando ELSI entregue
+            su catálogo aprobado.
+          </p>
+          <Link className={styles.primaryAction} href="/cursos">
+            Explorar cursos
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function CheckoutFlow({ course }: { course: CheckoutCourse }) {
   const { user } = useAuth();
   const gateway = useMemo(() => createMockPaymentGateway(), []);
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -492,6 +531,10 @@ export function CheckoutExperience({ course }: CheckoutExperienceProps) {
           <span className="section-kicker">Inscripción segura</span>
           <h1 id="checkout-title">Finaliza tu inscripción</h1>
           <p>Revisa el curso, confirma tus datos y continúa al pago.</p>
+          <PrototypeDataNote>
+            Curso, importe y confirmaciones son fixtures de integración; no se
+            realizan cargos ni inscripciones reales.
+          </PrototypeDataNote>
         </header>
 
         <div className={styles.checkoutGrid}>
@@ -554,4 +597,8 @@ export function CheckoutExperience({ course }: CheckoutExperienceProps) {
       </section>
     </main>
   );
+}
+
+export function CheckoutExperience({ course }: CheckoutExperienceProps) {
+  return course ? <CheckoutFlow course={course} /> : <CheckoutEmptyState />;
 }

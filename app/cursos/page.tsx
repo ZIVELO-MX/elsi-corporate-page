@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Clock, GraduationCap, Search, SearchX } from "lucide-react";
 import { getAllCourses, money, modalityLabel, publishState, stateMeta, type Course } from "@/lib/courses";
-import { courseImages } from "@/lib/image-assets";
-import { SafeImage } from "@/components/safe-image";
+import { CourseMedia } from "@/components/course-media";
+import { PrototypeDataNote } from "@/components/prototype-data-note";
 
 const allCourses = getAllCourses();
 const CATEGORIES = [
@@ -26,17 +26,17 @@ function StateBadge({ course }: { course: Course }) {
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] ${TONE[m.tone]}`}>{m.label}</span>;
 }
 
-function CourseMedia({ course }: { course: Course }) {
-  const img = courseImages[course.slug];
-  if (img) return <SafeImage src={img.src} alt={img.alt} width={900} height={600} style={{ width: "100%", height: "100%", objectFit: "cover" }} />;
-  return <div className="size-full bg-gradient-to-br from-[var(--accent-light)] via-[var(--primary-light)] to-[var(--muted)]" aria-hidden="true" />;
-}
-
 function FeaturedCard({ course }: { course: Course }) {
   const m = stateMeta(course);
   return (
     <article className="grid overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)] md:grid-cols-[1.05fr_1fr]">
-      <div className="relative aspect-[16/10] md:aspect-auto"><CourseMedia course={course} /></div>
+      <div className="relative aspect-[16/10] md:aspect-auto">
+        <CourseMedia
+          course={course}
+          variant="feature"
+          sizes="(max-width: 768px) 100vw, 52vw"
+        />
+      </div>
       <div className="flex min-w-0 flex-col p-5">
         <div className="mb-1 flex flex-wrap items-center gap-2">
           <span className="text-[10px] font-extrabold uppercase tracking-[.1em] text-[var(--primary-hover)]">Curso destacado</span>
@@ -64,7 +64,9 @@ function FeaturedCard({ course }: { course: Course }) {
 function CompactRow({ course }: { course: Course }) {
   return (
     <Link href={`/cursos/${course.slug}`} className="flex items-center gap-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 transition-colors hover:border-[var(--primary)]">
-      <div className="size-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--muted)]"><CourseMedia course={course} /></div>
+      <div className="size-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--muted)]">
+        <CourseMedia course={course} variant="thumbnail" sizes="64px" />
+      </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1"><StateBadge course={course} /></div>
         <h3 className="truncate text-[14px] font-bold text-[var(--text)]">{course.title}</h3>
@@ -98,6 +100,10 @@ export default function CursosPage() {
         <span className="section-kicker">Oferta formativa</span>
         <h1>Catálogo de cursos</h1>
         <p>Encuentra el curso por tema, modalidad o disponibilidad. El acceso a los cursos en línea se envía por correo tras la inscripción.</p>
+        <PrototypeDataNote>
+          Cursos, fechas, precios e imágenes se sustituirán con la información
+          validada por ELSI.
+        </PrototypeDataNote>
       </div>
 
       <section data-section-label="Cursos / Catálogo" style={{ padding: "28px 0 72px" }}>

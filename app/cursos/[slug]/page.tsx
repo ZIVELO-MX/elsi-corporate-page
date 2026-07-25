@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, GraduationCap, MapPin, QrCode, UserRound } from "lucide-react";
 import { getCourseBySlug, getAllCourses, money, modalityLabel, stateMeta, publishState, certType } from "@/lib/courses";
-import { SafeImage } from "@/components/safe-image";
-import { courseImages } from "@/lib/image-assets";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CourseMedia } from "@/components/course-media";
+import { PrototypeDataNote } from "@/components/prototype-data-note";
 
 export function generateStaticParams() {
   return getAllCourses().map((course) => ({ slug: course.slug }));
@@ -34,7 +34,6 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const course = getCourseBySlug(slug);
   if (!course) notFound();
 
-  const img = courseImages[course.slug];
   const m = stateMeta(course);
   const online = course.modality !== "presencial";
 
@@ -43,18 +42,25 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
       <section data-section-label="Detalle curso / Contenido" style={{ padding: "48px 0 72px" }}>
         <div className="shell">
           <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Cursos", href: "/cursos" }, { label: course.title }]} />
-          <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-            {/* main */}
-            <div>
+          <div className="curso-detail-grid mt-4">
+            <div className="curso-detail-summary">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] ${TONE[m.tone]}`}>{m.label}</span>
                 {course.certificateType && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--accent)]"><GraduationCap size={11} aria-hidden="true" />Constancia {certType(course)}</span>}
               </div>
               <h1 className="mt-2 font-heading text-[28px] font-bold leading-[1.08] text-[var(--text)]">{course.title}</h1>
               <p className="mt-2.5 text-[14px] leading-7 text-[var(--text-muted)] max-w-[65ch]">{course.description}</p>
+              <PrototypeDataNote>
+                Temario, fechas, precio, instructor e imagen permanecen como
+                ejemplo hasta recibir la ficha aprobada por ELSI.
+              </PrototypeDataNote>
 
               <div className="mt-4 aspect-[16/8] overflow-hidden rounded-[var(--radius-md)] bg-[var(--muted)]">
-                {img ? <SafeImage src={img.src} alt={img.alt} width={1200} height={600} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div className="size-full bg-gradient-to-br from-[var(--accent-light)] via-[var(--primary-light)] to-[var(--muted)]" aria-hidden="true" />}
+                <CourseMedia
+                  course={course}
+                  variant="detail"
+                  sizes="(max-width: 1024px) 100vw, 72vw"
+                />
               </div>
 
               <dl className="mt-4 grid grid-cols-1 gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4 sm:grid-cols-2">
@@ -65,7 +71,25 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                   ? <InfoRow icon={<MapPin size={16} aria-hidden="true" />} label="Acceso" value="La liga del curso llega por correo" />
                   : course.place && <InfoRow icon={<MapPin size={16} aria-hidden="true" />} label="Lugar" value={course.place} />}
               </dl>
+            </div>
 
+            <aside className="curso-sidebar h-fit rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-card)]">
+              <p className="font-heading text-[28px] font-bold text-[var(--primary-hover)]">{money(course.price)}</p>
+              {course.priceLabel && course.price > 0 && <p className="text-[12px] text-[var(--text-muted)]">{course.priceLabel}</p>}
+              {publishState(course) === "closed" ? (
+                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "var(--primary-hover)" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] border border-[var(--primary)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
+              ) : (
+                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "#fff" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[var(--primary-hover)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
+              )}
+              <div className="mt-3 flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-[var(--paper)] p-2.5">
+                <QrCode size={30} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />
+                <p className="text-[11px] leading-4 text-[var(--text-muted)]">Inscripción rápida por código QR (te lo compartimos al confirmar).</p>
+              </div>
+              {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {certType(course)}</p>}
+              <Link href="/cursos" style={{ color: "var(--primary-hover)" }} className="mt-4 block text-center text-[12px] font-extrabold">← Volver al catálogo</Link>
+            </aside>
+
+            <div className="curso-detail-program">
               <Section title={course.durationType === "modules" ? "Temario" : "Contenido"}>
                 {course.curriculum && course.curriculum.length > 0 ? (
                   <ol className="grid gap-2.5">
@@ -112,23 +136,6 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                 </Section>
               )}
             </div>
-
-            {/* purchase card */}
-            <aside className="h-fit rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-card)] lg:sticky lg:top-6">
-              <p className="font-heading text-[28px] font-bold text-[var(--primary-hover)]">{money(course.price)}</p>
-              {course.priceLabel && course.price > 0 && <p className="text-[12px] text-[var(--text-muted)]">{course.priceLabel}</p>}
-              {publishState(course) === "closed" ? (
-                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "var(--primary-hover)" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] border border-[var(--primary)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
-              ) : (
-                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "#fff" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[var(--primary-hover)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
-              )}
-              <div className="mt-3 flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-[var(--paper)] p-2.5">
-                <QrCode size={30} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />
-                <p className="text-[11px] leading-4 text-[var(--text-muted)]">Inscripción rápida por código QR (te lo compartimos al confirmar).</p>
-              </div>
-              {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {certType(course)}</p>}
-              <Link href="/cursos" style={{ color: "var(--primary-hover)" }} className="mt-4 block text-center text-[12px] font-extrabold">← Volver al catálogo</Link>
-            </aside>
           </div>
         </div>
       </section>
