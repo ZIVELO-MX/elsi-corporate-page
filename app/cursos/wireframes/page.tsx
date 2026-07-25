@@ -59,7 +59,7 @@ function SearchAndFilters() {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {["Todos", "Sostenibilidad", "Normatividad", "Habilidades"].map((c, i) => (
-          <span key={c} className={`inline-flex min-h-8 items-center rounded-full px-3 text-[12px] font-bold ${i === 0 ? "bg-[var(--primary)] text-[var(--text)]" : "border border-[var(--border)] bg-[var(--card)] text-[var(--text-muted)]"}`}>{c}</span>
+          <span key={c} className={`inline-flex min-h-8 items-center rounded-full px-3 text-[12px] font-bold ${i === 0 ? "bg-[var(--primary-hover)] text-white" : "border border-[var(--border)] bg-[var(--card)] text-[var(--text-muted)]"}`}>{c}</span>
         ))}
         <span className="ml-auto inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text-muted)]">
           <SlidersHorizontal size={13} aria-hidden="true" /> Más filtros
@@ -87,7 +87,7 @@ function FeaturedCard() {
           <div className="flex items-center gap-1.5 font-bold text-[var(--text)]">${DC3.priceAmount} MXN · {DC3.priceLabel}</div>
         </dl>
         <div className="mt-auto flex items-center gap-2 pt-4">
-          <span className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 text-[12px] font-extrabold text-[var(--text)]">Inscribirme</span>
+          <span className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-4 text-[12px] font-extrabold text-white">Inscribirme</span>
           <span style={{ color: "var(--primary-hover)" }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-bold">Ver curso</span>
         </div>
       </div>
@@ -163,7 +163,7 @@ function DetailView() {
       <aside className="h-fit rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-card)] lg:sticky lg:top-4">
         <p className="font-heading text-[26px] font-bold text-[var(--primary-hover)]">${DC3.priceAmount} <span className="text-[13px] font-bold text-[var(--text-muted)]">MXN</span></p>
         <p className="text-[11px] text-[var(--text-muted)]">{DC3.priceLabel}</p>
-        <button type="button" className="mt-3 h-10 w-full rounded-[var(--radius-sm)] bg-[var(--primary)] text-[13px] font-extrabold text-[var(--text)] transition-transform active:scale-[.98]">Inscribirme</button>
+        <button type="button" className="mt-3 h-10 w-full rounded-[var(--radius-sm)] bg-[var(--primary-hover)] text-[13px] font-extrabold text-white transition-transform active:scale-[.98]">Inscribirme</button>
         <div className="mt-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--paper)] p-2.5">
           <QrCode size={28} className="text-[var(--accent)]" aria-hidden="true" />
           <p className="text-[10px] leading-4 text-[var(--text-muted)]">Inscripción rápida por código QR</p>
@@ -192,7 +192,7 @@ function StatesView() {
       {rows.map((r) => (
         <div key={r.state} className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] p-3">
           <div className="min-w-0"><StateBadge state={r.state} /><p className="mt-1 text-[11px] text-[var(--text-muted)]">{r.note}</p></div>
-          <span className={`shrink-0 rounded-[var(--radius-sm)] px-3 py-1.5 text-[11px] font-extrabold ${r.state === "closed" || r.state === "pending" ? "border border-[var(--primary)] text-[var(--primary-hover)]" : "bg-[var(--primary)] text-[var(--text)]"}`} style={r.state === "closed" || r.state === "pending" ? { color: "var(--primary-hover)" } : undefined}>{r.cta}</span>
+          <span className={`shrink-0 rounded-[var(--radius-sm)] px-3 py-1.5 text-[11px] font-extrabold ${r.state === "closed" || r.state === "pending" ? "border border-[var(--primary)] text-[var(--primary-hover)]" : "bg-[var(--primary-hover)] text-white"}`} style={r.state === "closed" || r.state === "pending" ? { color: "var(--primary-hover)" } : undefined}>{r.cta}</span>
         </div>
       ))}
     </div>
