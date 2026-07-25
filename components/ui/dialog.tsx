@@ -22,7 +22,7 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
         "fixed inset-0 z-50 bg-[rgba(28,35,31,0.32)]",
         "data-[state=open]:animate-in data-[state=open]:fade-in-0",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-        "duration-[var(--motion-med)]",
+        "duration-[var(--motion-exit)] data-[state=open]:duration-[var(--motion-med)]",
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ function DialogContent({
           "origin-center",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-          "duration-[var(--motion-med)]",
+          "duration-[var(--motion-exit)] data-[state=open]:duration-[var(--motion-med)]",
           className
         )}
         style={{ borderColor: "var(--border)" }}
@@ -57,7 +57,7 @@ function DialogContent({
         {showClose && (
           <DialogPrimitive.Close
             aria-label="Cerrar"
-            className="absolute top-4 right-4 rounded-[var(--radius-sm)] p-1 opacity-70 transition-[opacity,transform] duration-[var(--motion-fast)] hover:opacity-100 focus-visible:opacity-100 active:scale-[0.9]"
+            className="absolute top-4 right-4 rounded-[var(--radius-sm)] p-1 opacity-70 transition-[opacity,transform] duration-[var(--motion-fast)] pointer-fine:hover:opacity-100 focus-visible:opacity-100 active:scale-[0.95] motion-reduce:active:scale-100"
           >
             <X size={16} />
           </DialogPrimitive.Close>

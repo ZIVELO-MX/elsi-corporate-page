@@ -52,8 +52,8 @@ export function CourseMedia({
     <SafeImage
       src={asset.src}
       alt={asset.alt}
-      width={variant === "detail" ? 1200 : 900}
-      height={600}
+      width={asset.width}
+      height={asset.height}
       loading={loading}
       sizes={sizes}
       style={{ width: "100%", height: "100%", objectFit: "cover" }}

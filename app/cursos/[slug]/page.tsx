@@ -59,7 +59,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                 <CourseMedia
                   course={course}
                   variant="detail"
-                  sizes="(max-width: 1024px) 100vw, 72vw"
+                  sizes="(max-width: 1024px) calc(100vw - 40px), (max-width: 1440px) 72vw, 832px"
                 />
               </div>
 

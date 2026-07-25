@@ -106,9 +106,9 @@ export default function SolucionesPage() {
                   <SafeImage
                     src={image.src}
                     alt={image.alt}
-                    width={1200}
-                    height={700}
-                    sizes="(max-width: 800px) 100vw, 52vw"
+                    width={image.width}
+                    height={image.height}
+                    sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 52vw, 657px"
                   />
                   <figcaption>Archivo ELSI · {solution.imageCaption}</figcaption>
                 </figure>

@@ -64,7 +64,15 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
 
           {image && (
             <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-card)", aspectRatio: "21 / 9", marginBottom: 40 }}>
-              <SafeImage src={image.src} alt={image.alt} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <SafeImage
+                src={image.src}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+                loading="eager"
+                sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1136px) calc(100vw - 96px), 1040px"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
           )}
 

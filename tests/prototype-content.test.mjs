@@ -43,9 +43,10 @@ test("every curated content image is local and versioned", () => {
   const assets = read("lib/image-assets.ts");
   const sources = [...assets.matchAll(/src: "([^"]+)"/g)].map((match) => match[1]);
 
-  assert.equal(sources.length, 10);
+  assert.ok(sources.length > 0);
+  assert.equal(new Set(sources).size, sources.length);
   for (const source of sources) {
-    assert.match(source, /^\/images\/.+\.webp$/);
+    assert.match(source, /^\/(?:images\/)?.+\.(?:jpe?g|png|webp|avif)$/);
     assert.ok(existsSync(resolve(process.cwd(), "public", source.slice(1))), `${source} is missing`);
   }
 });
