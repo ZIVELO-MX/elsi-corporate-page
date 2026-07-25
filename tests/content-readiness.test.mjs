@@ -65,3 +65,13 @@ test("prototype course data stays visibly provisional until client handoff", () 
   assert.match(detail, /ficha aprobada por ELSI/);
   assert.match(checkout, /no se\s+realizan cargos ni inscripciones reales/);
 });
+
+test("mission checkout capture selects a fixture course explicitly", () => {
+  const targets = read("tests/mission-screenshot-targets.ts");
+
+  assert.match(
+    targets,
+    /path: "\/checkout\?curso=manejo-integral-de-residuos"/,
+  );
+  assert.match(targets, /selector: section\("Pago \/ Checkout Conekta"\)/);
+});
