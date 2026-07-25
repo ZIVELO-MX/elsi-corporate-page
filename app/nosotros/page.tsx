@@ -22,7 +22,15 @@ export default function NosotrosPage() {
 
       <div className="shell" style={{ marginBottom: 48 }}>
         <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-card)", aspectRatio: "21 / 9" }}>
-          <SafeImage src={siteImages.story.src} alt={siteImages.story.alt} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <SafeImage
+            src={siteImages.story.src}
+            alt={siteImages.story.alt}
+            width={siteImages.story.width}
+            height={siteImages.story.height}
+            loading="eager"
+            sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) calc(100vw - 96px), 1264px"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         </div>
       </div>
 
