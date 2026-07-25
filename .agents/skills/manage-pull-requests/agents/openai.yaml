@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Pull Requests"
+  short_description: "Create and monitor reviewable GitHub PRs"
+  default_prompt: "Use $manage-pull-requests to create and monitor a reviewable pull request for my changes."

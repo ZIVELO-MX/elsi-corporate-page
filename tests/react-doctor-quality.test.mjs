@@ -5,18 +5,50 @@ import { resolve } from "node:path";
 
 const read = (path) => readFileSync(resolve(process.cwd(), path), "utf8");
 
-test("the screenshot workflow exposes Zipform credentials only to publication", () => {
+test("the screenshot workflow isolates credentials from install and build", () => {
   const workflow = read(".github/workflows/publish-mission-screenshots.yml");
-  const jobConfiguration = workflow.slice(workflow.indexOf("jobs:"), workflow.indexOf("    steps:"));
+  const credentialStep = workflow.slice(
+    workflow.indexOf("- name: Check publication credentials"),
+    workflow.indexOf("- name: Resolve screenshot request"),
+  );
+  const buildStep = workflow.slice(
+    workflow.indexOf("- name: Build screenshot application"),
+    workflow.indexOf("- name: Capture and publish screenshots"),
+  );
   const publishStep = workflow.slice(
     workflow.indexOf("- name: Capture and publish screenshots"),
-    workflow.indexOf("- name: Comment mission URL on PR"),
+    workflow.indexOf("- name: Comment on pull request"),
   );
 
-  assert.doesNotMatch(jobConfiguration, /ZIPFORM_TOKEN/);
-  assert.match(workflow, /contains\(github\.event\.pull_request\.body, 'ELS-'\)/);
+  assert.match(credentialStep, /ZIPFORM_TOKEN: \$\{\{ secrets\.ZIPFORM_TOKEN \}\}/);
+  assert.doesNotMatch(buildStep, /ZIPFORM_TOKEN/);
   assert.match(publishStep, /ZIPFORM_TOKEN: \$\{\{ secrets\.ZIPFORM_TOKEN \}\}/);
-  assert.ok(workflow.indexOf("pnpm install --frozen-lockfile") < workflow.indexOf("ZIPFORM_TOKEN"));
+  assert.ok(
+    workflow.indexOf("pnpm install --frozen-lockfile") <
+      workflow.indexOf("- name: Capture and publish screenshots"),
+  );
+});
+
+test("the screenshot workflow uses structured PR metadata and idempotent comments", () => {
+  const workflow = read(".github/workflows/publish-mission-screenshots.yml");
+
+  assert.match(workflow, /types: \[opened, synchronize, reopened, edited\]/);
+  assert.match(workflow, /node scripts\/screenshots\/resolve-pr\.mjs/);
+  assert.match(workflow, /MISSION_DISPLAY_ID:/);
+  assert.match(workflow, /SCREENSHOT_PROFILE:/);
+  assert.match(workflow, /<!-- elsi-mission-screenshots -->/);
+  assert.match(workflow, /issues\.updateComment/);
+  assert.doesNotMatch(workflow, /TLOZ_MISSION_ID/);
+});
+
+test("basic CI validates every pull request without forcing a screenshot build", () => {
+  const workflow = read(".github/workflows/ci.yml");
+
+  assert.match(workflow, /pull_request:/);
+  assert.match(workflow, /pnpm lint/);
+  assert.match(workflow, /pnpm typecheck/);
+  assert.match(workflow, /pnpm test/);
+  assert.doesNotMatch(workflow, /pnpm build|playwright/);
 });
 
 test("unauthenticated profile visits render a stable login action", () => {

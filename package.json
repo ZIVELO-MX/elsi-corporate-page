@@ -12,8 +12,9 @@
     "test:checkout:compat": "pnpm build && playwright test --config=playwright.checkout.config.ts",
     "start": "next start",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "screenshots:capture": "pnpm build && playwright test tests/mission-screenshots.spec.ts",
-    "screenshots:publish": "PUBLISH_MISSION_SCREENSHOTS=1 pnpm screenshots:capture"
+    "screenshots:publish": "PUBLISH_MISSION_SCREENSHOTS=1 playwright test tests/mission-screenshots.spec.ts"
   },
   "dependencies": {
     "class-variance-authority": "latest",
