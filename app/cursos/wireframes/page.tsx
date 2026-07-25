@@ -179,17 +179,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /* ---- states ---- */
+const stateRows: { state: State; cta: string; note: string }[] = [
+  { state: "published", cta: "Inscribirme", note: "Disponible y con cupo." },
+  { state: "upcoming", cta: "Reservar lugar", note: "Publicado con fecha futura." },
+  { state: "closed", cta: "Avísame si reabre", note: "Cupo lleno: captura de interés." },
+  { state: "free", cta: "Inscribirme gratis", note: "price = 0." },
+  { state: "pending", cta: "Más información", note: "Fecha u otro dato por confirmar." },
+];
+
 function StatesView() {
-  const rows: { state: State; cta: string; note: string }[] = [
-    { state: "published", cta: "Inscribirme", note: "Disponible y con cupo." },
-    { state: "upcoming", cta: "Reservar lugar", note: "Publicado con fecha futura." },
-    { state: "closed", cta: "Avísame si reabre", note: "Cupo lleno: captura de interés." },
-    { state: "free", cta: "Inscribirme gratis", note: "price = 0." },
-    { state: "pending", cta: "Más información", note: "Fecha u otro dato por confirmar." },
-  ];
   return (
     <div className="grid gap-2">
-      {rows.map((r) => (
+      {stateRows.map((r) => (
         <div key={r.state} className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] p-3">
           <div className="min-w-0"><StateBadge state={r.state} /><p className="mt-1 text-[11px] text-[var(--text-muted)]">{r.note}</p></div>
           <span className={`shrink-0 rounded-[var(--radius-sm)] px-3 py-1.5 text-[11px] font-extrabold ${r.state === "closed" || r.state === "pending" ? "border border-[var(--primary)] text-[var(--primary-hover)]" : "bg-[var(--primary-hover)] text-white"}`} style={r.state === "closed" || r.state === "pending" ? { color: "var(--primary-hover)" } : undefined}>{r.cta}</span>

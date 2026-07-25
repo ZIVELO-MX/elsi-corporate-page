@@ -86,9 +86,11 @@ export default function CursosPage() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return allCourses.filter((c) => publishState(c) !== "draft")
-      .filter((c) => cat === "todos" || c.cat === cat)
-      .filter((c) => !q || c.title.toLowerCase().includes(q) || c.catLabel.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
+    return allCourses.filter((c) =>
+      publishState(c) !== "draft" &&
+      (cat === "todos" || c.cat === cat) &&
+      (!q || c.title.toLowerCase().includes(q) || c.catLabel.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)),
+    );
   }, [cat, query]);
 
   const featured = visible.find((c) => c.featured) ?? visible.find((c) => publishState(c) === "upcoming") ?? visible[0];
