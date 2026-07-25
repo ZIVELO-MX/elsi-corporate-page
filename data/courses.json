@@ -23,7 +23,16 @@
     "objectives": ["Aplicar el marco legal del manejo de residuos", "Elaborar un plan de manejo", "Incorporar principios de economía circular"],
     "requirements": ["Sin requisitos previos"],
     "description": "Marco legal, clasificación, economía circular y elaboración de planes de manejo, con constancia oficial DC-3.",
-    "moduleList": ["Marco Legal", "Distribución de Competencias", "Clasificación de los Residuos", "Manejo Integral de los Residuos", "Plan de Manejo", "Economía Circular", "Sanciones"]
+    "moduleList": ["Marco Legal", "Distribución de Competencias", "Clasificación de los Residuos", "Manejo Integral de los Residuos", "Plan de Manejo", "Economía Circular", "Sanciones"],
+    "curriculum": [
+      { "tema": "Marco Legal", "subtemas": ["Ley General para la Prevención y Gestión Integral de los Residuos (LGPGIR)", "Reglamentos y Normas Oficiales aplicables"] },
+      { "tema": "Distribución de Competencias", "subtemas": ["Federación, estados y municipios", "Autoridades y responsabilidades"] },
+      { "tema": "Clasificación de los Residuos", "subtemas": ["Residuos sólidos urbanos", "Residuos de manejo especial", "Residuos peligrosos"] },
+      { "tema": "Manejo Integral de los Residuos", "subtemas": ["Jerarquía: reducir, reutilizar, reciclar", "Almacenamiento, transporte y disposición final"] },
+      { "tema": "Plan de Manejo", "subtemas": ["Elementos de un plan de manejo", "Elaboración y registro ante la autoridad"] },
+      { "tema": "Economía Circular", "subtemas": ["Principios y ciclos de valor", "Casos de aplicación"] },
+      { "tema": "Sanciones", "subtemas": ["Infracciones y multas", "Medidas de seguridad y correctivas"] }
+    ]
   },
   {
     "id": "c1",
