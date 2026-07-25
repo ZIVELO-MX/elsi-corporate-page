@@ -31,6 +31,17 @@ export default function Home() {
   return (
     <main>
       <section className="home-hero" data-section-label="Home / Hero editorial">
+        <SafeImage
+          src={siteImages.hero.src}
+          alt={siteImages.hero.alt}
+          className="home-hero-bg"
+          width={siteImages.hero.width}
+          height={siteImages.hero.height}
+          preload
+          sizes="100vw"
+        />
+        <div className="home-hero-overlay" />
+
         <div className="shell home-hero-grid">
           <div className="home-hero-copy">
             <p className="home-kicker">Instituto de educación y soluciones ambientales</p>
@@ -39,24 +50,12 @@ export default function Home() {
               ELSI crea rutas de formación y acompañamiento para organizaciones, comunidades e instituciones educativas.
             </p>
             <div className="home-hero-actions">
-              <Button asChild size="lg">
+              <Button asChild variant="inverse" size="lg">
                 <Link href="/soluciones">Explorar soluciones <ArrowRight data-icon="inline-end" /></Link>
               </Button>
               <Link href="/cursos" className="home-text-link">Ver cursos</Link>
             </div>
           </div>
-
-          <figure className="home-hero-media">
-            <SafeImage
-              src={siteImages.hero.src}
-              alt={siteImages.hero.alt}
-              width={siteImages.hero.width}
-              height={siteImages.hero.height}
-              preload
-              sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 54vw, 734px"
-            />
-            <figcaption>El territorio como punto de partida para aprender y actuar.</figcaption>
-          </figure>
         </div>
       </section>
 

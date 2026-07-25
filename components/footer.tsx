@@ -44,7 +44,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <span>© 2026 ELSI Academy</span>
           <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
-          <a href="https://zivelo.mx" rel="noreferrer">Diseño y desarrollo por Zivelo</a>
+          <a href="https://zivelo.dev" rel="noreferrer">Diseño y desarrollo por Zivelo</a>
         </div>
       </div>
     </footer>
