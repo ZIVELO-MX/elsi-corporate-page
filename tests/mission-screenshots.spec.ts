@@ -1,11 +1,19 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import sharp from "sharp";
-import { captureTargets, prepareCapture } from "./mission-screenshot-targets";
+import {
+  captureKey,
+  captureProfileNames,
+  captureProfiles,
+  getCaptureProfiles,
+  getCaptureTargets,
+  MAX_CAPTURE_COUNT,
+  prepareCapture,
+} from "./mission-screenshot-targets";
 
 const API_ORIGIN = "https://zipform.zivelo.dev";
+const SCREENSHOT_GROUP_KEY = "Screenshots";
 const MAX_FILE_SIZE = 6_291_456;
-const EXPECTED_CAPTURE_COUNT = 17;
 
 type LocalCapture = {
   key: string;
@@ -64,39 +72,26 @@ async function zipformRequest<T>(path: string, token: string, init?: RequestInit
   return payload.data;
 }
 
-const MISSION_PATTERN = /Misión:\s*(ELS-\d{4})/i;
-
 async function resolveMissionId(token: string): Promise<string> {
-  const prBody = process.env.PR_BODY;
-  if (prBody) {
-    const match = prBody.match(MISSION_PATTERN);
-    if (match) {
-      const displayId = match[1];
-      console.log(`Resolving display ID: ${displayId}`);
-      const detail = await zipformRequest<{ id: string }>(
-        `/api/v1/missions/${encodeURIComponent(displayId)}`,
-        token,
-      );
-      console.log(`Resolved ${displayId} → ${detail.id}`);
-      return detail.id;
-    }
-    console.log("PR body present but no mission ID pattern found; falling back to TLOZ_MISSION_ID");
-  }
-  return requiredEnv("TLOZ_MISSION_ID");
+  const displayId = requiredEnv("MISSION_DISPLAY_ID");
+  const detail = await zipformRequest<{ id: string }>(
+    `/api/v1/missions/${encodeURIComponent(displayId)}`,
+    token,
+  );
+  console.log(`Resolved ${displayId} → ${detail.id}`);
+  return detail.id;
 }
 
 async function publishCaptures(files: LocalCapture[]) {
   const token = requiredEnv("ZIPFORM_TOKEN");
   const missionId = await resolveMissionId(token);
-  const prNumber = requiredEnv("PR_NUMBER");
   const sourceRevision = requiredEnv("SOURCE_REVISION");
 
-  if (!/^\d+$/.test(prNumber)) throw new Error("PR_NUMBER must contain only digits");
   if (!/^[0-9a-fA-F]{40}$/.test(sourceRevision)) {
     throw new Error("SOURCE_REVISION must be the full 40-character commit SHA");
   }
 
-  const groupKey = `pr-${prNumber}`;
+  const groupKey = SCREENSHOT_GROUP_KEY;
   const endpoint = `/api/v1/missions/${encodeURIComponent(missionId)}/attachments`;
   const prepared = await zipformRequest<PreparedBatch>(endpoint, token, {
     method: "POST",
@@ -165,8 +160,22 @@ async function publishCaptures(files: LocalCapture[]) {
 }
 
 test("capture and optionally publish the TLOZ mission screenshot snapshot", async ({ page }, testInfo) => {
-  expect(captureTargets).toHaveLength(EXPECTED_CAPTURE_COUNT);
-  expect(new Set(captureTargets.map((target) => target.key)).size).toBe(EXPECTED_CAPTURE_COUNT);
+  expect(captureProfiles.public).toHaveLength(14);
+  expect(captureProfiles.account).toHaveLength(2);
+  expect(captureProfiles.admin).toHaveLength(1);
+
+  const profiles = getCaptureProfiles(process.env.SCREENSHOT_PROFILE);
+  const captureTargets = getCaptureTargets(profiles);
+  const expectedCaptureCount = profiles.reduce(
+    (count, profile) => count + captureProfiles[profile].length,
+    0,
+  );
+  const keys = captureTargets.map(captureKey);
+
+  expect(captureProfileNames).toEqual(["public", "account", "admin"]);
+  expect(captureTargets).toHaveLength(expectedCaptureCount);
+  expect(captureTargets.length).toBeLessThanOrEqual(MAX_CAPTURE_COUNT);
+  expect(new Set(keys).size).toBe(expectedCaptureCount);
 
   const outputDirectory = testInfo.outputPath("screenshots");
   await mkdir(outputDirectory, { recursive: true });
@@ -186,10 +195,11 @@ test("capture and optionally publish the TLOZ mission screenshot snapshot", asyn
       throw new Error(`${target.key} dimensions exceed 10,000 pixels`);
     }
 
-    const fileName = `${target.key}.png`;
+    const key = captureKey(target);
+    const fileName = `${key}.png`;
     await writeFile(`${outputDirectory}/${fileName}`, bytes);
     files.push({
-      key: target.key,
+      key,
       title: target.title,
       fileName,
       contentType: "image/png",
@@ -198,7 +208,7 @@ test("capture and optionally publish the TLOZ mission screenshot snapshot", asyn
       height: metadata.height,
       bytes,
     });
-    console.log(`Captured ${target.key} (${metadata.width}×${metadata.height}, ${bytes.byteLength} bytes)`);
+    console.log(`Captured ${key} (${metadata.width}×${metadata.height}, ${bytes.byteLength} bytes)`);
   }
 
   if (process.env.PUBLISH_MISSION_SCREENSHOTS === "1") {
