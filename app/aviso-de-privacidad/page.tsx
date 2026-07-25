@@ -1,4 +1,11 @@
 import Link from "next/link";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Aviso de privacidad",
+  description: "Aviso de privacidad de ELSI: cómo tratamos y protegemos tus datos personales.",
+  path: "/aviso-de-privacidad",
+});
 
 export default function AvisoPrivacidadPage() {
   return (

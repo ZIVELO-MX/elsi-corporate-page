@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicContactForm } from "@/components/public-contact-form";
 import { CourseMedia } from "@/components/course-media";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  description: "ELSI — Environment Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
+  path: "/",
+});
 
 const featuredCourses = getAllCourses().slice(0, 3);
 const [primaryCourse, ...secondaryCourses] = featuredCourses;

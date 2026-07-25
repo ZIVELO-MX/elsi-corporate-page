@@ -4,6 +4,13 @@ import { solutions, type Solution } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Soluciones",
+  description: "Capacitación, soluciones ambientales y educación universitaria: acompañamos a equipos, organizaciones y comunidades.",
+  path: "/soluciones",
+});
 
 const solutionIcons: Record<Solution["slug"], LucideIcon> = {
   capacitacion: GraduationCap,
