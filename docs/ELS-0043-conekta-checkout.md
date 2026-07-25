@@ -1,4 +1,4 @@
-# ELS-0043 — Checkout integrable con Conekta
+# ELS-0043 - Checkout integrable con Conekta
 
 ## Alcance de esta entrega
 
@@ -6,10 +6,12 @@
 los estados del flujo con un adaptador mock determinista. No crea órdenes, no
 carga el script de Conekta y no acepta datos reales de tarjeta.
 
-El curso mostrado es el ejemplo real validado en ELS-0013:
+El curso mostrado es un fixture de integración validado en ELS-0013:
 **Manejo Integral de Residuos**, recuperación de **$550 MXN**, duración de
-4 horas y constancia DC-3. Vive en el contrato de checkout sin modificar el
-modelo público de cursos que sigue evolucionando en ELS-0019/ELS-0008.
+4 horas y constancia DC-3. No representa precio, fecha, disponibilidad ni
+oferta aprobada por ELSI. Vive en el contrato de checkout sin modificar el
+modelo público de cursos y se sustituirá cuando el cliente entregue datos
+definitivos.
 
 ## Frontera de integración
 
@@ -66,17 +68,39 @@ Opciones visuales que deben mapearse a los tokens ELSI:
 ## Apple Pay
 
 No se dibuja un botón de Apple Pay. Conekta/Apple debe generar el botón oficial
-y ocultarlo cuando el dispositivo no sea compatible. Backend debe confirmar el
-enum exacto para la versión activa del API; la documentación consultada usa
-variantes `apple_pay` y `apple`.
+y ocultarlo cuando el dispositivo no sea compatible.
+
+La documentación oficial de Conekta v2.3.0, revisada el 24 de julio de 2026,
+confirma este contrato para Checkout Component embebido:
+
+```json
+{
+  "type": "Integration",
+  "allowed_payment_methods": ["card", "apple_pay"]
+}
+```
+
+El enum confirmado es `apple_pay`. Conekta también indica que permitir `card`
+puede activar Apple Pay cuando la cuenta, dominio, navegador y dispositivo son
+compatibles. El adaptador backend debe fijar la versión del API y volver a
+validar este enum antes de habilitar producción. El navegador nunca envía un
+importe editable ni una llave privada.
 
 Antes de habilitarlo:
 
-- servir el checkout por HTTPS;
-- verificar el dominio ante Apple/Conekta;
-- completar merchant validation del lado servidor;
-- mantener tarjeta como fallback;
-- probar en Safari y en un dispositivo compatible.
+- servir todas las páginas de pago por HTTPS con TLS válido;
+- habilitar procesamiento de tarjeta en la cuenta de Conekta;
+- crear el Merchant ID y los certificados requeridos por Apple;
+- registrar y verificar cada dominio y subdominio de checkout;
+- alojar el archivo de asociación en `/.well-known/`;
+- completar merchant validation exclusivamente desde backend;
+- crear el checkout con llave privada y devolver sólo `checkoutRequestId`;
+- mantener `card` como fallback dentro del mismo componente;
+- probar en Safari, VoiceOver y un dispositivo compatible antes de producción.
+
+Checkout Component detecta capacidad. En equipos incompatibles no renderiza el
+botón de Apple Pay y mantiene los demás métodos permitidos. ELSI no muestra un
+botón deshabilitado, no recrea la marca y no abre otro flujo de pago.
 
 ## Estados del prototipo
 
@@ -96,20 +120,58 @@ prototipo. Ningún resultado mock se persiste como venta o inscripción real.
 - `prefers-reduced-motion` elimina la aparición y la escala de presión.
 - No se usan llaves, webhooks, secretos ni credenciales en el cliente.
 
+## Contrato de compatibilidad
+
+| Entorno | Cobertura automatizada | Límite |
+| --- | --- | --- |
+| Chromium desktop | Validación, foco, estados aprobado y rechazado | No representa Safari |
+| WebKit desktop | Orden de teclado, foco, formulario y fallback sin Apple Pay | WebKit no equivale a Safari con VoiceOver |
+| WebKit touch 390 px | Targets, formulario, fallback y acción primaria | Emulación, no hardware real |
+| Safari + VoiceOver | Checklist preparado | Requiere Mac y lector de pantalla real |
+| Safari touch + Apple Pay | Checklist preparado | Requiere dominio, merchant y dispositivo compatible |
+
+La automatización no se presenta como evidencia de VoiceOver, Apple Pay real o
+hardware. Esas pruebas permanecen como condición de salida previa a producción.
+
+## Motion verificado
+
+- Press usa `transform` durante 100 ms en controles propios.
+- Estados entran en 180 ms con opacidad y 4 px de desplazamiento.
+- El estado anterior sale de forma inmediata al cambiar la máquina de estados;
+  no añade una espera simétrica ni bloquea la respuesta del sistema.
+- Hover sólo existe bajo puntero preciso.
+- No hay `transition: all`, `ease-in`, `scale(0)`, bounce, shake o confetti.
+- Reduced motion elimina desplazamiento y escala sin ocultar estado o feedback.
+
 ## Referencias
 
 - [Conekta Checkout Component](https://developers.conekta.com/docs/componente-de-pago)
 - [Customización del componente](https://developers.conekta.com/docs/customizaci%C3%B3n-del-component)
 - [Apple Pay en checkout embebido](https://developers.conekta.com/v2.3.0/docs/aceptar-pagos-con-apple-pay-en-checkout-embebido)
+- [Verificación de dominios en Conekta](https://developers.conekta.com/docs/verificaci%C3%B3n-de-dominios)
 - [Apple HIG — Apple Pay](https://developer.apple.com/design/human-interface-guidelines/apple-pay)
 - [Apple Pay on the Web](https://developer.apple.com/documentation/applepayontheweb)
+- [Configuración web de Apple Pay](https://developer.apple.com/help/account/capabilities/configure-apple-pay-on-the-web)
+- [Merchant validation](https://developer.apple.com/documentation/applepayontheweb/providing-merchant-validation)
 
 ## Verificación local
 
 - `pnpm lint`: 0 errores.
-- `pnpm test`: 32 pruebas aprobadas.
-- Playwright: flujo aprobado y rechazo recuperable, 2 pruebas aprobadas.
+- `pnpm test`: 43 pruebas aprobadas.
+- Playwright Chromium: flujo aprobado y rechazo recuperable, 2 pruebas
+  aprobadas en la entrega base.
+- `pnpm test:checkout:compat`: 2 pruebas WebKit aprobadas, escritorio y touch
+  emulado a 390 px.
 - `pnpm build`: compilación y generación estática aprobadas.
 - React Doctor 0.8.1 sobre el diff: 100/100, sin hallazgos.
 - Responsive: 390, 768, 1024 y 1440 px sin overflow.
 - Reflow equivalente a 200 % en los cuatro anchos: sin overflow.
+
+## Preflight de diseño
+
+- Lectura: checkout educativo trust-first con lenguaje calmado y funcional.
+- Diales: variación 3, movimiento 2 y densidad 5.
+- Sistema: tokens ELSI, Sora/Manrope, Lucide existente y CSS Modules.
+- Evolución dirigida: se preservan ruta, campos, orden, copy funcional y CTA.
+- Tema, acento y radios permanecen consistentes; no se agregan tarjetas,
+  gradientes, sellos, métricas ni confianza simulada.
