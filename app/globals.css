@@ -1023,6 +1023,26 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-num { text-align: right; font-variant-numeric: tabular-nums; }
 .admin-cell-truncate { max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Reusable AdminTable (components/admin/data-table.tsx). Cell padding and type
+   live here so pages stop repeating them inline; the mobile card reflow is in
+   the max-width:800px block below. */
+.admin-table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.admin-table--responsive { width: 100%; min-width: var(--admin-table-min, 36rem); border-collapse: collapse; }
+.admin-table--responsive th, .admin-table--responsive td { padding: 0.75rem 1rem; text-align: left; }
+.admin-table--responsive thead tr { border-bottom: 1px solid var(--border); background: var(--muted); }
+.admin-table--responsive th { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.admin-table--responsive tbody td { font-size: 0.8125rem; color: var(--text); vertical-align: middle; }
+.admin-table--responsive tbody tr { border-bottom: 1px solid var(--border); }
+.admin-table--responsive tbody tr:last-child { border-bottom: none; }
+.admin-table--responsive th[data-align="right"], .admin-table--responsive td[data-align="right"] { text-align: right; }
+.admin-td-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+.admin-td-empty { padding: 0 !important; }
+.admin-cell-muted { color: var(--text-muted); }
+/* Name button sits inside a padded AdminTable cell, so it carries no padding of
+   its own and inherits the cell's type (incl. the larger, bold mobile title). */
+.admin-user-row-btn { font: inherit; color: var(--primary-hover); background: none; border: none; padding: 0; text-align: left; cursor: pointer; }
+@media (pointer: fine) { .admin-user-row-btn:hover { text-decoration: underline; } }
+
 /* Logout: color feedback via CSS so keyboard users get it too (no JS mouse-only
    handlers). Hover gated to a precise pointer; focus mirrors it. */
 .admin-logout-btn { transition: color var(--motion-fast) var(--ease-out); }
@@ -1201,6 +1221,25 @@ body[data-section-labels="true"] section[data-section-label]::before {
   }
   .admin-stats-grid { grid-template-columns: 1fr !important; }
   .admin-two-col { grid-template-columns: 1fr !important; }
+
+  /* AdminTable → stacked label:value cards. Scoped to --responsive so legacy
+     inline-styled tables keep their horizontal scroll until they're migrated. */
+  .admin-table-card .admin-table-scroll { overflow: visible; max-height: none; }
+  .admin-table--responsive { min-width: 0 !important; }
+  .admin-table--responsive thead { display: none; }
+  .admin-table--responsive tbody,
+  .admin-table--responsive tr,
+  .admin-table--responsive td { display: block; }
+  .admin-table--responsive tbody tr { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); margin: 0 0 0.75rem; padding: 0.25rem 0; }
+  .admin-table--responsive tbody tr:last-child { margin-bottom: 0; }
+  .admin-table--responsive td { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.4rem 1rem; border: none; text-align: right; }
+  .admin-table--responsive td::before { content: attr(data-label); flex: 0 0 auto; text-align: left; font-size: 0.6875rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .admin-table--responsive td[data-primary] { padding-top: 0.6rem; padding-bottom: 0.25rem; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .admin-table--responsive td[data-primary]::before { content: none; }
+  .admin-table--responsive td.admin-td-actions { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0.5rem; text-align: left; margin-top: 0.25rem; padding-top: 0.6rem; border-top: 1px solid var(--border); }
+  .admin-table--responsive td.admin-td-actions::before { content: none; }
+  .admin-table--responsive td.admin-td-empty { display: block; text-align: center; }
+  .admin-table--responsive td.admin-td-empty::before { content: none; }
 }
 
 @media (max-width: 800px) {

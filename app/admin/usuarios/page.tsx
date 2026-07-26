@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, SearchX } from "lucide-react";
 import { useAdminData, type AdminUser } from "@/lib/admin-data";
+import { AdminTable } from "@/components/admin/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
@@ -10,7 +11,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 const dialogAvatarStyle: React.CSSProperties = { width: "2.5rem", height: "2.5rem", borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "1rem", color: "var(--secondary-foreground)", flexShrink: 0 };
 const enrollmentListStyle: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "16rem", overflowY: "auto" };
-const rowBtnStyle: React.CSSProperties = { width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" };
 
 function SourceBadge({ source }: { source: "interna" | "externa" }) {
   return (
@@ -120,54 +120,45 @@ export default function AdminUsers() {
       {loading ? (
         <TableSkeleton rows={5} widths={["9rem", "12rem", "5rem", "6rem", "6rem"]} />
       ) : (
-      <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div className="admin-table-scroll">
-          <table className="admin-table" style={{ width: "100%", minWidth: "36rem", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-                {["Nombre", "Email", "Rol", "Cursos inscritos", "Registro"].map(h => (
-                  <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: h === "Cursos inscritos" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(u => (
-                <tr key={u.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: 0 }}>
-                    <button
-                      type="button"
-                      onClick={() => setSelected(u)}
-                      className="admin-user-row-btn"
-                      style={rowBtnStyle}
-                    >
-                      {u.name}
-                    </button>
-                  </td>
-                  <td className="admin-cell-truncate" title={u.email} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{u.email}</td>
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    <Badge variant={u.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
-                      {u.role === "admin" ? "Admin" : "Usuario"}
-                    </Badge>
-                  </td>
-                  <td className="admin-num" style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{enrollmentCount(u.id)}</td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>{u.createdAt}</td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: 0 }}>
-                    <EmptyState
-                      icon={<SearchX size={20} aria-hidden="true" />}
-                      title="Sin coincidencias"
-                      hint={`Ningún usuario coincide con “${query}”. Prueba con otro nombre o correo.`}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <AdminTable
+          rows={filtered}
+          rowKey={(u) => u.id}
+          minWidth="36rem"
+          columns={[
+            {
+              key: "name", header: "Nombre", primary: true,
+              cell: (u) => (
+                <button type="button" onClick={() => setSelected(u)} className="admin-user-row-btn">
+                  {u.name}
+                </button>
+              ),
+            },
+            {
+              key: "email", header: "Email",
+              cell: (u) => <span className="admin-cell-truncate admin-cell-muted" title={u.email}>{u.email}</span>,
+            },
+            {
+              key: "role", header: "Rol",
+              cell: (u) => (
+                <Badge variant={u.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
+                  {u.role === "admin" ? "Admin" : "Usuario"}
+                </Badge>
+              ),
+            },
+            { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => enrollmentCount(u.id) },
+            {
+              key: "created", header: "Registro",
+              cell: (u) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{u.createdAt}</span>,
+            },
+          ]}
+          empty={
+            <EmptyState
+              icon={<SearchX size={20} aria-hidden="true" />}
+              title="Sin coincidencias"
+              hint={`Ningún usuario coincide con “${query}”. Prueba con otro nombre o correo.`}
+            />
+          }
+        />
       )}
 
       <UserDetailDialog user={selected} onClose={() => setSelected(null)} />
