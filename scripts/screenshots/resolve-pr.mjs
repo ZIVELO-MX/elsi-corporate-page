@@ -9,8 +9,18 @@ const PROFILE_LINE =
   /^\s*(?:Perfil(?:es)?|Perfil\(es\)) de capturas:\s*(.*?)\s*$/gimu;
 const KNOWN_PROFILES = new Set(["public", "account", "admin"]);
 
+// HTML comments in the PR template (field hints, placeholders) are guidance, not
+// content — they must never be parsed as a mission id, a checkbox or a profile.
+// Strip closed comments, and also drop a dangling unclosed `<!--` to end of body
+// (in HTML/Markdown everything after an unclosed comment is commented out anyway).
+function normalizeBody(body) {
+  return String(body || "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<!--[\s\S]*$/g, "");
+}
+
 export function extractMissionDisplayId(body) {
-  const matches = [...String(body || "").matchAll(MISSION_LINE)]
+  const matches = [...normalizeBody(body).matchAll(MISSION_LINE)]
     .map((match) => match[1].toUpperCase());
   const uniqueMatches = [...new Set(matches)];
 
@@ -22,7 +32,7 @@ export function extractMissionDisplayId(body) {
 }
 
 export function extractScreenshotDecision(body) {
-  const text = String(body || "");
+  const text = normalizeBody(body);
   const required = [...text.matchAll(SCREENSHOTS_REQUIRED)].length;
   const notRequired = [...text.matchAll(SCREENSHOTS_NOT_REQUIRED)].length;
 
@@ -35,7 +45,7 @@ export function extractScreenshotDecision(body) {
 }
 
 export function extractScreenshotProfiles(body) {
-  const matches = [...String(body || "").matchAll(PROFILE_LINE)];
+  const matches = [...normalizeBody(body).matchAll(PROFILE_LINE)];
   if (matches.length > 1) {
     throw new Error("PR description must contain exactly one screenshot profile field");
   }

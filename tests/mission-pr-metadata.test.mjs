@@ -88,3 +88,39 @@ test("returns normalized metadata for a valid screenshot request", () => {
     },
   );
 });
+
+test("ignores HTML comments so template hints are not parsed as profiles", () => {
+  // Reproduces the CI failure: a commented placeholder was read as "<!--".
+  assert.deepEqual(
+    extractScreenshotProfiles("Perfil(es) de capturas: <!-- public, account, admin -->"),
+    [],
+  );
+  // A real value with the template's comment block below the field still parses.
+  assert.deepEqual(
+    extractScreenshotProfiles(
+      "Perfil(es) de capturas: public\n<!--\n  hint: public, account, admin\n-->",
+    ),
+    ["public"],
+  );
+  // A dangling unclosed comment must not leak into the parsed value either.
+  assert.deepEqual(extractScreenshotProfiles("Perfil(es) de capturas: <!-- public"), []);
+});
+
+test("resolves the unfilled PR template to a clean skip (no unknown-profile error)", () => {
+  const template = [
+    "## Misión de Zipform",
+    "Misión ID: ELS-XXXX",
+    "<!-- Completa el ID si el cambio pertenece a una misión. -->",
+    "### Capturas",
+    "- [ ] Requiere capturas",
+    "- [ ] No requiere capturas",
+    "Perfil(es) de capturas:",
+    "<!--",
+    "  Si requiere capturas, lista uno o más perfiles: public, account, admin.",
+    "-->",
+  ].join("\n");
+  assert.deepEqual(resolvePrMetadata(template), {
+    skip: true,
+    reason: "No completed mission or screenshot decision",
+  });
+});
