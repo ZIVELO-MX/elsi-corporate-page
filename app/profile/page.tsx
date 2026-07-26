@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle, BookOpen, CalendarDays, CheckCircle2, Download, FileClock,
-  GraduationCap, LoaderCircle, Mail, MapPin, TicketCheck,
+  GraduationCap, Mail, MapPin, TicketCheck,
 } from "lucide-react";
 import { useAuth, type User } from "@/components/auth-context";
 import type { ProfilePayload, ProfileUpcoming, ProfileCertificate } from "@/app/api/profile/route";
@@ -28,7 +28,7 @@ function Status({ children, tone = "teal" }: { children: React.ReactNode; tone?:
 function Metric({ value, label }: { value: number; label: string }) {
   return (
     <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 text-center sm:text-left">
-      <p className="font-heading text-[22px] font-bold tabular-nums text-[var(--primary-hover)]">{value}</p>
+      <p className="font-heading text-[22px] font-bold tracking-[-0.01em] tabular-nums text-[var(--primary-hover)]">{value}</p>
       <p className="mt-1 text-[11px] font-bold text-[var(--text-muted)]">{label}</p>
     </div>
   );
@@ -125,7 +125,7 @@ function Discover({ empty = false }: { empty?: boolean }) {
       {/* Inline color: globals.css `a { color: inherit }` is unlayered and beats
           Tailwind's layered color utilities, so a link on the navy card would
           otherwise inherit white-on-white. Inline wins the cascade. */}
-      <Link href="/cursos" style={{ color: "var(--accent)" }} className="mt-4 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold transition-transform active:scale-95">Cursos</Link>
+      <Link href="/cursos" style={{ color: "var(--accent)" }} className="mt-4 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold transition-transform active:scale-95">Ver cursos</Link>
     </article>
   );
 }
@@ -140,7 +140,7 @@ function AccountSection({ user }: { user: User }) {
       <div className="flex items-center justify-between gap-3">
         <h2 id="account-title" className="font-heading text-[15px] font-bold text-[var(--text)]">Datos de la cuenta</h2>
         {!editing && (
-          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Editar</button>
+          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Editar</button>
         )}
       </div>
 
@@ -175,7 +175,7 @@ function AccountSection({ user }: { user: User }) {
           </label>
           <div className="flex gap-2">
             <button type="submit" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Guardar</button>
-            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Cancelar</button>
+            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Cancelar</button>
           </div>
           <p className="text-[11px] text-[var(--text-muted)]">Prototipo: por ahora los cambios no se guardan.</p>
         </form>
@@ -234,16 +234,16 @@ export default function ProfilePage() {
         </div>
         <div className="flex items-center gap-2">
           {user.role === "admin" && (
-            <Link href="/admin" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Panel admin</Link>
+            <Link href="/admin" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Panel admin</Link>
           )}
-          <button type="button" onClick={logout} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)]">Cerrar sesión</button>
+          <button type="button" onClick={logout} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Cerrar sesión</button>
         </div>
       </header>
 
       {/* At-a-glance summary spans the full width; the detailed content and the
           account rail split into two columns on desktop. */}
       {state === "ready" && data && !isEmpty && (
-        <section aria-label="Resumen" className="mb-6">
+        <section aria-label="Resumen" className="mb-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 motion-reduce:animate-none">
           <div className="grid grid-cols-3 gap-3 sm:gap-4">
             <Metric value={data.summary.upcoming} label="Próximos" />
             <Metric value={data.summary.completed} label="Realizados" />
@@ -252,18 +252,15 @@ export default function ProfilePage() {
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
+      <div className="grid gap-6 duration-500 animate-in fade-in-0 motion-reduce:animate-none lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
         {/* Main column — activity, depends on load state */}
         <div className="flex min-w-0 flex-col gap-8">
           {state === "loading" && (
-            <div role="status" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5">
-              <div className="flex items-center gap-3">
-                <LoaderCircle className="animate-spin text-[var(--primary)] motion-reduce:animate-none" size={20} aria-hidden="true" />
-                <div>
-                  <p className="text-[13px] font-bold text-[var(--text)]">Cargando tu portal</p>
-                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">Esto puede tomar unos segundos.</p>
-                </div>
-              </div>
+            <div role="status" aria-label="Cargando tu portal" className="flex flex-col gap-4">
+              <div className="h-4 w-28 animate-pulse rounded bg-[var(--muted)] motion-reduce:animate-none" />
+              <div className="h-36 animate-pulse rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--muted)] motion-reduce:animate-none" />
+              <div className="h-28 animate-pulse rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--muted)] motion-reduce:animate-none" />
+              <span className="sr-only">Cargando tu portal…</span>
             </div>
           )}
 
@@ -274,7 +271,7 @@ export default function ProfilePage() {
                 <div>
                   <p className="text-[13px] font-bold text-[var(--destructive)]">No pudimos cargar tu portal</p>
                   <p className="mt-1 text-[11px] text-[var(--text-muted)]">Comprueba tu conexión e inténtalo de nuevo.</p>
-                  <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-colors pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
+                  <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
                 </div>
               </div>
             </div>
