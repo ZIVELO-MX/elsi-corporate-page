@@ -29,7 +29,7 @@ function Status({ children, tone = "teal" }: { children: React.ReactNode; tone?:
 function Metric({ value, label }: { value: number; label: string }) {
   return (
     <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3 text-center sm:text-left">
-      <p className="font-heading text-[22px] font-bold tabular-nums text-[var(--primary-hover)]">{value}</p>
+      <p className="font-heading text-[22px] font-bold tracking-[-0.01em] tabular-nums text-[var(--primary-hover)]">{value}</p>
       <p className="mt-1 text-[11px] font-bold text-[var(--text-muted)]">{label}</p>
     </div>
   );
