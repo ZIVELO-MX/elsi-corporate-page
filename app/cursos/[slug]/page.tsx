@@ -5,9 +5,17 @@ import { getCourseBySlug, getAllCourses, money, modalityLabel, stateMeta, publis
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CourseMedia } from "@/components/course-media";
 import { PrototypeDataNote } from "@/components/prototype-data-note";
+import { buildMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
   return getAllCourses().map((course) => ({ slug: course.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const course = getCourseBySlug(slug);
+  if (!course) return buildMetadata({ title: "Curso no encontrado", path: `/cursos/${slug}` });
+  return buildMetadata({ title: course.title, description: course.description, path: `/cursos/${course.slug}` });
 }
 
 const TONE: Record<string, string> = {

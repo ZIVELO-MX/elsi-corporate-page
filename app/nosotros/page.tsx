@@ -3,6 +3,13 @@ import { SafeImage } from "@/components/safe-image";
 import { siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Nosotros",
+  description: "La historia de ELSI: de la iniciativa estudiantil Bee Blue a un instituto de educación y soluciones ambientales.",
+  path: "/nosotros",
+});
 
 const timelineItems = [
   { num: "2019", style: "filled", label: "Bee Blue", desc: "Nace la iniciativa estudiantil enfocada en educación y concientización ambiental." },
