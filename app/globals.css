@@ -1021,7 +1021,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-table-scroll { overflow: auto; max-height: calc(100dvh - 15rem); }
 .admin-table-scroll thead th { position: sticky; top: 0; z-index: 1; background: var(--muted); }
 .admin-num { text-align: right; font-variant-numeric: tabular-nums; }
-.admin-cell-truncate { max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-cell-truncate { max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Reusable AdminTable (components/admin/data-table.tsx). Cell padding and type
    live here so pages stop repeating them inline; the mobile card reflow is in
@@ -1035,7 +1035,9 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-table--responsive tbody tr { border-bottom: 1px solid var(--border); }
 .admin-table--responsive tbody tr:last-child { border-bottom: none; }
 .admin-table--responsive th[data-align="right"], .admin-table--responsive td[data-align="right"] { text-align: right; }
-.admin-td-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+/* Actions stack vertically so the column stays narrow (side-by-side buttons made
+   the table outgrow its container and clip on the right). Mobile stretches them. */
+.admin-td-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 0.375rem; }
 .admin-td-empty { padding: 0 !important; }
 .admin-cell-muted { color: var(--text-muted); }
 /* Name button sits inside a padded AdminTable cell, so it carries no padding of
@@ -1240,6 +1242,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .admin-table--responsive td.admin-td-actions::before { content: none; }
   .admin-table--responsive td.admin-td-empty { display: block; text-align: center; }
   .admin-table--responsive td.admin-td-empty::before { content: none; }
+  .admin-table--responsive td[data-desktop-only] { display: none; }
 }
 
 @media (max-width: 800px) {

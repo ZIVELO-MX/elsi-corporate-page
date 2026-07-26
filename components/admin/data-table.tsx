@@ -2,13 +2,17 @@ import type { ReactNode } from "react";
 
 export type AdminColumn<T> = {
   key: string;
-  header: string;
+  header: ReactNode;
   cell: (row: T) => ReactNode;
   align?: "left" | "right";
   /** On mobile this column becomes the card title (its label is hidden). */
   primary?: boolean;
   /** Hide the mobile "label: value" prefix without making it the title. */
   hideMobileLabel?: boolean;
+  /** Mobile card label when `header` isn't a plain string (e.g. a checkbox). */
+  mobileLabel?: string;
+  /** Show only on desktop; hidden in the mobile card view (e.g. bulk-select). */
+  desktopOnly?: boolean;
 };
 
 type AdminTableProps<T> = {
@@ -50,7 +54,7 @@ export function AdminTable<T>({
           <thead>
             <tr>
               {columns.map((c) => (
-                <th key={c.key} scope="col" data-align={c.align}>
+                <th key={c.key} scope="col" data-align={c.align} data-desktop-only={c.desktopOnly || undefined}>
                   {c.header}
                 </th>
               ))}
@@ -71,16 +75,23 @@ export function AdminTable<T>({
             ) : (
               rows.map((row) => (
                 <tr key={rowKey(row)}>
-                  {columns.map((c) => (
-                    <td
-                      key={c.key}
-                      data-align={c.align}
-                      data-primary={c.primary || undefined}
-                      data-label={c.primary || c.hideMobileLabel ? undefined : c.header}
-                    >
-                      {c.cell(row)}
-                    </td>
-                  ))}
+                  {columns.map((c) => {
+                    const label =
+                      c.primary || c.hideMobileLabel
+                        ? undefined
+                        : c.mobileLabel ?? (typeof c.header === "string" ? c.header : undefined);
+                    return (
+                      <td
+                        key={c.key}
+                        data-align={c.align}
+                        data-primary={c.primary || undefined}
+                        data-desktop-only={c.desktopOnly || undefined}
+                        data-label={label}
+                      >
+                        {c.cell(row)}
+                      </td>
+                    );
+                  })}
                   {actions ? (
                     <td className="admin-td-actions" data-label={actionsHeader}>
                       {actions(row)}
