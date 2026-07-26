@@ -1,8 +1,9 @@
 "use client";
 
 import { useId, useMemo, useRef, useState } from "react";
-import { Search, SearchX, ChevronRight } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
+import { AdminTable } from "@/components/admin/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -39,7 +40,6 @@ const emptyForm = (): CourseForm => ({
 const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" };
 const fieldInputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" };
 const fieldGridStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" };
-const rowBtnStyle: React.CSSProperties = { width: "100%", textAlign: "left", padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", color: "var(--text)" };
 
 // Pairs a label with its control via a generated id, so screen readers announce
 // them together (fixes label-has-associated-control / control-has-associated-label).
@@ -245,67 +245,44 @@ export default function AdminCourses() {
       {loading ? (
         <TableSkeleton rows={6} widths={["12rem", "8rem", "5rem", "5rem", "5rem", "4rem", "4rem"]} />
       ) : (
-      <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div className="admin-table-scroll">
-        <table className="admin-table" style={{ width: "100%", minWidth: "46rem", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-              {["Título", "Categoría", "Modalidad", "Duración", "Estado", "Estudiantes", "Acciones"].map(h => (
-                <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: h === "Estudiantes" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(c => (
-              <tr key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: 0 }}>
-                  <button
-                    type="button"
-                    onClick={() => startEdit(c)}
-                    className="admin-user-row-btn"
-                    style={rowBtnStyle}
-                  >
-                    {c.title}
-                  </button>
-                </td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.category}</td>
-                <td style={{ padding: "0.75rem 1rem" }}>
-                  <Badge variant="outline" style={{ fontSize: "0.75rem" }}>{c.modality === "online" ? "En línea" : "Presencial"}</Badge>
-                </td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{c.duration}</td>
-                <td style={{ padding: "0.75rem 1rem" }}>
-                  <button
-                    type="button"
-                    onClick={() => toggleCourse(c.id)}
-                    aria-label={`Cambiar estado de ${c.title}; actualmente ${c.status === "active" ? "activo" : "inactivo"}`}
-                    style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}
-                  >
-                    <Badge variant={c.status === "active" ? "default" : "secondary"}>
-                      {c.status === "active" ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </button>
-                </td>
-                <td className="admin-num" style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem" }}>{c.students}</td>
-                <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem" }}>Editar <ChevronRight size={13} strokeWidth={2} aria-hidden="true" /></span>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ padding: 0 }}>
-                  <EmptyState
-                    icon={<SearchX size={20} aria-hidden="true" />}
-                    title="Sin coincidencias"
-                    hint="Ningún curso coincide con los filtros actuales. Ajusta la búsqueda o el estado."
-                  />
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        </div>
-      </div>
+        <AdminTable
+          rows={filtered}
+          rowKey={(c) => c.id}
+          minWidth="42rem"
+          columns={[
+            {
+              key: "title", header: "Título", primary: true,
+              cell: (c) => (
+                <button type="button" onClick={() => startEdit(c)} className="admin-user-row-btn">
+                  {c.title}
+                </button>
+              ),
+            },
+            { key: "category", header: "Categoría", cell: (c) => <span className="admin-cell-muted">{c.category}</span> },
+            { key: "modality", header: "Modalidad", cell: (c) => <Badge variant="outline" style={{ fontSize: "0.75rem" }}>{c.modality === "online" ? "En línea" : "Presencial"}</Badge> },
+            { key: "duration", header: "Duración", cell: (c) => <span className="admin-cell-muted">{c.duration}</span> },
+            {
+              key: "status", header: "Estado",
+              cell: (c) => (
+                <button type="button" onClick={() => toggleCourse(c.id)}
+                  aria-label={`Cambiar estado de ${c.title}; actualmente ${c.status === "active" ? "activo" : "inactivo"}`}
+                  style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
+                  <Badge variant={c.status === "active" ? "default" : "secondary"}>
+                    {c.status === "active" ? "Activo" : "Inactivo"}
+                  </Badge>
+                </button>
+              ),
+            },
+            { key: "students", header: "Estudiantes", align: "right", cell: (c) => c.students },
+          ]}
+          empty={
+            <EmptyState
+              icon={<SearchX size={20} aria-hidden="true" />}
+              title="Sin coincidencias"
+              hint="Ningún curso coincide con los filtros actuales. Ajusta la búsqueda o el estado."
+            />
+          }
+        />
       )}
 
       <ConfirmDialog

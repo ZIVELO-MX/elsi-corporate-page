@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, SearchX, Inbox, CheckCircle2, Mail, Phone } from "lucide-react";
 import { useAdminData, type Lead, type LeadStatus } from "@/lib/admin-data";
+import { AdminTable } from "@/components/admin/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -13,8 +14,6 @@ import { useToast } from "@/components/ui/toast";
 type StatusFilter = "todos" | LeadStatus;
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
-const thStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", whiteSpace: "nowrap" };
-const cellStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" };
 
 function StatusBadge({ status }: { status: LeadStatus }) {
   return status === "nuevo"
@@ -86,64 +85,52 @@ export default function AdminContacto() {
       {loading ? (
         <TableSkeleton rows={5} widths={["9rem", "14rem", "9rem", "6rem", "6rem", "9rem"]} />
       ) : (
-      <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div className="admin-table-scroll">
-          <table className="admin-table" style={{ width: "100%", minWidth: "48rem", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-                {["Nombre", "Contacto", "Curso", "Fecha", "Estado", ""].map((h) => (
-                  <th key={h} scope="col" style={thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((l) => (
-                <tr key={l.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{l.name}</td>
-                  <td style={cellStyle}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem" }}>
-                      <a href={`mailto:${l.email}`} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "var(--text)" }}><Mail size={12} aria-hidden="true" />{l.email}</a>
-                      <a href={`tel:${l.phone.replace(/[^0-9+]/g, "")}`} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}><Phone size={12} aria-hidden="true" />{l.phone}</a>
-                    </div>
-                  </td>
-                  <td className="admin-cell-truncate" title={courseTitle(l.courseSlug) ?? undefined} style={cellStyle}>{courseTitle(l.courseSlug) ?? "—"}</td>
-                  <td style={cellStyle}>{l.createdAt}</td>
-                  <td style={{ padding: "0.75rem 1rem" }}><StatusBadge status={l.status} /></td>
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                      <Button type="button" variant="outline" size="sm" onClick={() => setOpenLead(l)}>Ver mensaje</Button>
-                      {l.status === "nuevo" && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => attend(l)}>
-                          <CheckCircle2 size={12} /> Marcar atendido
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} style={{ padding: 0 }}>
-                    {leads.length === 0 ? (
-                      <EmptyState
-                        icon={<Inbox size={20} aria-hidden="true" />}
-                        title="Sin mensajes todavía"
-                        hint="Los mensajes enviados desde el formulario de contacto aparecerán aquí."
-                      />
-                    ) : (
-                      <EmptyState
-                        icon={<SearchX size={20} aria-hidden="true" />}
-                        title="Sin coincidencias"
-                        hint="Ningún mensaje coincide con los filtros actuales. Ajusta la búsqueda o el estado."
-                      />
-                    )}
-                  </td>
-                </tr>
+        <AdminTable
+          rows={filtered}
+          rowKey={(l) => l.id}
+          minWidth="46rem"
+          actionsHeader=""
+          columns={[
+            { key: "name", header: "Nombre", primary: true, cell: (l) => <span style={{ fontWeight: 500 }}>{l.name}</span> },
+            {
+              key: "contact", header: "Contacto",
+              cell: (l) => (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", alignItems: "flex-end", textAlign: "right" }}>
+                  <a href={`mailto:${l.email}`} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "var(--text)" }}><Mail size={12} aria-hidden="true" />{l.email}</a>
+                  <a href={`tel:${l.phone.replace(/[^0-9+]/g, "")}`} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}><Phone size={12} aria-hidden="true" />{l.phone}</a>
+                </div>
+              ),
+            },
+            { key: "course", header: "Curso", cell: (l) => <span className="admin-cell-truncate admin-cell-muted" title={courseTitle(l.courseSlug) ?? undefined}>{courseTitle(l.courseSlug) ?? "—"}</span> },
+            { key: "date", header: "Fecha", cell: (l) => <span className="admin-cell-muted">{l.createdAt}</span> },
+            { key: "status", header: "Estado", cell: (l) => <StatusBadge status={l.status} /> },
+          ]}
+          actions={(l) => (
+            <>
+              <Button type="button" variant="outline" size="sm" onClick={() => setOpenLead(l)}>Ver mensaje</Button>
+              {l.status === "nuevo" && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => attend(l)}>
+                  <CheckCircle2 size={12} /> Marcar atendido
+                </Button>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </>
+          )}
+          empty={
+            leads.length === 0 ? (
+              <EmptyState
+                icon={<Inbox size={20} aria-hidden="true" />}
+                title="Sin mensajes todavía"
+                hint="Los mensajes enviados desde el formulario de contacto aparecerán aquí."
+              />
+            ) : (
+              <EmptyState
+                icon={<SearchX size={20} aria-hidden="true" />}
+                title="Sin coincidencias"
+                hint="Ningún mensaje coincide con los filtros actuales. Ajusta la búsqueda o el estado."
+              />
+            )
+          }
+        />
       )}
 
       <Dialog open={!!openLead} onOpenChange={(open) => { if (!open) setOpenLead(null); }}>
