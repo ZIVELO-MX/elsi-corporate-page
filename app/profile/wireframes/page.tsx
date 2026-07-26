@@ -66,7 +66,7 @@ function CourseCard({ online = false }: { online?: boolean }) {
         <Status tone="green"><TicketCheck size={12} aria-hidden="true" />Pagado</Status>
       </div>
       <dl className="grid gap-2 text-[12px] text-[var(--text-muted)] sm:grid-cols-2">
-        <div className="flex gap-2"><CalendarDays size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Fecha y hora</dt><dd>18 jul · 09:00–13:00</dd></div></div>
+        <div className="flex gap-2"><CalendarDays size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Fecha y hora</dt><dd>18 jul · 09:00-13:00</dd></div></div>
         <div className="flex gap-2"><GraduationCap size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Modalidad</dt><dd>{online ? "En línea" : "Presencial"}</dd></div></div>
         <div className="flex gap-2 sm:col-span-2"><MapPin size={15} className="mt-0.5 shrink-0 text-[var(--primary)]" aria-hidden="true" /><div><dt className="sr-only">Información de acceso</dt><dd>{online ? "Te enviaremos los datos de acceso por correo." : "Campus ELSI · Av. Universidad 1200"}</dd></div></div>
       </dl>

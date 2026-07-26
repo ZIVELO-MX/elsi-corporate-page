@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth, type User } from "@/components/auth-context";
 import type { ProfilePayload, ProfileUpcoming, ProfileCertificate } from "@/app/api/profile/route";
+import styles from "./profile.module.css";
 
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
 
@@ -42,6 +43,36 @@ function InfoNote({ children }: { children: React.ReactNode }) {
   return <p className="mt-3 rounded-[var(--radius-sm)] bg-[var(--primary-light)] p-3 text-[11px] leading-5 text-[var(--text-muted)]">{children}</p>;
 }
 
+function ProfileSkeleton() {
+  return (
+    <section
+      className={styles.skeleton}
+      role="status"
+      aria-label="Cargando tu portal"
+      aria-busy="true"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <span className={`${styles.skeletonLine} h-3 w-24`} />
+          <span className={`${styles.skeletonLine} h-6 w-48 max-w-full`} />
+        </div>
+        <span className={`${styles.skeletonLine} size-11 shrink-0 rounded-full`} />
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        {["one", "two", "three"].map((item) => (
+          <span key={item} className={`${styles.skeletonLine} h-16`} />
+        ))}
+      </div>
+      <div className="mt-6 flex flex-col gap-2">
+        <span className={`${styles.skeletonLine} h-4 w-28`} />
+        <span className={`${styles.skeletonLine} h-4 w-full`} />
+        <span className={`${styles.skeletonLine} h-4 w-2/3`} />
+      </div>
+      <span className="sr-only">Estamos preparando tus cursos y constancias.</span>
+    </section>
+  );
+}
+
 function UpcomingCard({ c }: { c: ProfileUpcoming }) {
   if (c.access === "access-pending") {
     return (
@@ -54,7 +85,7 @@ function UpcomingCard({ c }: { c: ProfileUpcoming }) {
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
           style={{ color: "var(--primary-hover)" }}
-          className="mt-3 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-extrabold transition-colors pointer-fine:hover:bg-[var(--primary-light)]"
+        className={`${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-extrabold pointer-fine:hover:bg-[var(--primary-light)]`}
         >
           Contactar soporte
         </a>
@@ -108,9 +139,10 @@ function CertificateCard({ c }: { c: ProfileCertificate }) {
       <button
         type="button"
         aria-label={`Descargar constancia de ${c.course}`}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] text-white transition-transform active:scale-95"
+        className={`${styles.control} inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[11px] font-extrabold text-white`}
       >
         <Download size={16} aria-hidden="true" />
+        <span>Descargar</span>
       </button>
     </article>
   );
@@ -125,7 +157,7 @@ function Discover({ empty = false }: { empty?: boolean }) {
       {/* Inline color: globals.css `a { color: inherit }` is unlayered and beats
           Tailwind's layered color utilities, so a link on the navy card would
           otherwise inherit white-on-white. Inline wins the cascade. */}
-      <Link href="/cursos" style={{ color: "var(--accent)" }} className="mt-4 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold transition-transform active:scale-95">Ver cursos</Link>
+      <Link href="/cursos" style={{ color: "var(--accent)" }} className={`${styles.control} mt-4 inline-flex items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold`}>Ver cursos</Link>
     </article>
   );
 }
@@ -136,11 +168,11 @@ function AccountSection({ user }: { user: User }) {
   const [saved, setSaved] = useState(false);
 
   return (
-    <section aria-labelledby="account-title" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4">
+    <section aria-labelledby="account-title" className={`${styles.revealItem} rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4`} data-reveal-index="0">
       <div className="flex items-center justify-between gap-3">
         <h2 id="account-title" className="font-heading text-[15px] font-bold text-[var(--text)]">Datos de la cuenta</h2>
         {!editing && (
-          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Editar</button>
+          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Editar</button>
         )}
       </div>
 
@@ -174,8 +206,8 @@ function AccountSection({ user }: { user: User }) {
             />
           </label>
           <div className="flex gap-2">
-            <button type="submit" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Guardar</button>
-            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Cancelar</button>
+            <button type="submit" className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white`}>Guardar</button>
+            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cancelar</button>
           </div>
           <p className="text-[11px] text-[var(--text-muted)]">Prototipo: por ahora los cambios no se guardan.</p>
         </form>
@@ -226,7 +258,7 @@ export default function ProfilePage() {
   const isEmpty = data && data.upcoming.length === 0 && data.history.length === 0 && data.certificates.length === 0;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
+    <main className={`${styles.portalContent} mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12`}>
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[var(--primary)]">Portal del alumno</p>
@@ -234,16 +266,16 @@ export default function ProfilePage() {
         </div>
         <div className="flex items-center gap-2">
           {user.role === "admin" && (
-            <Link href="/admin" className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Panel admin</Link>
+            <Link href="/admin" className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Panel admin</Link>
           )}
-          <button type="button" onClick={logout} className="inline-flex min-h-9 items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[var(--paper-warm)]">Cerrar sesión</button>
+          <button type="button" onClick={logout} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cerrar sesión</button>
         </div>
       </header>
 
       {/* At-a-glance summary spans the full width; the detailed content and the
           account rail split into two columns on desktop. */}
       {state === "ready" && data && !isEmpty && (
-        <section aria-label="Resumen" className="mb-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 motion-reduce:animate-none">
+        <section aria-label="Resumen" className={`${styles.revealItem} mb-6`} data-reveal-index="0">
           <div className="grid grid-cols-3 gap-3 sm:gap-4">
             <Metric value={data.summary.upcoming} label="Próximos" />
             <Metric value={data.summary.completed} label="Realizados" />
@@ -252,37 +284,32 @@ export default function ProfilePage() {
         </section>
       )}
 
-      <div className="grid gap-6 duration-500 animate-in fade-in-0 motion-reduce:animate-none lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
-        {/* Main column — activity, depends on load state */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
+        {/* Main column, activity depends on load state */}
         <div className="flex min-w-0 flex-col gap-8">
           {state === "loading" && (
-            <div role="status" aria-label="Cargando tu portal" className="flex flex-col gap-4">
-              <div className="h-4 w-28 animate-pulse rounded bg-[var(--muted)] motion-reduce:animate-none" />
-              <div className="h-36 animate-pulse rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--muted)] motion-reduce:animate-none" />
-              <div className="h-28 animate-pulse rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--muted)] motion-reduce:animate-none" />
-              <span className="sr-only">Cargando tu portal…</span>
-            </div>
+            <ProfileSkeleton />
           )}
 
           {state === "error" && (
-            <div role="alert" className="rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4">
+            <div role="alert" className={`${styles.revealItem} rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4`} data-reveal-index="0">
               <div className="flex gap-3">
                 <AlertCircle className="shrink-0 text-[var(--destructive)]" size={19} aria-hidden="true" />
                 <div>
                   <p className="text-[13px] font-bold text-[var(--destructive)]">No pudimos cargar tu portal</p>
                   <p className="mt-1 text-[11px] text-[var(--text-muted)]">Comprueba tu conexión e inténtalo de nuevo.</p>
-                  <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-[background-color,transform] active:scale-[.97] pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
+                  <button type="button" onClick={() => { setState("loading"); load(); }} className={`${styles.control} mt-3 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] pointer-fine:hover:bg-[#f9e8e8]`}>Reintentar</button>
                 </div>
               </div>
             </div>
           )}
 
-          {state === "ready" && data && isEmpty && <Discover empty />}
+          {state === "ready" && data && isEmpty && <div className={styles.revealItem} data-reveal-index="1"><Discover empty /></div>}
 
           {state === "ready" && data && !isEmpty && (
             <>
               {data.upcoming.length > 0 && (
-                <section aria-labelledby="next-title">
+                <section aria-labelledby="next-title" className={styles.revealItem} data-reveal-index="1">
                   <SectionTitle id="next-title" title="Lo siguiente" />
                   <div className="flex flex-col gap-3">
                     {data.upcoming.map((c) => <UpcomingCard key={c.id} c={c} />)}
@@ -292,7 +319,7 @@ export default function ProfilePage() {
               )}
 
               {data.history.length > 0 && (
-                <section aria-labelledby="history-title">
+                <section aria-labelledby="history-title" className={styles.revealItem} data-reveal-index="2">
                   <SectionTitle id="history-title" title="Historial" />
                   <div className="divide-y divide-[var(--border)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-4">
                     {data.history.map((h) => (
@@ -309,7 +336,7 @@ export default function ProfilePage() {
               )}
 
               {data.certificates.length > 0 && (
-                <section aria-labelledby="cert-title">
+                <section aria-labelledby="cert-title" className={styles.revealItem} data-reveal-index="3">
                   <SectionTitle id="cert-title" title="Constancias" />
                   <div className="flex flex-col gap-3">
                     {data.certificates.map((c) => <CertificateCard key={c.id} c={c} />)}
@@ -320,19 +347,19 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Account rail — persistent identity + support, sticky on desktop */}
+        {/* Account rail, persistent identity and support on desktop */}
         <aside className="flex flex-col gap-6 lg:sticky lg:top-6">
           <AccountSection user={user} />
 
           {state === "ready" && data && !isEmpty && (
-            <section aria-label="Descubre nuevos cursos"><Discover /></section>
+            <section aria-label="Descubre nuevos cursos" className={styles.revealItem} data-reveal-index="2"><Discover /></section>
           )}
 
-          <section aria-labelledby="help-title" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
+          <section aria-labelledby="help-title" className={`${styles.revealItem} rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4`} data-reveal-index="3">
             <Mail className="text-[var(--primary)]" size={22} aria-hidden="true" />
             <h2 id="help-title" className="mt-3 font-heading text-[15px] font-bold text-[var(--text)]">¿Necesitas ayuda?</h2>
             <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">Para dudas sobre inscripciones, acceso o constancias, escribe al canal de soporte.</p>
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Enviar correo</a>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className={`${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white`}>Enviar correo</a>
           </section>
         </aside>
       </div>

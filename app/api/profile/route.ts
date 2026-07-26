@@ -33,8 +33,8 @@ export type ProfilePayload = {
 const DATA: ProfilePayload = {
   summary: { upcoming: 2, completed: 3, certificates: 2 },
   upcoming: [
-    { id: "u1", title: "Gestión ambiental aplicada", modality: "presencial", access: "paid", date: "18 jul", time: "09:00–13:00", location: "Campus ELSI · Av. Universidad 1200" },
-    { id: "u2", title: "Auditoría ambiental para organizaciones", modality: "online", access: "access-pending", date: "02 ago", time: "17:00–19:00" },
+    { id: "u1", title: "Gestión ambiental aplicada", modality: "presencial", access: "paid", date: "18 jul", time: "09:00-13:00", location: "Campus ELSI · Av. Universidad 1200" },
+    { id: "u2", title: "Auditoría ambiental para organizaciones", modality: "online", access: "access-pending", date: "02 ago", time: "17:00-19:00" },
   ],
   history: [
     { id: "h1", title: "Introducción a la sostenibilidad", year: 2024 },
