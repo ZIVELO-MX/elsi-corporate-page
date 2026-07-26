@@ -1028,7 +1028,10 @@ body[data-section-labels="true"] section[data-section-label]::before {
 /* Reusable AdminTable (components/admin/data-table.tsx). Cell padding and type
    live here so pages stop repeating them inline; the mobile card reflow is in
    the max-width:800px block below. */
-.admin-table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+/* container-type lets the table reflow to cards based on its OWN width, not the
+   viewport — so it also switches when the sidebar (visible ≥800px) squeezes the
+   content column (e.g. at 1024px), where a viewport media query would miss it. */
+.admin-table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; container-type: inline-size; }
 .admin-table--responsive { width: 100%; min-width: var(--admin-table-min, 36rem); border-collapse: collapse; }
 .admin-table--responsive th, .admin-table--responsive td { padding: 0.75rem 1rem; text-align: left; }
 .admin-table--responsive thead tr { border-bottom: 1px solid var(--border); background: var(--muted); }
@@ -1041,6 +1044,29 @@ body[data-section-labels="true"] section[data-section-label]::before {
    the table outgrow its container and clip on the right). Mobile stretches them. */
 .admin-td-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 0.375rem; }
 .admin-td-empty { padding: 0 !important; }
+
+/* When the table's container is too narrow for a real table, reflow rows to
+   stacked label:value cards (label from data-label). Threshold sits below the
+   widest table's natural width so full tables still show on normal desktops. */
+@container (max-width: 820px) {
+  .admin-table-card .admin-table-scroll { overflow: visible; max-height: none; }
+  .admin-table--responsive { min-width: 0 !important; }
+  .admin-table--responsive thead { display: none; }
+  .admin-table--responsive tbody,
+  .admin-table--responsive tr,
+  .admin-table--responsive td { display: block; }
+  .admin-table--responsive tbody tr { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); margin: 0 0 0.75rem; padding: 0.25rem 0; }
+  .admin-table--responsive tbody tr:last-child { margin-bottom: 0; }
+  .admin-table--responsive td { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.4rem 1rem; border: none; text-align: right; }
+  .admin-table--responsive td::before { content: attr(data-label); flex: 0 0 auto; text-align: left; font-size: 0.6875rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .admin-table--responsive td[data-primary] { padding-top: 0.6rem; padding-bottom: 0.25rem; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .admin-table--responsive td[data-primary]::before { content: none; }
+  .admin-table--responsive td.admin-td-actions { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0.5rem; text-align: left; margin-top: 0.25rem; padding-top: 0.6rem; border-top: 1px solid var(--border); }
+  .admin-table--responsive td.admin-td-actions::before { content: none; }
+  .admin-table--responsive td.admin-td-empty { display: block; text-align: center; }
+  .admin-table--responsive td.admin-td-empty::before { content: none; }
+  .admin-table--responsive td[data-desktop-only] { display: none; }
+}
 .admin-cell-muted { color: var(--text-muted); }
 /* Name button sits inside a padded AdminTable cell, so it carries no padding of
    its own and inherits the cell's type (incl. the larger, bold mobile title). */
@@ -1249,26 +1275,6 @@ body[data-section-labels="true"] section[data-section-label]::before {
   }
   .admin-stats-grid { grid-template-columns: 1fr !important; }
   .admin-two-col { grid-template-columns: 1fr !important; }
-
-  /* AdminTable → stacked label:value cards. Scoped to --responsive so legacy
-     inline-styled tables keep their horizontal scroll until they're migrated. */
-  .admin-table-card .admin-table-scroll { overflow: visible; max-height: none; }
-  .admin-table--responsive { min-width: 0 !important; }
-  .admin-table--responsive thead { display: none; }
-  .admin-table--responsive tbody,
-  .admin-table--responsive tr,
-  .admin-table--responsive td { display: block; }
-  .admin-table--responsive tbody tr { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); margin: 0 0 0.75rem; padding: 0.25rem 0; }
-  .admin-table--responsive tbody tr:last-child { margin-bottom: 0; }
-  .admin-table--responsive td { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.4rem 1rem; border: none; text-align: right; }
-  .admin-table--responsive td::before { content: attr(data-label); flex: 0 0 auto; text-align: left; font-size: 0.6875rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .admin-table--responsive td[data-primary] { padding-top: 0.6rem; padding-bottom: 0.25rem; font-size: 0.95rem; font-weight: 700; color: var(--text); }
-  .admin-table--responsive td[data-primary]::before { content: none; }
-  .admin-table--responsive td.admin-td-actions { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0.5rem; text-align: left; margin-top: 0.25rem; padding-top: 0.6rem; border-top: 1px solid var(--border); }
-  .admin-table--responsive td.admin-td-actions::before { content: none; }
-  .admin-table--responsive td.admin-td-empty { display: block; text-align: center; }
-  .admin-table--responsive td.admin-td-empty::before { content: none; }
-  .admin-table--responsive td[data-desktop-only] { display: none; }
 }
 
 @media (max-width: 800px) {
