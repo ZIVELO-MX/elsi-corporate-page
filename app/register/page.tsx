@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -63,48 +64,51 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit} noValidate aria-busy={loading}>
-        <header>
-          <p className="auth-eyebrow">Portal ELSI</p>
-          <h1>Crear cuenta</h1>
-          <p className="auth-lede">Regístrate para acceder a tus cursos.</p>
-        </header>
+    <AuthShell title="Crear cuenta" subtitle="Regístrate para acceder a tus cursos.">
+      <form className="w-full" onSubmit={handleSubmit} noValidate aria-busy={loading}>
+        {formError ? (
+          <p className="mb-4 rounded-[var(--radius-sm)] border border-[#E9C8C8] bg-[#FDF2F2] px-3 py-2.5 text-[12px] font-semibold text-[var(--destructive)]" role="alert">
+            {formError}
+          </p>
+        ) : null}
 
-        {formError ? <p className="auth-form-error" role="alert">{formError}</p> : null}
+        <div className="space-y-4">
+          <Field data-invalid={Boolean(errors.name)}>
+            <Label htmlFor="name">Nombre</Label>
+            <Input id="name" name="name" autoComplete="name" value={values.name} onChange={(event) => updateValue("name", event.target.value)} onBlur={(event) => validateField("name", event.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} required />
+            <FieldError id="name-error">{errors.name}</FieldError>
+          </Field>
 
-        <Field data-invalid={Boolean(errors.name)}>
-          <Label htmlFor="name">Nombre</Label>
-          <Input id="name" name="name" autoComplete="name" value={values.name} onChange={(event) => updateValue("name", event.target.value)} onBlur={(event) => validateField("name", event.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} required />
-          <FieldError id="name-error">{errors.name}</FieldError>
-        </Field>
+          <Field data-invalid={Boolean(errors.email)}>
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input id="email" name="email" type="email" inputMode="email" autoComplete="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} onBlur={(event) => validateField("email", event.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} required />
+            <FieldError id="email-error">{errors.email}</FieldError>
+          </Field>
 
-        <Field data-invalid={Boolean(errors.email)}>
-          <Label htmlFor="email">Correo electrónico</Label>
-          <Input id="email" name="email" type="email" inputMode="email" autoComplete="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} onBlur={(event) => validateField("email", event.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} required />
-          <FieldError id="email-error">{errors.email}</FieldError>
-        </Field>
+          <Field data-invalid={Boolean(errors.phone)}>
+            <Label htmlFor="phone">Teléfono</Label>
+            <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} onBlur={(event) => validateField("phone", event.target.value)} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : undefined} required />
+            <FieldError id="phone-error">{errors.phone}</FieldError>
+          </Field>
 
-        <Field data-invalid={Boolean(errors.phone)}>
-          <Label htmlFor="phone">Teléfono</Label>
-          <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} onBlur={(event) => validateField("phone", event.target.value)} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : undefined} required />
-          <FieldError id="phone-error">{errors.phone}</FieldError>
-        </Field>
+          <Field data-invalid={Boolean(errors.password)}>
+            <Label htmlFor="password">Contraseña</Label>
+            <Input id="password" name="password" type="password" autoComplete="new-password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} onBlur={(event) => validateField("password", event.target.value)} aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? "password-error" : undefined} required />
+            <FieldError id="password-error">{errors.password}</FieldError>
+          </Field>
+        </div>
 
-        <Field data-invalid={Boolean(errors.password)}>
-          <Label htmlFor="password">Contraseña</Label>
-          <Input id="password" name="password" type="password" autoComplete="new-password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} onBlur={(event) => validateField("password", event.target.value)} aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? "password-error" : undefined} required />
-          <FieldError id="password-error">{errors.password}</FieldError>
-        </Field>
-
-        <Button type="submit" disabled={loading} variant="primary" className="auth-submit">
+        <Button type="submit" disabled={loading} variant="primary" className="mt-6 w-full">
           {loading ? "Creando cuenta…" : "Crear cuenta"}
         </Button>
-
-        <p className="auth-switch">
-          ¿Ya tienes cuenta? <Link href="/login" style={{ color: "var(--accent)" }}>Inicia sesión</Link>
-        </p>
       </form>
-    </main>
+
+      <p className="mt-6 text-center text-[12px] text-[var(--text-muted)]">
+        ¿Ya tienes cuenta?{" "}
+        <Link href="/login" className="font-bold pointer-fine:hover:underline" style={{ color: "var(--accent)" }}>
+          Inicia sesión
+        </Link>
+      </p>
+    </AuthShell>
   );
 }
