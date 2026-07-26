@@ -226,11 +226,11 @@ export default function ProfilePage() {
   const isEmpty = data && data.upcoming.length === 0 && data.history.length === 0 && data.certificates.length === 0;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[var(--primary)]">Portal del alumno</p>
-          <h1 className="mt-1 break-words font-heading text-2xl font-bold text-[var(--text)]">Hola, {firstName}</h1>
+          <h1 className="mt-1 break-words font-heading text-2xl font-bold tracking-[-0.01em] text-[var(--text)]">Hola, {firstName}</h1>
         </div>
         <div className="flex items-center gap-2">
           {user.role === "admin" && (
@@ -240,82 +240,96 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      {state === "loading" && (
-        <div role="status" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5">
-          <div className="flex items-center gap-3">
-            <LoaderCircle className="animate-spin text-[var(--primary)] motion-reduce:animate-none" size={20} aria-hidden="true" />
-            <div>
-              <p className="text-[13px] font-bold text-[var(--text)]">Cargando tu portal</p>
-              <p className="mt-1 text-[11px] text-[var(--text-muted)]">Esto puede tomar unos segundos.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {state === "error" && (
-        <div role="alert" className="rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4">
-          <div className="flex gap-3">
-            <AlertCircle className="shrink-0 text-[var(--destructive)]" size={19} aria-hidden="true" />
-            <div>
-              <p className="text-[13px] font-bold text-[var(--destructive)]">No pudimos cargar tu portal</p>
-              <p className="mt-1 text-[11px] text-[var(--text-muted)]">Comprueba tu conexión e inténtalo de nuevo.</p>
-              <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-colors pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {state === "ready" && data && isEmpty && <Discover empty />}
-
+      {/* At-a-glance summary spans the full width; the detailed content and the
+          account rail split into two columns on desktop. */}
       {state === "ready" && data && !isEmpty && (
-        <div className="flex flex-col gap-8">
-          {/* Apple/Emil: lead with the real next action (the upcoming course),
-              not a grid of equivalent metrics. Metrics follow as context. */}
-          {data.upcoming.length > 0 && (
-            <section aria-labelledby="next-title">
-              <SectionTitle id="next-title" title="Lo siguiente" />
-              <div className="flex flex-col gap-3">
-                {data.upcoming.map((c) => <UpcomingCard key={c.id} c={c} />)}
-              </div>
-              <InfoNote>La liga de los cursos en línea no aparece en el perfil: se envía únicamente por correo.</InfoNote>
-            </section>
-          )}
+        <section aria-label="Resumen" className="mb-6">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+            <Metric value={data.summary.upcoming} label="Próximos" />
+            <Metric value={data.summary.completed} label="Realizados" />
+            <Metric value={data.summary.certificates} label="Constancias" />
+          </div>
+        </section>
+      )}
 
-          <section aria-label="Resumen">
-            <div className="grid grid-cols-3 gap-2">
-              <Metric value={data.summary.upcoming} label="Próximos" />
-              <Metric value={data.summary.completed} label="Realizados" />
-              <Metric value={data.summary.certificates} label="Constancias" />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
+        {/* Main column — activity, depends on load state */}
+        <div className="flex min-w-0 flex-col gap-8">
+          {state === "loading" && (
+            <div role="status" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5">
+              <div className="flex items-center gap-3">
+                <LoaderCircle className="animate-spin text-[var(--primary)] motion-reduce:animate-none" size={20} aria-hidden="true" />
+                <div>
+                  <p className="text-[13px] font-bold text-[var(--text)]">Cargando tu portal</p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">Esto puede tomar unos segundos.</p>
+                </div>
+              </div>
             </div>
-          </section>
+          )}
 
-          {data.history.length > 0 && (
-            <section aria-labelledby="history-title">
-              <SectionTitle id="history-title" title="Historial" />
-              <div className="divide-y divide-[var(--border)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-4">
-                {data.history.map((h) => (
-                  <div key={h.id} className="flex items-center justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="break-words text-[13px] font-bold text-[var(--text)]">{h.title}</p>
-                      <p className="mt-1 text-[11px] text-[var(--text-muted)]">Realizado · {h.year}</p>
-                    </div>
-                    <CheckCircle2 className="shrink-0 text-[var(--leaf)]" size={18} aria-label="Realizado" />
+          {state === "error" && (
+            <div role="alert" className="rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4">
+              <div className="flex gap-3">
+                <AlertCircle className="shrink-0 text-[var(--destructive)]" size={19} aria-hidden="true" />
+                <div>
+                  <p className="text-[13px] font-bold text-[var(--destructive)]">No pudimos cargar tu portal</p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">Comprueba tu conexión e inténtalo de nuevo.</p>
+                  <button type="button" onClick={() => { setState("loading"); load(); }} className="mt-3 min-h-9 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] transition-colors pointer-fine:hover:bg-[#f9e8e8]">Reintentar</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {state === "ready" && data && isEmpty && <Discover empty />}
+
+          {state === "ready" && data && !isEmpty && (
+            <>
+              {data.upcoming.length > 0 && (
+                <section aria-labelledby="next-title">
+                  <SectionTitle id="next-title" title="Lo siguiente" />
+                  <div className="flex flex-col gap-3">
+                    {data.upcoming.map((c) => <UpcomingCard key={c.id} c={c} />)}
                   </div>
-                ))}
-              </div>
-            </section>
-          )}
+                  <InfoNote>La liga de los cursos en línea no aparece en el perfil: se envía únicamente por correo.</InfoNote>
+                </section>
+              )}
 
-          {data.certificates.length > 0 && (
-            <section aria-labelledby="cert-title">
-              <SectionTitle id="cert-title" title="Constancias" />
-              <div className="flex flex-col gap-3">
-                {data.certificates.map((c) => <CertificateCard key={c.id} c={c} />)}
-              </div>
-            </section>
-          )}
+              {data.history.length > 0 && (
+                <section aria-labelledby="history-title">
+                  <SectionTitle id="history-title" title="Historial" />
+                  <div className="divide-y divide-[var(--border)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-4">
+                    {data.history.map((h) => (
+                      <div key={h.id} className="flex items-center justify-between gap-3 py-3">
+                        <div className="min-w-0">
+                          <p className="break-words text-[13px] font-bold text-[var(--text)]">{h.title}</p>
+                          <p className="mt-1 text-[11px] text-[var(--text-muted)]">Realizado · {h.year}</p>
+                        </div>
+                        <CheckCircle2 className="shrink-0 text-[var(--leaf)]" size={18} aria-label="Realizado" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-          <section aria-label="Descubre nuevos cursos"><Discover /></section>
+              {data.certificates.length > 0 && (
+                <section aria-labelledby="cert-title">
+                  <SectionTitle id="cert-title" title="Constancias" />
+                  <div className="flex flex-col gap-3">
+                    {data.certificates.map((c) => <CertificateCard key={c.id} c={c} />)}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Account rail — persistent identity + support, sticky on desktop */}
+        <aside className="flex flex-col gap-6 lg:sticky lg:top-6">
+          <AccountSection user={user} />
+
+          {state === "ready" && data && !isEmpty && (
+            <section aria-label="Descubre nuevos cursos"><Discover /></section>
+          )}
 
           <section aria-labelledby="help-title" className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
             <Mail className="text-[var(--primary)]" size={22} aria-hidden="true" />
@@ -323,11 +337,7 @@ export default function ProfilePage() {
             <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">Para dudas sobre inscripciones, acceso o constancias, escribe al canal de soporte.</p>
             <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white transition-transform active:scale-95">Enviar correo</a>
           </section>
-        </div>
-      )}
-
-      <div className="mt-8">
-        <AccountSection user={user} />
+        </aside>
       </div>
     </main>
   );
