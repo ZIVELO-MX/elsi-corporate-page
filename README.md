@@ -14,6 +14,23 @@ Sitio web corporativo de ELSI Academy. Incluye landing, catálogo de cursos, blo
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
+## Publicación e indexación
+
+La indexación falla de forma segura. `robots` y los datos estructurados solo se
+habilitan cuando se cumplen las tres condiciones:
+
+1. `NEXT_PUBLIC_PROTOTYPE_MODE=0`
+2. `NEXT_PUBLIC_CONTENT_STATUS=verified`
+3. `NEXT_PUBLIC_SITE_URL` contiene el dominio público aprobado de ELSI
+
+Los cursos y soluciones conservan además un `contentStatus` individual. Solo
+los recursos marcados como `verified` aparecen en sitemap, catálogos públicos
+de producción y datos estructurados. Hasta recibir la información final del
+cliente deben permanecer como `fixture`.
+
+Después de `pnpm build`, `pnpm audit:seo` valida el HTML generado: títulos,
+canonical, robots, encabezados y activos de descubrimiento.
+
 ## Capturas de pull requests
 
 Cada PR debe indicar su misión en la descripción usando el campo `Misión: ELS-XXXX` (ver [`PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)). El workflow:

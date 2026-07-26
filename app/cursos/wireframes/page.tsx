@@ -25,7 +25,7 @@ const DC3 = {
   synopsis: "Marco legal, clasificación, economía circular y elaboración de planes de manejo, con constancia oficial DC-3.",
   modality: "En línea (en vivo)",
   date: "29 de julio",
-  time: "12:00 – 16:00",
+  time: "12:00 - 16:00",
   durationText: "4 horas",
   priceAmount: 550,
   priceLabel: "Recuperación",

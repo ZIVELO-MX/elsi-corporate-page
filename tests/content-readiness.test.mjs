@@ -59,7 +59,7 @@ test("prototype course data stays visibly provisional until client handoff", () 
   const detail = read("app/cursos/[slug]/page.tsx");
   const checkout = read("components/checkout/checkout-experience.tsx");
 
-  assert.match(note, /siteConfig\.prototypeMode/);
+  assert.match(note, /siteConfig\.previewMode/);
   assert.match(note, /Contenido de demostración/);
   assert.match(catalog, /información\s+validada por ELSI/);
   assert.match(detail, /ficha aprobada por ELSI/);

@@ -18,6 +18,11 @@ type PublicContactFormProps = {
   defaultMessage?: string;
   idPrefix: string;
   statusClassName: string;
+  context?: {
+    type: "course" | "solution";
+    id: string;
+    label: string;
+  };
 };
 
 const fields: ContactField[] = ["name", "email", "message"];
@@ -29,6 +34,7 @@ export function PublicContactForm({
   defaultMessage = "",
   idPrefix,
   statusClassName,
+  context,
 }: PublicContactFormProps) {
   const [values, setValues] = useState<ContactValues>({ name: "", email: "", message: defaultMessage });
   const [errors, setErrors] = useState<ContactErrors>({});
@@ -60,6 +66,13 @@ export function PublicContactForm({
 
   return (
     <form ref={formRef} className={className} action={handleSubmit} noValidate aria-label="Solicitud de información">
+      {context ? (
+        <>
+          <input type="hidden" name="resourceType" value={context.type} />
+          <input type="hidden" name="resourceId" value={context.id} />
+          <input type="hidden" name="resourceLabel" value={context.label} />
+        </>
+      ) : null}
       <Field data-invalid={Boolean(errors.name)}>
         <Label htmlFor={`${idPrefix}-name`}>Nombre</Label>
         <Input

@@ -1,14 +1,18 @@
 import type { MetadataRoute } from "next";
-import { SITE, indexable, INTERNAL_ROUTES } from "@/lib/seo";
+import { SITE, indexable } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   // Validation prototype: keep the entire site out of the index.
   if (!indexable) {
     return { rules: { userAgent: "*", disallow: "/" } };
   }
-  // Live: allow public pages, keep internal routes out.
+  // Live: crawlers may read page-level noindex directives on utility and
+  // private routes. Auth remains the access-control boundary.
   return {
-    rules: { userAgent: "*", allow: "/", disallow: [...INTERNAL_ROUTES] },
+    rules: [
+      { userAgent: "*", allow: "/" },
+      { userAgent: "OAI-SearchBot", allow: "/" },
+    ],
     sitemap: `${SITE.url}/sitemap.xml`,
   };
 }

@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="footer-brand">
             <SafeImage
               src="/logos/elsi-horizontal-logo.png"
-              alt="ELSI — Environmental Learning & Solutions Institute"
+              alt="ELSI, Environmental Learning & Solutions Institute"
               width={180}
               height={101}
               className="footer-logo block h-auto w-[190px] object-contain"

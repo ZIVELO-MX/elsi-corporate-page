@@ -6,7 +6,7 @@ type PrototypeDataNoteProps = {
 };
 
 export function PrototypeDataNote({ children }: PrototypeDataNoteProps) {
-  if (!siteConfig.prototypeMode) return null;
+  if (!siteConfig.previewMode) return null;
 
   return (
     <aside className="prototype-data-note" aria-label="Contenido de demostración">

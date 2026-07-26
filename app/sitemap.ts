@@ -1,18 +1,31 @@
 import type { MetadataRoute } from "next";
 import { SITE, indexable, PUBLIC_ROUTES } from "@/lib/seo";
-import { getAllCourses } from "@/lib/courses";
-import { solutions } from "@/lib/solutions";
+import { getVerifiedCourses } from "@/lib/courses";
+import { getVerifiedSolutions } from "@/lib/solutions";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // No sitemap is served while the site is a validation prototype.
   if (!indexable) return [];
 
-  const now = new Date();
   const abs = (path: string) => `${SITE.url}${path === "/" ? "" : path}`;
+  const courses = getVerifiedCourses();
+  const solutions = getVerifiedSolutions();
+  const publicRoutes = PUBLIC_ROUTES.filter((path) => {
+    if (path === "/cursos") return courses.length > 0;
+    if (path === "/soluciones") return solutions.length > 0;
+    return true;
+  });
+  const entry = (path: string, updatedAt?: string) => ({
+    url: abs(path),
+    ...(updatedAt ? { lastModified: updatedAt } : {}),
+  });
 
   return [
-    ...PUBLIC_ROUTES.map((path) => ({ url: abs(path), lastModified: now })),
-    ...getAllCourses().map((c) => ({ url: abs(`/cursos/${c.slug}`), lastModified: now })),
-    ...solutions.map((s) => ({ url: abs(`/soluciones/${s.slug}`), lastModified: now })),
+    ...publicRoutes.map((path) => entry(path)),
+    ...courses.map((course) =>
+      entry(`/cursos/${course.slug}`, course.updatedAt),
+    ),
+    ...solutions.map((solution) =>
+      entry(`/soluciones/${solution.slug}`, solution.updatedAt),
+    ),
   ];
 }

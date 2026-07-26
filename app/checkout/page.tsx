@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
 import { CheckoutExperience } from "@/components/checkout/checkout-experience";
 import { getCheckoutCourseBySlug } from "@/lib/payments";
+import { buildPrivateMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Finalizar inscripción | ELSI",
+export const metadata = buildPrivateMetadata({
+  title: "Finalizar inscripción",
   description: "Confirma tu inscripción y continúa al pago seguro.",
-  // Transactional route: keep out of the index even once the site goes live.
-  robots: { index: false, follow: false },
-};
+  path: "/checkout",
+});
 
 export default async function CheckoutPage({
   searchParams,

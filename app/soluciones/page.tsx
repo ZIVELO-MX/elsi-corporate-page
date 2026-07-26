@@ -1,16 +1,23 @@
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Building2, GraduationCap, Sprout, type LucideIcon } from "lucide-react";
-import { solutions, type Solution } from "@/lib/solutions";
+import {
+  getPublicSolutions,
+  getVerifiedSolutions,
+  type Solution,
+} from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, indexable } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Soluciones",
   description: "Capacitación, soluciones ambientales y educación universitaria: acompañamos a equipos, organizaciones y comunidades.",
   path: "/soluciones",
+  allowIndexing: indexable && getVerifiedSolutions().length > 0,
 });
+
+const publicSolutions = getPublicSolutions();
 
 const solutionIcons: Record<Solution["slug"], LucideIcon> = {
   capacitacion: GraduationCap,
@@ -25,20 +32,29 @@ export default function SolucionesPage() {
         <div className="shell solutions-editorial-hero-grid">
           <div>
             <p className="home-kicker">Soluciones ELSI</p>
-            <h1>Tres formas de convertir el conocimiento ambiental en una ruta de trabajo.</h1>
+            <h1>
+              {publicSolutions.length > 0
+                ? "Tres formas de convertir el conocimiento ambiental en una ruta de trabajo."
+                : "La oferta de soluciones está en preparación."}
+            </h1>
           </div>
           <div className="solutions-editorial-lede">
             <p>
-              Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias.
+              {publicSolutions.length > 0
+                ? "Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias."
+                : "Las rutas aparecerán cuando ELSI valide su alcance, modalidad y entregables."}
             </p>
-            <a href="#indice-soluciones" className="home-text-link">Comparar las rutas <ArrowDown aria-hidden="true" /></a>
+            {publicSolutions.length > 0 ? (
+              <a href="#indice-soluciones" className="home-text-link">Comparar las rutas <ArrowDown aria-hidden="true" /></a>
+            ) : null}
           </div>
         </div>
       </section>
 
+      {publicSolutions.length > 0 ? (
       <nav id="indice-soluciones" className="solutions-editorial-index" aria-label="Índice de soluciones">
         <ol className="shell">
-          {solutions.map((solution, index) => (
+          {publicSolutions.map((solution, index) => (
             <li key={solution.slug}>
               <a href={`#${solution.slug}`}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
@@ -49,9 +65,10 @@ export default function SolucionesPage() {
           ))}
         </ol>
       </nav>
+      ) : null}
 
       <div className="solution-chapters">
-        {solutions.map((solution, index) => {
+        {publicSolutions.map((solution, index) => {
           const Icon = solutionIcons[solution.slug];
           const image = solutionImages[solution.slug];
           const titleId = `${solution.slug}-title`;

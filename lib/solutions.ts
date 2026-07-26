@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/site-config";
+
 type SolutionDefinition = {
   slug: "capacitacion" | "soluciones-ambientales" | "educacion-universitaria";
   title: string;
@@ -10,9 +12,15 @@ type SolutionDefinition = {
   intro: string;
   approach: string;
   delivery: string;
+  contentStatus: "fixture" | "verified";
+  updatedAt?: string;
 };
 
-export const solutions = [
+const defineSolutions = (
+  definitions: readonly SolutionDefinition[],
+): readonly SolutionDefinition[] => definitions;
+
+export const solutions = defineSolutions([
   {
     slug: "capacitacion",
     title: "Capacitación",
@@ -30,6 +38,7 @@ export const solutions = [
     intro: "Diseñamos experiencias formativas claras, aplicables y cercanas para que cada participante pueda convertir el conocimiento ambiental en acciones concretas.",
     approach: "Partimos del contexto, el perfil de las personas y el resultado de aprendizaje esperado. Con esa información definimos una ruta breve, materiales de apoyo y una forma clara de revisar lo aprendido.",
     delivery: "El alcance, la modalidad y el calendario se acuerdan antes de iniciar. Cada propuesta distingue lo incluido de cualquier servicio adicional.",
+    contentStatus: "fixture",
   },
   {
     slug: "soluciones-ambientales",
@@ -48,6 +57,7 @@ export const solutions = [
     intro: "Acompañamos a organizaciones que necesitan ordenar sus prioridades ambientales, documentar procesos y avanzar con una ruta técnica comprensible.",
     approach: "Comenzamos por delimitar el reto y reunir la información disponible. Después organizamos prioridades y entregables para que el equipo pueda tomar decisiones con una secuencia comprensible.",
     delivery: "La propuesta define responsables, documentos y puntos de revisión. No se presentan resultados ni certificaciones antes de contar con evidencia del proyecto.",
+    contentStatus: "fixture",
   },
   {
     slug: "educacion-universitaria",
@@ -66,11 +76,32 @@ export const solutions = [
     intro: "Creamos espacios de aprendizaje para comunidades universitarias que buscan participar, proponer y ejecutar proyectos con impacto ambiental.",
     approach: "Diseñamos la experiencia con la institución y el grupo participante, conectando el tema ambiental con actividades que puedan llevarse al campus o a la comunidad.",
     delivery: "El formato puede adaptarse a conferencia, taller o programa. La disponibilidad y los resultados esperados se confirman con cada institución.",
+    contentStatus: "fixture",
   },
-] as const satisfies readonly SolutionDefinition[];
+] as const satisfies readonly SolutionDefinition[]);
 
-export type Solution = (typeof solutions)[number];
+export type Solution = SolutionDefinition;
 
 export function getSolutionBySlug(slug: string) {
   return solutions.find((solution) => solution.slug === slug);
+}
+
+export function isSolutionVerified(solution: Solution) {
+  return solution.contentStatus === "verified";
+}
+
+export function getVerifiedSolutions() {
+  return solutions.filter(isSolutionVerified);
+}
+
+export function getPublicSolutions() {
+  return siteConfig.previewMode ? solutions : getVerifiedSolutions();
+}
+
+export function getPublicSolutionBySlug(slug: string) {
+  const solution = getSolutionBySlug(slug);
+  if (!solution) return undefined;
+  return siteConfig.previewMode || isSolutionVerified(solution)
+    ? solution
+    : undefined;
 }

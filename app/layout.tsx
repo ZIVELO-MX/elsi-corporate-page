@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth-context";
 import { PrototypeNotice } from "@/components/prototype-notice";
 import { siteConfig } from "@/lib/site-config";
-import { SITE, indexable, organizationJsonLd } from "@/lib/seo";
+import { SITE, SOCIAL_IMAGE, indexable } from "@/lib/seo";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -29,22 +29,27 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
-  // Global indexing policy: noindex while the site is a validation prototype.
   robots: indexable
     ? { index: true, follow: true, googleBot: { index: true, follow: true } }
     : { index: false, follow: false },
-  alternates: { canonical: "/" },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/logos/elsi-full-logo.png",
+    apple: "/logos/elsi-full-logo.png",
+  },
   openGraph: {
     type: "website",
     siteName: SITE.name,
     locale: SITE.locale,
     title: "ELSI | Educación y soluciones ambientales",
     description: SITE.description,
+    images: [SOCIAL_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "ELSI | Educación y soluciones ambientales",
     description: SITE.description,
+    images: [SOCIAL_IMAGE.url],
   },
 };
 
@@ -52,12 +57,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" className={`${manrope.variable} ${sora.variable}`}>
       <body data-section-labels={siteConfig.sectionLabels ? "true" : undefined}>
-        {indexable && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c") }}
-          />
-        )}
         <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
         <AuthProvider>
           <PrototypeNotice />
