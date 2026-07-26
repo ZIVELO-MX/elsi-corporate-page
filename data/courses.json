@@ -1,6 +1,7 @@
 [
   {
     "id": "dc3",
+    "contentStatus": "fixture",
     "slug": "manejo-integral-de-residuos",
     "title": "Manejo Integral de Residuos",
     "category": "Habilidades ambientales",
@@ -12,7 +13,7 @@
     "status": "Próximo",
     "publishState": "upcoming",
     "modality": "online",
-    "schedule": { "date": "29 de julio", "time": "12:00 – 16:00" },
+    "schedule": { "date": "29 de julio", "time": "12:00 - 16:00" },
     "students": 0,
     "price": 550,
     "priceLabel": "Recuperación",
@@ -36,6 +37,7 @@
   },
   {
     "id": "c1",
+    "contentStatus": "fixture",
     "slug": "fundamentos-de-educacion-ambiental",
     "title": "Fundamentos de Educación Ambiental",
     "category": "Sostenibilidad",
@@ -56,6 +58,7 @@
   },
   {
     "id": "c2",
+    "contentStatus": "fixture",
     "slug": "cumplimiento-ambiental-para-empresas",
     "title": "Cumplimiento Ambiental para Empresas",
     "category": "Normatividad",
@@ -77,6 +80,7 @@
   },
   {
     "id": "c3",
+    "contentStatus": "fixture",
     "slug": "liderazgo-ambiental-universitario",
     "title": "Liderazgo Ambiental Universitario",
     "category": "Habilidades ambientales",
@@ -98,6 +102,7 @@
   },
   {
     "id": "c4",
+    "contentStatus": "fixture",
     "slug": "gestion-de-residuos-industriales",
     "title": "Gestión de Residuos Industriales",
     "category": "Sostenibilidad",
@@ -119,6 +124,7 @@
   },
   {
     "id": "c5",
+    "contentStatus": "fixture",
     "slug": "impacto-ambiental-y-permisos",
     "title": "Impacto Ambiental y Permisos",
     "category": "Normatividad",
@@ -138,6 +144,7 @@
   },
   {
     "id": "c6",
+    "contentStatus": "fixture",
     "slug": "comunicacion-de-sostenibilidad",
     "title": "Comunicación de Sostenibilidad",
     "category": "Habilidades ambientales",

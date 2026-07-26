@@ -1,22 +1,36 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Leaf } from "lucide-react";
-import { getAllCourses, money } from "@/lib/courses";
-import { solutions } from "@/lib/solutions";
+import { getPublicCourses, money } from "@/lib/courses";
+import { getPublicSolutions } from "@/lib/solutions";
 import { SafeImage } from "@/components/safe-image";
 import { siteImages } from "@/lib/image-assets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicContactForm } from "@/components/public-contact-form";
 import { CourseMedia } from "@/components/course-media";
-import { buildMetadata } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
+import {
+  buildMetadata,
+  indexable,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
+import { intentRoutes } from "@/lib/agentic-navigation";
 
 export const metadata = buildMetadata({
-  description: "ELSI — Environment Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
+  description: "ELSI, Environmental Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
   path: "/",
 });
 
-const featuredCourses = getAllCourses().slice(0, 3);
+const featuredCourses = getPublicCourses().slice(0, 3);
 const [primaryCourse, ...secondaryCourses] = featuredCourses;
+const publicSolutions = getPublicSolutions();
+const availableIntentRoutes = intentRoutes.filter((intent) => {
+  if (intent.href === "/cursos") return featuredCourses.length > 0;
+  return publicSolutions.some(
+    (solution) => intent.href === `/soluciones/${solution.slug}`,
+  );
+});
 
 const homeFaqs = [
   {
@@ -36,6 +50,12 @@ const homeFaqs = [
 export default function Home() {
   return (
     <main>
+      {indexable ? (
+        <>
+          <StructuredData value={organizationJsonLd} />
+          <StructuredData value={websiteJsonLd} />
+        </>
+      ) : null}
       <section className="home-hero" data-section-label="Home / Hero editorial">
         <SafeImage
           src={siteImages.hero.src}
@@ -57,39 +77,96 @@ export default function Home() {
             </p>
             <div className="home-hero-actions">
               <Button asChild variant="inverse" size="lg">
-                <Link href="/soluciones">Explorar soluciones <ArrowRight data-icon="inline-end" /></Link>
+                <Link
+                  href={
+                    publicSolutions.length > 0 ? "/soluciones" : "/contacto"
+                  }
+                >
+                  {publicSolutions.length > 0
+                    ? "Explorar soluciones"
+                    : "Solicitar información"}{" "}
+                  <ArrowRight data-icon="inline-end" />
+                </Link>
               </Button>
-              <Link href="/cursos" className="home-text-link">Ver cursos</Link>
+              {featuredCourses.length > 0 ? (
+                <Link href="/cursos" className="home-text-link">
+                  Ver cursos
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="home-solutions" data-section-label="Home / Índice de soluciones">
-        <div className="shell home-solutions-layout">
-          <header className="home-section-intro">
-            <p className="home-kicker">Tres rutas, un propósito</p>
-            <h2>La forma de avanzar depende del reto.</h2>
-            <p>Compara el enfoque de cada solución y entra sólo al capítulo que corresponde a tu contexto.</p>
-          </header>
+      {availableIntentRoutes.length > 0 ? (
+        <section
+          className="home-intent"
+          aria-labelledby="home-intent-title"
+          data-section-label="Home / Rutas por intención"
+        >
+          <div className="shell home-intent-layout">
+            <header>
+              <p className="home-kicker">Empieza por tu objetivo</p>
+              <h2 id="home-intent-title">¿Qué necesitas resolver?</h2>
+            </header>
+            <nav aria-label="Rutas según tu objetivo">
+              <ol className="home-intent-list">
+                {availableIntentRoutes.map((intent) => (
+                  <li key={intent.href}>
+                    <Link href={intent.href}>
+                      <span>
+                        <strong>{intent.label}</strong>
+                        <small>{intent.description}</small>
+                      </span>
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </div>
+        </section>
+      ) : null}
 
-          <ol className="home-solutions-index">
-            {solutions.map((solution, index) => (
-              <li key={solution.slug} className="home-solution-index-item" data-layout={solution.layout}>
-                <Link href={`/soluciones/${solution.slug}`}>
-                  <span className="home-solution-number">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="home-solution-index-copy">
-                    <span>{solution.eyebrow}</span>
-                    <strong>{solution.title}</strong>
-                    <small>{solution.audience}</small>
-                  </span>
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {publicSolutions.length > 0 ? (
+        <section
+          className="home-solutions"
+          data-section-label="Home / Índice de soluciones"
+        >
+          <div className="shell home-solutions-layout">
+            <header className="home-section-intro">
+              <p className="home-kicker">Tres rutas, un propósito</p>
+              <h2>La forma de avanzar depende del reto.</h2>
+              <p>
+                Compara el enfoque de cada solución y entra sólo al capítulo que
+                corresponde a tu contexto.
+              </p>
+            </header>
+
+            <ol className="home-solutions-index">
+              {publicSolutions.map((solution, index) => (
+                <li
+                  key={solution.slug}
+                  className="home-solution-index-item"
+                  data-layout={solution.layout}
+                >
+                  <Link href={`/soluciones/${solution.slug}`}>
+                    <span className="home-solution-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="home-solution-index-copy">
+                      <span>{solution.eyebrow}</span>
+                      <strong>{solution.title}</strong>
+                      <small>{solution.audience}</small>
+                    </span>
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      ) : null}
 
       <section className="home-story" data-section-label="Home / Historia documental">
         <div className="shell home-story-grid">
@@ -118,17 +195,22 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-courses" data-section-label="Home / Cursos destacados">
-        <div className="shell">
-          <header className="home-courses-header">
-            <div>
-              <p className="home-kicker">Aprendizaje disponible</p>
-              <h2>Cursos para pasar del interés a la práctica.</h2>
-            </div>
-            <Link href="/cursos" className="home-text-link">Ver catálogo completo</Link>
-          </header>
+      {primaryCourse ? (
+        <section
+          className="home-courses"
+          data-section-label="Home / Cursos destacados"
+        >
+          <div className="shell">
+            <header className="home-courses-header">
+              <div>
+                <p className="home-kicker">Aprendizaje disponible</p>
+                <h2>Cursos para pasar del interés a la práctica.</h2>
+              </div>
+              <Link href="/cursos" className="home-text-link">
+                Ver catálogo completo
+              </Link>
+            </header>
 
-          {primaryCourse ? (
             <div className="home-courses-layout">
               <Link href={`/cursos/${primaryCourse.slug}`} className="home-course-feature">
                 <div className="home-course-feature-media">
@@ -165,9 +247,9 @@ export default function Home() {
                 ))}
               </nav>
             </div>
-          ) : null}
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : null}
 
       <section className="home-faq" data-section-label="Home / Preguntas frecuentes">
         <div className="shell home-faq-grid">

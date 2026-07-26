@@ -1,5 +1,8 @@
+import { siteConfig } from "@/lib/site-config";
+
 export type CourseModality = "online" | "presencial";
 export type PublishState = "draft" | "published" | "upcoming" | "closed" | "pending";
+export type ContentStatus = "fixture" | "verified";
 // ELS-0013 §2.1: curriculum = tema → subtemas[]. Optional; falls back to moduleList[].
 export type CurriculumTopic = { tema: string; subtemas?: string[] };
 
@@ -31,6 +34,8 @@ export type Course = {
   targetAudience?: string[];
   objectives?: string[];
   requirements?: string[];
+  contentStatus?: ContentStatus;
+  updatedAt?: string;
 };
 
 import coursesData from "@/data/courses.json";
@@ -41,6 +46,24 @@ export function getAllCourses(): Course[] {
 
 export function getCourseBySlug(slug: string): Course | undefined {
   return (coursesData as Course[]).find((c) => c.slug === slug);
+}
+
+export function isCourseVerified(course: Course): boolean {
+  return course.contentStatus === "verified";
+}
+
+export function getVerifiedCourses(): Course[] {
+  return getAllCourses().filter(isCourseVerified);
+}
+
+export function getPublicCourses(): Course[] {
+  return siteConfig.previewMode ? getAllCourses() : getVerifiedCourses();
+}
+
+export function getPublicCourseBySlug(slug: string): Course | undefined {
+  const course = getCourseBySlug(slug);
+  if (!course) return undefined;
+  return siteConfig.previewMode || isCourseVerified(course) ? course : undefined;
 }
 
 export function money(n: number): string {

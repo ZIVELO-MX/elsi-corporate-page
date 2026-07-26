@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { getSolutionBySlug, solutions } from "@/lib/solutions";
+import {
+  getPublicSolutionBySlug,
+  getPublicSolutions,
+  isSolutionVerified,
+} from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import {
+  buildMetadata,
+  buildPrivateMetadata,
+  indexable,
+} from "@/lib/seo";
+import { buildContactPath } from "@/lib/agentic-navigation";
 
 type SolutionDetailPageProps = {
   params: Promise<{
@@ -15,30 +25,33 @@ type SolutionDetailPageProps = {
 };
 
 export function generateStaticParams() {
-  return solutions.map((solution) => ({
+  return getPublicSolutions().map((solution) => ({
     slug: solution.slug,
   }));
 }
 
 export async function generateMetadata({ params }: SolutionDetailPageProps) {
   const { slug } = await params;
-  const solution = getSolutionBySlug(slug);
+  const solution = getPublicSolutionBySlug(slug);
 
   if (!solution) {
-    return {
-      title: "Solución no encontrada | ELSI",
-    };
+    return buildPrivateMetadata({
+      title: "Solución no encontrada",
+      path: `/soluciones/${slug}`,
+    });
   }
 
-  return {
-    title: `${solution.title} | ELSI`,
+  return buildMetadata({
+    title: solution.title,
     description: solution.description,
-  };
+    path: `/soluciones/${solution.slug}`,
+    allowIndexing: indexable && isSolutionVerified(solution),
+  });
 }
 
 export default async function SolutionDetailPage({ params }: SolutionDetailPageProps) {
   const { slug } = await params;
-  const solution = getSolutionBySlug(slug);
+  const solution = getPublicSolutionBySlug(slug);
 
   if (!solution) {
     notFound();
@@ -50,7 +63,7 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
     <main>
       <section className="solution-article" data-section-label={`Soluciones / ${solution.title}`}>
         <div className="shell solution-article-shell">
-          <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Soluciones", href: "/soluciones" }, { label: solution.title }]} />
+          <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Soluciones", href: "/soluciones" }, { label: solution.title, href: `/soluciones/${solution.slug}` }]} />
           <Link href="/soluciones" className="solution-back-link">
             <ArrowLeft aria-hidden="true" />
             Volver a soluciones
@@ -93,7 +106,7 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
                 ))}
               </ul>
               <Button asChild variant="primary" className="solution-article-button">
-                <Link href="/contacto">Solicitar información <ArrowRight data-icon="inline-end" /></Link>
+                <Link href={buildContactPath({ solution: solution.slug })}>Solicitar información <ArrowRight data-icon="inline-end" /></Link>
               </Button>
             </aside>
           </div>

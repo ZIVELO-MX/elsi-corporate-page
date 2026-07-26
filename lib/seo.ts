@@ -3,21 +3,19 @@ import { siteConfig } from "@/lib/site-config";
 
 // Single source of truth for SEO.
 //
-// Indexing policy: while the site runs as a validation prototype it stays out
-// of the index. Enabling indexing is an EXPLICIT decision — set
-// NEXT_PUBLIC_PROTOTYPE_MODE=0 (and NEXT_PUBLIC_SITE_URL to the real domain)
-// before going live. Nothing here flips on its own.
-export const indexable = !siteConfig.prototypeMode;
+// Indexing requires three explicit signals: prototype mode disabled, a
+// non-placeholder domain and content marked as verified. A partial
+// configuration always fails closed.
+export const indexable = siteConfig.indexingReady;
 
 export const SITE = {
   name: "ELSI",
-  fullName: "ELSI — Environmental Learning & Solutions Institute",
-  // Placeholder until the real domain is set as part of the go-live decision.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://elsi.example.com",
+  fullName: "ELSI | Environmental Learning & Solutions Institute",
+  url: siteConfig.siteUrl,
   description:
-    "Environment Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.",
+    "Environmental Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.",
   locale: "es_MX",
-  // Real, verified ELSI contact (matches the footer). Used for structured data.
+  language: "es-MX",
   contact: {
     phone: "+523921104719",
     email: "instituteelsi@gmail.com",
@@ -25,6 +23,13 @@ export const SITE = {
     region: "Guanajuato",
     country: "MX",
   },
+} as const;
+
+export const SOCIAL_IMAGE = {
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "ELSI, educación y soluciones ambientales",
 } as const;
 
 // Public routes served to visitors. Internal routes (admin, profile, auth,
@@ -57,15 +62,20 @@ export function buildMetadata({
   title,
   description = SITE.description,
   path = "/",
+  allowIndexing = indexable,
 }: {
   title?: string;
   description?: string;
   path?: string;
+  allowIndexing?: boolean;
 }): Metadata {
   return {
-    title,
+    ...(title ? { title } : {}),
     description,
     alternates: { canonical: path },
+    robots: allowIndexing
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     openGraph: {
       type: "website",
       siteName: SITE.name,
@@ -73,16 +83,62 @@ export function buildMetadata({
       url: path,
       title: title ?? SITE.fullName,
       description,
+      images: [SOCIAL_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: title ?? SITE.fullName,
       description,
+      images: [SOCIAL_IMAGE.url],
     },
   };
 }
 
-// Organization structured data — only real, validated ELSI data. No mock
+export function buildPrivateMetadata({
+  title,
+  description = SITE.description,
+  path,
+}: {
+  title: string;
+  description?: string;
+  path: string;
+}): Metadata {
+  return {
+    ...buildMetadata({
+      title,
+      description,
+      path,
+      allowIndexing: false,
+    }),
+    robots: { index: false, follow: false },
+  };
+}
+
+export function absoluteUrl(path: string) {
+  return new URL(path, SITE.url).toString();
+}
+
+export function serializeJsonLd(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+export function buildBreadcrumbJsonLd(
+  items: ReadonlyArray<{ label: string; href: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.label,
+      item: absoluteUrl(item.href),
+    })),
+  };
+}
+
+// Organization structured data is emitted on the home page only and only when
+// the complete site has passed the go-live gate. No mock
 // courses, prices or reviews are ever emitted as structured data.
 export const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -100,3 +156,54 @@ export const organizationJsonLd = {
     addressCountry: SITE.contact.country,
   },
 } as const;
+
+export const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE.name,
+  alternateName: SITE.fullName,
+  url: SITE.url,
+  inLanguage: SITE.language,
+  description: SITE.description,
+  publisher: {
+    "@type": "EducationalOrganization",
+    name: SITE.name,
+    url: SITE.url,
+  },
+} as const;
+
+export function buildCourseJsonLd(course: {
+  title: string;
+  description: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title,
+    description: course.description,
+    provider: {
+      "@type": "EducationalOrganization",
+      name: SITE.name,
+      url: SITE.url,
+    },
+  };
+}
+
+export function buildCourseListJsonLd(
+  courses: ReadonlyArray<{
+    slug: string;
+    title: string;
+    description: string;
+  }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: courses.map((course, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: absoluteUrl(`/cursos/${course.slug}`),
+      item: buildCourseJsonLd(course),
+    })),
+  };
+}

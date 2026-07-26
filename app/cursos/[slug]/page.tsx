@@ -1,21 +1,47 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, GraduationCap, MapPin, QrCode, UserRound } from "lucide-react";
-import { getCourseBySlug, getAllCourses, money, modalityLabel, stateMeta, publishState, certType } from "@/lib/courses";
+import {
+  certType,
+  getPublicCourseBySlug,
+  getPublicCourses,
+  isCourseVerified,
+  modalityLabel,
+  money,
+  publishState,
+  stateMeta,
+} from "@/lib/courses";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CourseMedia } from "@/components/course-media";
 import { PrototypeDataNote } from "@/components/prototype-data-note";
-import { buildMetadata } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
+import {
+  buildCourseJsonLd,
+  buildMetadata,
+  buildPrivateMetadata,
+  indexable,
+} from "@/lib/seo";
+import { buildContactPath } from "@/lib/agentic-navigation";
 
 export function generateStaticParams() {
-  return getAllCourses().map((course) => ({ slug: course.slug }));
+  return getPublicCourses().map((course) => ({ slug: course.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getCourseBySlug(slug);
-  if (!course) return buildMetadata({ title: "Curso no encontrado", path: `/cursos/${slug}` });
-  return buildMetadata({ title: course.title, description: course.description, path: `/cursos/${course.slug}` });
+  const course = getPublicCourseBySlug(slug);
+  if (!course) {
+    return buildPrivateMetadata({
+      title: "Curso no encontrado",
+      path: `/cursos/${slug}`,
+    });
+  }
+  return buildMetadata({
+    title: course.title,
+    description: course.description,
+    path: `/cursos/${course.slug}`,
+    allowIndexing: indexable && isCourseVerified(course),
+  });
 }
 
 const TONE: Record<string, string> = {
@@ -39,7 +65,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default async function CursoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getCourseBySlug(slug);
+  const course = getPublicCourseBySlug(slug);
   if (!course) notFound();
 
   const m = stateMeta(course);
@@ -47,9 +73,12 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
 
   return (
     <main>
+      {indexable && isCourseVerified(course) ? (
+        <StructuredData value={buildCourseJsonLd(course)} />
+      ) : null}
       <section data-section-label="Detalle curso / Contenido" style={{ padding: "48px 0 72px" }}>
         <div className="shell">
-          <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Cursos", href: "/cursos" }, { label: course.title }]} />
+          <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Cursos", href: "/cursos" }, { label: course.title, href: `/cursos/${course.slug}` }]} />
           <div className="curso-detail-grid mt-4">
             <div className="curso-detail-summary">
               <div className="flex flex-wrap items-center gap-2">
@@ -85,13 +114,15 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               <p className="font-heading text-[28px] font-bold text-[var(--primary-hover)]">{money(course.price)}</p>
               {course.priceLabel && course.price > 0 && <p className="text-[12px] text-[var(--text-muted)]">{course.priceLabel}</p>}
               {publishState(course) === "closed" ? (
-                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "var(--primary-hover)" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] border border-[var(--primary)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
+                <Link href={buildContactPath({ course: course.slug })} style={{ color: "var(--primary-hover)" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] border border-[var(--primary)] text-[14px] font-extrabold transition-transform active:scale-[.98]">Avísame si reabre</Link>
               ) : (
-                <Link href={`/contacto?curso=${course.slug}`} style={{ color: "#fff" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[var(--primary-hover)] text-[14px] font-extrabold transition-transform active:scale-[.98]">{m.cta}</Link>
+                <Link href={buildContactPath({ course: course.slug })} style={{ color: "#fff" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[var(--primary-hover)] text-[14px] font-extrabold transition-transform active:scale-[.98]">
+                  {publishState(course) === "published" ? "Solicitar inscripción" : "Solicitar información"}
+                </Link>
               )}
               <div className="mt-3 flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-[var(--paper)] p-2.5">
                 <QrCode size={30} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />
-                <p className="text-[11px] leading-4 text-[var(--text-muted)]">Inscripción rápida por código QR (te lo compartimos al confirmar).</p>
+                <p className="text-[11px] leading-4 text-[var(--text-muted)]">Recibirás los pasos de inscripción cuando ELSI confirme la disponibilidad.</p>
               </div>
               {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {certType(course)}</p>}
               <Link href="/cursos" style={{ color: "var(--primary-hover)" }} className="mt-4 block text-center text-[12px] font-extrabold">← Volver al catálogo</Link>
@@ -107,7 +138,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
                         {t.subtemas && t.subtemas.length > 0 && (
                           <ul className="mt-1 ml-6 grid gap-1">
                             {t.subtemas.map((s) => (
-                              <li key={s} className="text-[12px] leading-5 text-[var(--text-muted)]">– {s}</li>
+                              <li key={s} className="text-[12px] leading-5 text-[var(--text-muted)]">- {s}</li>
                             ))}
                           </ul>
                         )}
