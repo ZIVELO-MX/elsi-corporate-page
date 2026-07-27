@@ -273,8 +273,6 @@ export async function deployPreview(options = {}, dependencies = {}) {
       "upload",
       "--preview-alias",
       config.candidateAlias,
-      "--message",
-      `Preview candidate ${sourceRevision}`,
     ],
     { cwd, env: cloudflareEnvironment },
   );
