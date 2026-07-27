@@ -38,8 +38,8 @@ export default function AdminDashboard() {
   return (
     <div>
       <div style={{ marginBottom: "1.75rem" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.5rem" }}>Dashboard</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>Resumen general de la plataforma. Toca una tarjeta para ir a su sección.</p>
+        <h1 className="admin-page-title" style={{ marginBottom: "0.5rem" }}>Dashboard</h1>
+        <p className="admin-page-sub">Resumen general de la plataforma. Toca una tarjeta para ir a su sección.</p>
       </div>
 
       {loading && (

@@ -37,8 +37,6 @@ const emptyForm = (): CourseForm => ({
   modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "",
 });
 
-const fieldLabelStyle: React.CSSProperties = { display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" };
-const fieldInputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)", color: "var(--text)" };
 const fieldGridStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" };
 
 // Pairs a label with its control via a generated id, so screen readers announce
@@ -47,7 +45,7 @@ function Field({ label, children }: { label: string; children: (id: string) => R
   const id = useId();
   return (
     <div>
-      <label htmlFor={id} style={fieldLabelStyle}>{label}</label>
+      <label htmlFor={id} className="admin-label">{label}</label>
       {children(id)}
     </div>
   );
@@ -137,8 +135,8 @@ export default function AdminCourses() {
     <div>
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", marginBottom: "1.5rem" }}>
         <div>
-          <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Cursos</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+          <h1 className="admin-page-title">Cursos</h1>
+          <p className="admin-page-sub">
             {filtered.length === courses.length
               ? `${courses.length} cursos registrados`
               : `${filtered.length} de ${courses.length} cursos`}
@@ -179,28 +177,28 @@ export default function AdminCourses() {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <Field label="Título">{id => <input id={id} required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={fieldInputStyle} />}</Field>
+              <Field label="Título">{id => <input id={id} required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="admin-input" />}</Field>
               <div style={fieldGridStyle}>
-                <Field label="Categoría">{id => <input id={id} required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={fieldInputStyle} />}</Field>
-                <Field label="Slug">{id => <input id={id} required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} style={fieldInputStyle} />}</Field>
+                <Field label="Categoría">{id => <input id={id} required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="admin-input" />}</Field>
+                <Field label="Slug">{id => <input id={id} required value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} className="admin-input" />}</Field>
               </div>
               <Field label="Sinopsis">{id => (
                 <textarea id={id} required rows={3} value={form.synopsis} onChange={e => setForm({ ...form, synopsis: e.target.value })}
                   placeholder="Resumen breve del curso para el listado público."
-                  style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+                  className="admin-input" style={{ resize: "vertical", fontFamily: "inherit" }} />
               )}</Field>
               <div style={fieldGridStyle}>
-                <Field label="Duración">{id => <input id={id} required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" style={fieldInputStyle} />}</Field>
-                <Field label="Precio">{id => <input id={id} type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} style={fieldInputStyle} />}</Field>
+                <Field label="Duración">{id => <input id={id} required value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} placeholder="Ej. 8 horas" className="admin-input" />}</Field>
+                <Field label="Precio">{id => <input id={id} type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} className="admin-input" />}</Field>
               </div>
               <Field label="Público objetivo">{id => (
                 <input id={id} required value={form.targetAudience} onChange={e => setForm({ ...form, targetAudience: e.target.value })}
-                  placeholder="Ej. Docentes y promotores comunitarios" style={fieldInputStyle} />
+                  placeholder="Ej. Docentes y promotores comunitarios" className="admin-input" />
               )}</Field>
               <Field label="Temario (temas y subtemas)">{id => (
                 <textarea id={id} rows={5} value={form.curriculum} onChange={e => setForm({ ...form, curriculum: e.target.value })}
                   placeholder={"Un tema por línea. Antecede subtemas con \"- \".\nEj.\nIntroducción\n- Objetivos\n- Alcance"}
-                  style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+                  className="admin-input" style={{ resize: "vertical", fontFamily: "inherit" }} />
               )}</Field>
               <Field label="Modalidad">{id => (
                 <select id={id} value={form.modality} onChange={e => setForm({ ...form, modality: e.target.value as CourseModality })} className="admin-select" style={{ width: "100%" }}>
@@ -209,27 +207,27 @@ export default function AdminCourses() {
                 </select>
               )}</Field>
               {form.modality === "online" ? (
-                <Field label="Enlace de acceso en línea">{id => <input id={id} value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." style={fieldInputStyle} />}</Field>
+                <Field label="Enlace de acceso en línea">{id => <input id={id} value={form.externalUrl} onChange={e => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://..." className="admin-input" />}</Field>
               ) : (
                 <>
                   <Field label="Lugar">{id => (
                     <input id={id} required value={form.presencialLocation} onChange={e => setForm({ ...form, presencialLocation: e.target.value })}
-                      placeholder="Ej. Campus Central ELSI, Auditorio B" style={fieldInputStyle} />
+                      placeholder="Ej. Campus Central ELSI, Auditorio B" className="admin-input" />
                   )}</Field>
                   <div style={fieldGridStyle}>
                     <Field label="Fecha">{id => (
                       <input id={id} required value={form.presencialDate} onChange={e => setForm({ ...form, presencialDate: e.target.value })}
-                        placeholder="Ej. 2025-08-14" style={fieldInputStyle} />
+                        placeholder="Ej. 2025-08-14" className="admin-input" />
                     )}</Field>
                     <Field label="Hora">{id => (
                       <input id={id} required value={form.presencialTime} onChange={e => setForm({ ...form, presencialTime: e.target.value })}
-                        placeholder="Ej. 09:00 - 13:00" style={fieldInputStyle} />
+                        placeholder="Ej. 09:00 - 13:00" className="admin-input" />
                     )}</Field>
                   </div>
                   <Field label="Información general">{id => (
                     <textarea id={id} rows={2} value={form.presencialInfo} onChange={e => setForm({ ...form, presencialInfo: e.target.value })}
                       placeholder="Cupo, requisitos de acceso, recomendaciones para asistentes."
-                      style={{ ...fieldInputStyle, resize: "vertical", fontFamily: "inherit" }} />
+                      className="admin-input" style={{ resize: "vertical", fontFamily: "inherit" }} />
                   )}</Field>
                 </>
               )}

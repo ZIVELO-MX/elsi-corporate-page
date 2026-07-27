@@ -9,8 +9,6 @@ import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
-const adminFormStyle: React.CSSProperties = { display: "flex", gap: "0.75rem", alignItems: "flex-end", padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap" };
-
 export default function AdminSales() {
   const { loading, courses, users, sales, addSale } = useAdminData();
   const { toast } = useToast();
@@ -38,13 +36,13 @@ export default function AdminSales() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Ventas</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+        <h1 className="admin-page-title">Ventas</h1>
+        <p className="admin-page-sub">
           {sales.length} ventas registradas &middot; {totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora"}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={adminFormStyle}>
+      <form onSubmit={handleSubmit} className="admin-form-bar">
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label htmlFor="sale-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required

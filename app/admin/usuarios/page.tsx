@@ -98,8 +98,8 @@ export default function AdminUsers() {
     <div>
       <div style={{ marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem" }}>
         <div>
-          <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Usuarios</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>{users.length} usuarios registrados</p>
+          <h1 className="admin-page-title">Usuarios</h1>
+          <p className="admin-page-sub">{users.length} usuarios registrados</p>
         </div>
         <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />

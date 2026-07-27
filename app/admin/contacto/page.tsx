@@ -53,10 +53,10 @@ export default function AdminContacto() {
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
-          <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>Contacto</h1>
+          <h1 className="admin-page-title" style={{ margin: 0 }}>Contacto</h1>
           {newCount > 0 && <Badge variant="default" style={{ fontSize: "0.75rem" }}>{newCount} nuevo{newCount > 1 ? "s" : ""}</Badge>}
         </div>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: "0.25rem 0 0" }}>
+        <p className="admin-page-sub" style={{ marginTop: "0.25rem" }}>
           {filtered.length === leads.length
             ? `${leads.length} mensaje${leads.length === 1 ? "" : "s"} del formulario de contacto`
             : `${filtered.length} de ${leads.length} mensajes`}
