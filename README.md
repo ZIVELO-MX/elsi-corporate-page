@@ -31,6 +31,31 @@ cliente deben permanecer como `fixture`.
 Después de `pnpm build`, `pnpm audit:seo` valida el HTML generado: títulos,
 canonical, robots, encabezados y activos de descubrimiento.
 
+## Preview de `main`
+
+Cada push a `main` que aprueba el workflow `CI` se publica en un Worker dedicado de
+Cloudflare mediante OpenNext. El pipeline sube una versión candidata, ejecuta smoke
+tests, promueve su ID exacto y restaura la versión anterior si falla la verificación
+estable.
+
+- Worker: `elsi-main-preview`
+- URL: `https://elsi-main-preview.<workers-subdomain>.workers.dev`
+- GitHub secrets: `CLOUDFLARE_ACCOUNT_ID` y `CLOUDFLARE_API_TOKEN`
+- Runtime: Cloudflare Workers; no usa Pages, Tunnel, dominio productivo ni R2
+- Indexación: el build fuerza modo prototipo y contenido `fixture`
+
+Para validar el adaptador localmente:
+
+```bash
+cp .dev.vars.example .dev.vars
+pnpm cloudflare:build
+pnpm cloudflare:preview
+```
+
+El token de CI debe usar `Workers Scripts: Edit` y estar limitado a la cuenta de
+ELSI. `NEXT_PUBLIC_SITE_URL` se calcula desde el subdominio `workers.dev` de esa
+cuenta y no se guarda como secreto.
+
 ## Capturas de pull requests
 
 Cada PR debe indicar su misión en la descripción usando el campo `Misión: ELS-XXXX` (ver [`PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)). El workflow:

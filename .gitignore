@@ -15,3 +15,10 @@ public/images/
 !public/images/
 public/images/*
 !public/images/*.webp
+
+# zivelo-cloudflare-preview:start
+.open-next/
+.wrangler/
+.dev.vars
+cloudflare-env.d.ts
+# zivelo-cloudflare-preview:end
