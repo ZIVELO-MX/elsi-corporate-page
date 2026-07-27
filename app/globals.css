@@ -1087,7 +1087,9 @@ body[data-section-labels="true"] section[data-section-label]::before {
 /* Name button sits inside a padded AdminTable cell, so it carries no padding of
    its own and inherits the cell's type (incl. the larger, bold mobile title). */
 .admin-user-row-btn { font: inherit; color: var(--primary-hover); background: none; border: none; padding: 0; text-align: left; cursor: pointer; }
-@media (pointer: fine) { .admin-user-row-btn:hover { text-decoration: underline; } }
+@media (hover: hover) and (pointer: fine) {
+  .admin-user-row-btn:hover { text-decoration: underline; }
+}
 
 /* Admin dashboard: KPI tiles, "needs attention" tiles and list panels, styled
    via classes (not inline) so the layout stays consistent and easy to tune. */
@@ -1101,7 +1103,9 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .admin-attention-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; margin-bottom: 2rem; }
 .admin-attention-tile { display: flex; align-items: center; gap: 0.875rem; padding: 1rem 1.125rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit; transition: border-color var(--motion-fast) var(--ease-out); }
 .admin-attention-tile[data-alert="true"] { border-color: color-mix(in srgb, var(--primary-hover) 45%, var(--border)); background: var(--primary-light); }
-@media (pointer: fine) { .admin-attention-tile:hover { border-color: var(--primary); } }
+@media (hover: hover) and (pointer: fine) {
+  .admin-attention-tile:hover { border-color: var(--primary); }
+}
 .admin-attention-tile:active { transform: scale(0.99); }
 .admin-attention-num { font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; color: var(--primary-hover); min-width: 1.25rem; text-align: center; }
 .admin-attention-tile[data-alert="false"] .admin-attention-num { color: var(--text-light); }
