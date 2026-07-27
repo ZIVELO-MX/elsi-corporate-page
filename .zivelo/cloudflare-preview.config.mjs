@@ -3,6 +3,7 @@
 export default {
   workerName: "elsi-main-preview",
   candidateAlias: "candidate",
+  initialSmokeAttempts: 30,
   packageManager: "pnpm",
   buildEnvironment: {
     NEXT_PUBLIC_PROTOTYPE_MODE: "1",
