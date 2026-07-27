@@ -19,8 +19,8 @@ export default function AdminContent() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Contenido</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+        <h1 className="admin-page-title">Contenido</h1>
+        <p className="admin-page-sub">
           Edita los textos y activa/desactiva secciones de la página corporativa.
         </p>
       </div>

@@ -3,12 +3,11 @@
 import { useMemo, useState } from "react";
 import { Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
+import { AdminTable } from "@/components/admin/data-table";
 import { Button } from "@/components/ui/button";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
-
-const adminFormStyle: React.CSSProperties = { display: "flex", gap: "0.75rem", alignItems: "flex-end", padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap" };
 
 export default function AdminSales() {
   const { loading, courses, users, sales, addSale } = useAdminData();
@@ -37,13 +36,13 @@ export default function AdminSales() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Ventas</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+        <h1 className="admin-page-title">Ventas</h1>
+        <p className="admin-page-sub">
           {sales.length} ventas registradas &middot; {totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora"}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={adminFormStyle}>
+      <form onSubmit={handleSubmit} className="admin-form-bar">
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label htmlFor="sale-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
@@ -75,42 +74,31 @@ export default function AdminSales() {
       {loading ? (
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
       ) : (
-      <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div className="admin-table-scroll">
-          <table className="admin-table" style={{ width: "100%", minWidth: "32rem", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-                {["Usuario", "Curso", "Monto", "Fecha"].map(h => (
-                  <th key={h} scope="col" style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: h === "Monto" ? "right" : "left", whiteSpace: "nowrap" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {sales.map(s => (
-                <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{s.userName}</td>
-                  <td className="admin-cell-truncate" title={s.courseName} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{s.courseName}</td>
-                  <td className="admin-num" style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
-                    {s.amount === 0 ? <span style={{ color: "var(--moss)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>{s.soldAt}</td>
-                </tr>
-              ))}
-              {sales.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ padding: 0 }}>
-                    <EmptyState
-                      icon={<Receipt size={20} aria-hidden="true" />}
-                      title="Sin ventas todavía"
-                      hint="Registra la primera venta con el formulario de arriba."
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <AdminTable
+          rows={sales}
+          rowKey={(s) => s.id}
+          minWidth="32rem"
+          columns={[
+            { key: "user", header: "Usuario", primary: true, cell: (s) => <span style={{ fontWeight: 500 }}>{s.userName}</span> },
+            { key: "course", header: "Curso", cell: (s) => <span className="admin-cell-truncate admin-cell-muted" title={s.courseName}>{s.courseName}</span> },
+            {
+              key: "amount", header: "Monto", align: "right",
+              cell: (s) => (
+                <span style={{ fontWeight: 600 }}>
+                  {s.amount === 0 ? <span style={{ color: "var(--moss)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
+                </span>
+              ),
+            },
+            { key: "date", header: "Fecha", cell: (s) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{s.soldAt}</span> },
+          ]}
+          empty={
+            <EmptyState
+              icon={<Receipt size={20} aria-hidden="true" />}
+              title="Sin ventas todavía"
+              hint="Registra la primera venta con el formulario de arriba."
+            />
+          }
+        />
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Upload, CheckCircle2, Search, SearchX, ClipboardList } from "lucide-react";
 import { useAdminData, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
+import { AdminTable } from "@/components/admin/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -17,9 +18,7 @@ type SourceFilter = "todas" | EnrollmentSource;
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
 const certListStyle: React.CSSProperties = { listStyle: "none", margin: "0 0 1rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem", maxHeight: "10rem", overflowY: "auto" };
 const uploadLabelStyle: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", padding: "1.5rem", border: "1px dashed var(--input)", borderRadius: "var(--radius-sm)", cursor: "pointer", marginBottom: "1.25rem" };
-const adminFormStyle: React.CSSProperties = { display: "flex", gap: "0.75rem", alignItems: "flex-end", padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap" };
 const bulkBannerStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.75rem 1.25rem", background: "var(--primary-light)", borderRadius: "var(--radius)", marginBottom: "1rem" };
-const thStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", whiteSpace: "nowrap" };
 
 function SourceBadge({ source }: { source: EnrollmentSource }) {
   return (
@@ -171,15 +170,15 @@ export default function AdminEnrollments() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.25rem" }}>Inscripciones</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
+        <h1 className="admin-page-title">Inscripciones</h1>
+        <p className="admin-page-sub">
           {filtered.length === enrollments.length
             ? `${enrollments.length} inscripciones registradas`
             : `${filtered.length} de ${enrollments.length} inscripciones`}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={adminFormStyle}>
+      <form onSubmit={handleSubmit} className="admin-form-bar">
         <div style={{ flex: 1, minWidth: "10rem" }}>
           <label htmlFor="enr-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
           <select id="enr-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
@@ -252,101 +251,89 @@ export default function AdminEnrollments() {
       {loading ? (
         <TableSkeleton rows={6} widths={["1.5rem", "9rem", "12rem", "6rem", "6rem", "6rem", "8rem"]} />
       ) : (
-      <div style={{ background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)", overflow: "hidden" }}>
-        <div className="admin-table-scroll">
-          <table className="admin-table" style={{ width: "100%", minWidth: "44rem", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--muted)" }}>
-                <th scope="col" style={{ padding: "0.75rem 1rem", width: "2.5rem" }}>
-                  <input
-                    type="checkbox"
-                    aria-label="Seleccionar todas las inscripciones en curso"
-                    checked={allPendingSelected}
-                    onChange={toggleSelectAll}
-                    disabled={pendingIds.length === 0}
-                    className="admin-checkbox"
-                  />
-                </th>
-                {["Usuario", "Curso", "Origen", "Estado", "Fecha de inscripción", ""].map(h => (
-                  <th key={h} scope="col" style={thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(e => (
-                <tr key={e.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    {e.status === "en-curso" && (
-                      <input
-                        type="checkbox"
-                        aria-label={`Seleccionar inscripción de ${e.userName}`}
-                        checked={selectedSet.has(e.id)}
-                        onChange={() => toggleSelect(e.id)}
-                        className="admin-checkbox"
-                      />
-                    )}
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 500 }}>{e.userName}</td>
-                  <td className="admin-cell-truncate" title={e.courseName} style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.courseName}</td>
-                  <td style={{ padding: "0.75rem 1rem" }}><SourceBadge source={e.source} /></td>
-                  <td style={{ padding: "0.75rem 1rem" }}><StatusCell enrollment={e} /></td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{e.enrolledAt}</td>
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    {e.status === "en-curso" && (
-                      <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                        <Button type="button" variant="outline" size="sm" onClick={() => { setIsReplace(false); setCertificateTarget([e]); }}>
-                          <Upload size={12} /> Constancia
-                        </Button>
-                        <Button
-                          type="button" variant="ghost" size="sm"
-                          title="Respaldo para casos excepcionales, sin constancia"
-                          onClick={() => setManualTarget(e)}
-                        >
-                          <CheckCircle2 size={12} /> Marcar realizado
-                        </Button>
-                      </div>
-                    )}
-                    {e.status === "realizado" && (
-                      <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                        {e.certificateStatus === "pendiente" && (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => { markCertificateAvailable(e.id); toast({ title: "Constancia publicada.", variant: "success" }); }}>
-                            <CheckCircle2 size={12} /> Marcar disponible
-                          </Button>
-                        )}
-                        <Button
-                          type="button" variant="outline" size="sm"
-                          onClick={() => { setIsReplace(!!e.certificateStatus); setCertificateTarget([e]); }}
-                        >
-                          <Upload size={12} /> {e.certificateStatus ? "Reemplazar" : "Cargar constancia"}
-                        </Button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ padding: 0 }}>
-                    {enrollments.length === 0 ? (
-                      <EmptyState
-                        icon={<ClipboardList size={20} aria-hidden="true" />}
-                        title="Sin inscripciones todavía"
-                        hint="Registra la primera inscripción con el formulario de arriba."
-                      />
-                    ) : (
-                      <EmptyState
-                        icon={<SearchX size={20} aria-hidden="true" />}
-                        title="Sin coincidencias"
-                        hint="Ninguna inscripción coincide con los filtros actuales. Ajusta la búsqueda, el estado o el origen."
-                      />
-                    )}
-                  </td>
-                </tr>
+        <AdminTable
+          rows={filtered}
+          rowKey={(e) => e.id}
+          minWidth="44rem"
+          actionsHeader=""
+          columns={[
+            {
+              key: "select", desktopOnly: true,
+              header: (
+                <input
+                  type="checkbox"
+                  aria-label="Seleccionar todas las inscripciones en curso"
+                  checked={allPendingSelected}
+                  onChange={toggleSelectAll}
+                  disabled={pendingIds.length === 0}
+                  className="admin-checkbox"
+                />
+              ),
+              cell: (e) => e.status === "en-curso" ? (
+                <input
+                  type="checkbox"
+                  aria-label={`Seleccionar inscripción de ${e.userName}`}
+                  checked={selectedSet.has(e.id)}
+                  onChange={() => toggleSelect(e.id)}
+                  className="admin-checkbox"
+                />
+              ) : null,
+            },
+            { key: "user", header: "Usuario", primary: true, cell: (e) => <span style={{ fontWeight: 500 }}>{e.userName}</span> },
+            { key: "course", header: "Curso", cell: (e) => <span className="admin-cell-truncate admin-cell-muted" title={e.courseName}>{e.courseName}</span> },
+            { key: "source", header: "Origen", cell: (e) => <SourceBadge source={e.source} /> },
+            { key: "status", header: "Estado", cell: (e) => <StatusCell enrollment={e} /> },
+            { key: "date", header: "Fecha", mobileLabel: "Inscrito el", cell: (e) => <span className="admin-cell-muted">{e.enrolledAt}</span> },
+          ]}
+          actions={(e) => (
+            <>
+              {e.status === "en-curso" && (
+                <>
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setIsReplace(false); setCertificateTarget([e]); }}>
+                    <Upload size={12} /> Constancia
+                  </Button>
+                  <Button
+                    type="button" variant="ghost" size="sm"
+                    title="Respaldo para casos excepcionales, sin constancia"
+                    onClick={() => setManualTarget(e)}
+                  >
+                    <CheckCircle2 size={12} /> Marcar realizado
+                  </Button>
+                </>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              {e.status === "realizado" && (
+                <>
+                  {e.certificateStatus === "pendiente" && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => { markCertificateAvailable(e.id); toast({ title: "Constancia publicada.", variant: "success" }); }}>
+                      <CheckCircle2 size={12} /> Marcar disponible
+                    </Button>
+                  )}
+                  <Button
+                    type="button" variant="outline" size="sm"
+                    onClick={() => { setIsReplace(!!e.certificateStatus); setCertificateTarget([e]); }}
+                  >
+                    <Upload size={12} /> {e.certificateStatus ? "Reemplazar" : "Cargar constancia"}
+                  </Button>
+                </>
+              )}
+            </>
+          )}
+          empty={
+            enrollments.length === 0 ? (
+              <EmptyState
+                icon={<ClipboardList size={20} aria-hidden="true" />}
+                title="Sin inscripciones todavía"
+                hint="Registra la primera inscripción con el formulario de arriba."
+              />
+            ) : (
+              <EmptyState
+                icon={<SearchX size={20} aria-hidden="true" />}
+                title="Sin coincidencias"
+                hint="Ninguna inscripción coincide con los filtros actuales. Ajusta la búsqueda, el estado o el origen."
+              />
+            )
+          }
+        />
       )}
 
       <CertificateDialog
