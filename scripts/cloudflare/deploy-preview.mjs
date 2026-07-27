@@ -265,6 +265,42 @@ export async function deployPreview(options = {}, dependencies = {}) {
     cwd,
     env: cloudflareEnvironment,
   });
+
+  if (previousVersionId === null) {
+    log("No active Worker deployment found; bootstrapping the preview Worker");
+    runExecutable(
+      run,
+      config,
+      "opennextjs-cloudflare",
+      ["deploy"],
+      { cwd, env: cloudflareEnvironment },
+    );
+    const versionsAfter = await readVersions({
+      run,
+      config,
+      cwd,
+      environment: cloudflareEnvironment,
+    });
+    const newVersionIds = [...versionsAfter].filter((id) => !versionsBefore.has(id));
+    if (newVersionIds.length !== 1) {
+      throw new Error(`Expected exactly one new Worker version, found ${newVersionIds.length}`);
+    }
+    const newVersionId = newVersionIds[0];
+    await smokeChecks(fetchImpl, stableUrl, config.healthChecks, dependencies);
+    const deploymentAfter = await apiRequest(`${workerPath}/deployments`);
+    const activeVersionId = activeVersionFromDeployments(deploymentAfter);
+    if (activeVersionId !== newVersionId) {
+      throw new Error(`Stable deployment is ${activeVersionId}, expected ${newVersionId}`);
+    }
+    await writeOutputs(environment, {
+      preview_url: stableUrl,
+      worker_version_id: newVersionId,
+      source_revision: sourceRevision,
+    });
+    log(`Bootstrapped ${sourceRevision} as ${newVersionId} at ${stableUrl}`);
+    return { stableUrl, candidateUrl, newVersionId, previousVersionId, sourceRevision };
+  }
+
   runExecutable(
     run,
     config,
