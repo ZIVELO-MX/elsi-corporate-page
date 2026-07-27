@@ -25,6 +25,10 @@ export function validateConfig(config) {
   if (!["pnpm", "npm"].includes(config.packageManager)) {
     throw new Error("packageManager must be pnpm or npm");
   }
+  if (config.initialSmokeAttempts !== undefined &&
+      (!Number.isInteger(config.initialSmokeAttempts) || config.initialSmokeAttempts < 1)) {
+    throw new Error("initialSmokeAttempts must be a positive integer");
+  }
   if (!config.buildEnvironment || typeof config.buildEnvironment !== "object" ||
       Array.isArray(config.buildEnvironment)) {
     throw new Error("buildEnvironment must be an object");
@@ -286,7 +290,10 @@ export async function deployPreview(options = {}, dependencies = {}) {
       throw new Error(`Expected exactly one new Worker version, found ${newVersionIds.length}`);
     }
     const newVersionId = newVersionIds[0];
-    await smokeChecks(fetchImpl, stableUrl, config.healthChecks, dependencies);
+    await smokeChecks(fetchImpl, stableUrl, config.healthChecks, {
+      ...dependencies,
+      attempts: config.initialSmokeAttempts || dependencies.attempts || 10,
+    });
     const deploymentAfter = await apiRequest(`${workerPath}/deployments`);
     const activeVersionId = activeVersionFromDeployments(deploymentAfter);
     if (activeVersionId !== newVersionId) {
