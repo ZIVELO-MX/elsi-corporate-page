@@ -61,5 +61,5 @@ test("the public screenshot profile captures the redesigned first viewport", () 
 
   assert.match(targets, /key: "about-hero"/);
   assert.match(targets, /section\("Nosotros \/ Historia"\)/);
-  assert.match(screenshots, /captureProfiles\.public\)\.toHaveLength\(15\)/);
+  assert.match(screenshots, /captureProfiles\.public\)\.toHaveLength\(17\)/);
 });

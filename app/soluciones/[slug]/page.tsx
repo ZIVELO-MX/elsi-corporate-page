@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   getPublicSolutionBySlug,
   getPublicSolutions,
@@ -8,8 +8,8 @@ import {
 } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
+import { PrototypeDataNote } from "@/components/prototype-data-note";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import {
   buildMetadata,
@@ -61,55 +61,107 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
 
   return (
     <main>
-      <section className="solution-article" data-section-label={`Soluciones / ${solution.title}`}>
-        <div className="shell solution-article-shell">
+      <section
+        className="solution-detail-hero"
+        data-layout={solution.layout}
+        aria-labelledby="solution-detail-title"
+        data-section-label={`Soluciones / ${solution.title}`}
+      >
+        <div className="shell">
           <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Soluciones", href: "/soluciones" }, { label: solution.title, href: `/soluciones/${solution.slug}` }]} />
-          <Link href="/soluciones" className="solution-back-link">
-            <ArrowLeft aria-hidden="true" />
-            Volver a soluciones
-          </Link>
 
-          <div className="solution-article-header">
-            <Badge variant="outline" className="solution-article-badge">Solución ELSI</Badge>
-            <h1>{solution.title}</h1>
-            <p>{solution.intro}</p>
+          <div className="solution-detail-hero-grid">
+            <header className="solution-detail-copy">
+              <p className="home-kicker">{solution.eyebrow}</p>
+              <h1 id="solution-detail-title">{solution.title}</h1>
+              <p className="solution-detail-intro">{solution.intro}</p>
+              <PrototypeDataNote>
+                El alcance, la modalidad y los entregables permanecen como
+                propuesta hasta recibir la validación final de ELSI.
+              </PrototypeDataNote>
+            </header>
+
+            {image ? (
+              <figure className="solution-detail-media">
+                <SafeImage
+                  src={image.src}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                  preload
+                  sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 58vw, 760px"
+                />
+              </figure>
+            ) : null}
           </div>
+        </div>
+      </section>
 
-          {image && (
-            <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-card)", aspectRatio: "21 / 9", marginBottom: 40 }}>
-              <SafeImage
-                src={image.src}
-                alt={image.alt}
-                width={image.width}
-                height={image.height}
-                loading="eager"
-                sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1136px) calc(100vw - 96px), 1040px"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-          )}
+      <section
+        className="solution-detail-body"
+        data-layout={solution.layout}
+        aria-labelledby="solution-detail-approach-title"
+        data-section-label={`Soluciones / ${solution.title} / Alcance`}
+      >
+        <div className="shell solution-detail-body-grid">
+          <article className="solution-detail-approach">
+            <h2 id="solution-detail-approach-title">
+              Cómo se construye la ruta
+            </h2>
+            <p>{solution.approach}</p>
 
-          <div className="solution-article-grid">
-            <article className="solution-article-content">
-              <h2>Una ruta clara para avanzar</h2>
-              <p>{solution.approach}</p>
+            <dl className="solution-detail-facts">
+              <div>
+                <dt>Para quién</dt>
+                <dd>{solution.audience}</dd>
+              </div>
+              <div>
+                <dt>Cómo se entrega</dt>
+                <dd>{solution.delivery}</dd>
+              </div>
+            </dl>
+          </article>
 
-              <h2>Alcance transparente</h2>
-              <p>{solution.delivery}</p>
-            </article>
+          <section
+            className="solution-detail-scope"
+            aria-labelledby="solution-detail-scope-title"
+          >
+            <h2 id="solution-detail-scope-title">Líneas de trabajo</h2>
+            <ol>
+              {solution.items.map((item, index) => (
+                <li key={item}>
+                  <span aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <strong>{item}</strong>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
+      </section>
 
-            <aside className="solution-article-aside">
-              <h2>Qué incluye</h2>
-              <ul>
-                {solution.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <Button asChild variant="primary" className="solution-article-button">
-                <Link href={buildContactPath({ solution: solution.slug })}>Solicitar información <ArrowRight data-icon="inline-end" /></Link>
-              </Button>
-            </aside>
+      <section
+        className="solution-detail-contact"
+        aria-labelledby="solution-detail-contact-title"
+        data-section-label={`Soluciones / ${solution.title} / Contacto`}
+      >
+        <div className="shell solution-detail-contact-grid">
+          <div>
+            <h2 id="solution-detail-contact-title">
+              Define el punto de partida con ELSI.
+            </h2>
+            <p>
+              Comparte el contexto para orientar alcance, modalidad y próximos
+              pasos.
+            </p>
           </div>
+          <Button asChild size="lg" variant="primary">
+            <Link href={buildContactPath({ solution: solution.slug })}>
+              Solicitar información
+              <ArrowRight data-icon="inline-end" />
+            </Link>
+          </Button>
         </div>
       </section>
     </main>
