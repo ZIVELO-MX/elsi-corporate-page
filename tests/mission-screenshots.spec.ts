@@ -160,7 +160,7 @@ async function publishCaptures(files: LocalCapture[]) {
 }
 
 test("capture and optionally publish the TLOZ mission screenshot snapshot", async ({ page }, testInfo) => {
-  expect(captureProfiles.public).toHaveLength(15);
+  expect(captureProfiles.public).toHaveLength(17);
   expect(captureProfiles.account).toHaveLength(2);
   expect(captureProfiles.admin).toHaveLength(1);
 
