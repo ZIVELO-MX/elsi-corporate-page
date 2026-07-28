@@ -54,6 +54,7 @@ export const captureProfiles: Record<CaptureProfileName, CaptureTarget[]> = {
     { profile: "public", key: "course-detail-fundamentals", title: "Curso — Fundamentos de Educación Ambiental", path: "/cursos/fundamentos-de-educacion-ambiental", selector: section("Detalle curso / Contenido") },
     { profile: "public", key: "solutions-overview", title: "Soluciones — Introducción", path: "/soluciones", selector: section("Soluciones / Introducción") },
     { profile: "public", key: "solution-detail-environmental", title: "Solución — Soluciones ambientales", path: "/soluciones/soluciones-ambientales", selector: section("Soluciones / Soluciones ambientales") },
+    { profile: "public", key: "about-hero", title: "Nosotros — Historia", path: "/nosotros", selector: section("Nosotros / Historia") },
     { profile: "public", key: "about-timeline", title: "Nosotros — Línea de tiempo", path: "/nosotros", selector: section("Nosotros / Línea de tiempo") },
     { profile: "public", key: "about-values", title: "Nosotros — Misión, visión y valores", path: "/nosotros", selector: section("Nosotros / Misión visión valores") },
     { profile: "public", key: "contact-form", title: "Contacto — Formulario", path: "/contacto", selector: section("Contacto / Formulario") },
