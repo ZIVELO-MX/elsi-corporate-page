@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, Clock, GraduationCap, MapPin, QrCode, UserRound } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   certType,
   getPublicCourseBySlug,
@@ -10,6 +10,7 @@ import {
   money,
   publishState,
   stateMeta,
+  type PublishState,
 } from "@/lib/courses";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CourseMedia } from "@/components/course-media";
@@ -44,23 +45,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   });
 }
 
-const TONE: Record<string, string> = {
-  teal: "bg-[var(--primary-light)] text-[var(--secondary-foreground)]",
-  purple: "bg-[var(--accent-light)] text-[var(--accent)]",
-  muted: "bg-[var(--muted)] text-[var(--text-muted)]",
+const inquiryLabels: Record<PublishState, string> = {
+  published: "Solicitar inscripción",
+  upcoming: "Solicitar información",
+  closed: "Avísame si reabre",
+  pending: "Solicitar información",
+  draft: "Consultar disponibilidad",
 };
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function CourseFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2">
-      <span className="mt-0.5 shrink-0 text-[var(--primary)]">{icon}</span>
-      <div><dt className="text-[10px] font-bold uppercase tracking-[.06em] text-[var(--text-muted)]">{label}</dt><dd className="text-[13px] text-[var(--text)]">{value}</dd></div>
+    <div className="course-detail-fact">
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="mt-6"><h2 className="mb-2.5 font-heading text-[15px] font-bold text-[var(--text)]">{title}</h2>{children}</section>;
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="course-detail-section">
+      <h2>{title}</h2>
+      {children}
+    </section>
+  );
 }
 
 export default async function CursoPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -68,7 +76,8 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const course = getPublicCourseBySlug(slug);
   if (!course) notFound();
 
-  const m = stateMeta(course);
+  const state = publishState(course);
+  const availability = stateMeta(course).label;
   const online = course.modality !== "presencial";
 
   return (
@@ -76,106 +85,99 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
       {indexable && isCourseVerified(course) ? (
         <StructuredData value={buildCourseJsonLd(course)} />
       ) : null}
-      <section data-section-label="Detalle curso / Contenido" style={{ padding: "48px 0 72px" }}>
+
+      <section className="course-detail-hero" data-section-label="Detalle curso / Contenido">
         <div className="shell">
           <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Cursos", href: "/cursos" }, { label: course.title, href: `/cursos/${course.slug}` }]} />
-          <div className="curso-detail-grid mt-4">
-            <div className="curso-detail-summary">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] ${TONE[m.tone]}`}>{m.label}</span>
-                {course.certificateType && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--accent)]"><GraduationCap size={11} aria-hidden="true" />Constancia {certType(course)}</span>}
-              </div>
-              <h1 className="mt-2 font-heading text-[28px] font-bold leading-[1.08] text-[var(--text)]">{course.title}</h1>
-              <p className="mt-2.5 text-[14px] leading-7 text-[var(--text-muted)] max-w-[65ch]">{course.description}</p>
+          <div className="course-detail-hero-grid">
+            <header className="course-detail-intro">
+              <p className="course-detail-kicker">Curso {modalityLabel(course).toLowerCase()}</p>
+              <h1>{course.title}</h1>
+              <p className="course-detail-description">{course.description}</p>
               <PrototypeDataNote>
-                Temario, fechas, precio, instructor e imagen permanecen como
-                ejemplo hasta recibir la ficha aprobada por ELSI.
+                Temario, fechas, precio, instructor e imagen permanecen como ejemplo hasta recibir la ficha aprobada por ELSI.
               </PrototypeDataNote>
-
-              <div className="mt-4 aspect-[16/8] overflow-hidden rounded-[var(--radius-md)] bg-[var(--muted)]">
-                <CourseMedia
-                  course={course}
-                  variant="detail"
-                  sizes="(max-width: 1024px) calc(100vw - 40px), (max-width: 1440px) 72vw, 832px"
-                />
-              </div>
-
-              <dl className="mt-4 grid grid-cols-1 gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4 sm:grid-cols-2">
-                <InfoRow icon={<GraduationCap size={16} aria-hidden="true" />} label="Modalidad" value={modalityLabel(course)} />
-                <InfoRow icon={<Clock size={16} aria-hidden="true" />} label="Duración" value={course.duration} />
-                {course.schedule && <InfoRow icon={<CalendarDays size={16} aria-hidden="true" />} label="Fecha y hora" value={`${course.schedule.date} · ${course.schedule.time}`} />}
-                {online
-                  ? <InfoRow icon={<MapPin size={16} aria-hidden="true" />} label="Acceso" value="La liga del curso llega por correo" />
-                  : course.place && <InfoRow icon={<MapPin size={16} aria-hidden="true" />} label="Lugar" value={course.place} />}
-              </dl>
-            </div>
-
-            <aside className="curso-sidebar h-fit rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-card)]">
-              <p className="font-heading text-[28px] font-bold text-[var(--primary-hover)]">{money(course.price)}</p>
-              {course.priceLabel && course.price > 0 && <p className="text-[12px] text-[var(--text-muted)]">{course.priceLabel}</p>}
-              {publishState(course) === "closed" ? (
-                <Link href={buildContactPath({ course: course.slug })} style={{ color: "var(--primary-hover)" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] border border-[var(--primary)] text-[14px] font-extrabold transition-transform active:scale-[.98]">Avísame si reabre</Link>
-              ) : (
-                <Link href={buildContactPath({ course: course.slug })} style={{ color: "#fff" }} className="mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[var(--primary-hover)] text-[14px] font-extrabold transition-transform active:scale-[.98]">
-                  {publishState(course) === "published" ? "Solicitar inscripción" : "Solicitar información"}
-                </Link>
-              )}
-              <div className="mt-3 flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-[var(--paper)] p-2.5">
-                <QrCode size={30} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />
-                <p className="text-[11px] leading-4 text-[var(--text-muted)]">Recibirás los pasos de inscripción cuando ELSI confirme la disponibilidad.</p>
-              </div>
-              {course.certificateType && <p className="mt-3 flex items-center gap-1.5 text-[12px] font-bold text-[var(--moss)]"><GraduationCap size={14} aria-hidden="true" /> Incluye constancia {certType(course)}</p>}
-              <Link href="/cursos" style={{ color: "var(--primary-hover)" }} className="mt-4 block text-center text-[12px] font-extrabold">← Volver al catálogo</Link>
-            </aside>
-
-            <div className="curso-detail-program">
-              <Section title={course.durationType === "modules" ? "Temario" : "Contenido"}>
-                {course.curriculum && course.curriculum.length > 0 ? (
-                  <ol className="grid gap-2.5">
-                    {course.curriculum.map((t, i) => (
-                      <li key={t.tema} className="text-[13px] text-[var(--text)]">
-                        <div className="flex items-baseline gap-2"><span className="font-heading text-[11px] font-bold text-[var(--primary-hover)]">{String(i + 1).padStart(2, "0")}</span><span className="font-semibold">{t.tema}</span></div>
-                        {t.subtemas && t.subtemas.length > 0 && (
-                          <ul className="mt-1 ml-6 grid gap-1">
-                            {t.subtemas.map((s) => (
-                              <li key={s} className="text-[12px] leading-5 text-[var(--text-muted)]">- {s}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <ol className="grid gap-1.5 sm:grid-cols-2">
-                    {course.moduleList.map((t, i) => (
-                      <li key={t} className="flex items-baseline gap-2 text-[13px] text-[var(--text)]"><span className="font-heading text-[11px] font-bold text-[var(--primary-hover)]">{String(i + 1).padStart(2, "0")}</span>{t}</li>
-                    ))}
-                  </ol>
-                )}
-              </Section>
-
-              {course.objectives && course.objectives.length > 0 && (
-                <Section title="Objetivos"><ul className="grid gap-1.5">{course.objectives.map((o) => <li key={o} className="text-[13px] leading-6 text-[var(--text-muted)]">• {o}</li>)}</ul></Section>
-              )}
-
-              {course.targetAudience && course.targetAudience.length > 0 && (
-                <Section title="Dirigido a"><ul className="flex flex-wrap gap-1.5">{course.targetAudience.map((a) => <li key={a} className="rounded-full bg-[var(--muted)] px-2.5 py-1 text-[12px] text-[var(--text-muted)]">{a}</li>)}</ul></Section>
-              )}
-
-              {course.requirements && course.requirements.length > 0 && (
-                <Section title="Requisitos"><ul className="grid gap-1.5">{course.requirements.map((r) => <li key={r} className="text-[13px] leading-6 text-[var(--text-muted)]">• {r}</li>)}</ul></Section>
-              )}
-
-              {course.instructor && (
-                <Section title="Instructor">
-                  <div className="flex gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-3.5">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--primary-light)] text-[var(--secondary-foreground)]"><UserRound size={20} aria-hidden="true" /></div>
-                    <div><p className="text-[14px] font-bold text-[var(--text)]">{course.instructor.name}</p>{course.instructor.bio && <p className="mt-0.5 text-[12px] leading-5 text-[var(--text-muted)]">{course.instructor.bio}</p>}</div>
-                  </div>
-                </Section>
-              )}
-            </div>
+            </header>
+            <figure className="course-detail-media">
+              <CourseMedia
+                course={course}
+                variant="detail"
+                loading="eager"
+                sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 46vw, 660px"
+              />
+            </figure>
           </div>
+        </div>
+      </section>
+
+      <section className="course-detail-overview">
+        <div className="shell course-detail-overview-grid">
+          <dl className="course-detail-facts">
+            <CourseFact label="Modalidad" value={modalityLabel(course)} />
+            <CourseFact label="Duración" value={course.duration} />
+            {course.schedule ? <CourseFact label="Fecha y hora" value={`${course.schedule.date} · ${course.schedule.time}`} /> : null}
+            {online ? <CourseFact label="Acceso" value="La liga del curso llega por correo" /> : null}
+            {!online && course.place ? <CourseFact label="Lugar" value={course.place} /> : null}
+          </dl>
+
+          <aside className="course-detail-decision" aria-labelledby="course-decision-title">
+            <p className="course-detail-price">{money(course.price)}</p>
+            {course.priceLabel && course.price > 0 ? <p className="course-detail-price-note">{course.priceLabel}</p> : null}
+            <p id="course-decision-title" className="course-detail-availability">Disponibilidad: {availability}</p>
+            {course.certificateType ? <p className="course-detail-certificate">Incluye constancia {certType(course)}</p> : null}
+            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={buildContactPath({ course: course.slug })}>
+              {inquiryLabels[state]}
+              <ArrowRight aria-hidden="true" size={16} />
+            </Link>
+            <p className="course-detail-action-note">ELSI confirmará disponibilidad y los siguientes pasos por correo.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="course-detail-content">
+        <div className="shell course-detail-content-grid">
+          <DetailSection title={course.durationType === "modules" ? "Temario" : "Contenido"}>
+            {course.curriculum && course.curriculum.length > 0 ? (
+              <ol className="course-detail-curriculum">
+                {course.curriculum.map((topic, index) => (
+                  <li key={topic.tema}>
+                    <div><span>{String(index + 1).padStart(2, "0")}</span><strong>{topic.tema}</strong></div>
+                    {topic.subtemas && topic.subtemas.length > 0 ? (
+                      <ul>{topic.subtemas.map((subtopic) => <li key={subtopic}>{subtopic}</li>)}</ul>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <ol className="course-detail-module-list">
+                {course.moduleList.map((module, index) => (
+                  <li key={module}><span>{String(index + 1).padStart(2, "0")}</span>{module}</li>
+                ))}
+              </ol>
+            )}
+          </DetailSection>
+
+          {(course.objectives?.length || course.targetAudience?.length || course.requirements?.length || course.instructor) ? (
+            <div className="course-detail-support">
+              {course.objectives && course.objectives.length > 0 ? (
+                <DetailSection title="Objetivos"><ul className="course-detail-list">{course.objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul></DetailSection>
+              ) : null}
+              {course.targetAudience && course.targetAudience.length > 0 ? (
+                <DetailSection title="Dirigido a"><ul className="course-detail-list">{course.targetAudience.map((audience) => <li key={audience}>{audience}</li>)}</ul></DetailSection>
+              ) : null}
+              {course.requirements && course.requirements.length > 0 ? (
+                <DetailSection title="Requisitos"><ul className="course-detail-list">{course.requirements.map((requirement) => <li key={requirement}>{requirement}</li>)}</ul></DetailSection>
+              ) : null}
+              {course.instructor ? (
+                <DetailSection title="Instructor">
+                  <div className="course-detail-instructor">
+                    <p>{course.instructor.name}</p>
+                    {course.instructor.bio ? <p>{course.instructor.bio}</p> : null}
+                  </div>
+                </DetailSection>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
     </main>

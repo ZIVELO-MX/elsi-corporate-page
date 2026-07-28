@@ -39,16 +39,15 @@ test("public forms expose field-specific errors and focus the first invalid cont
   assert.match(contactForm, /role="status"/);
 });
 
-test("mobile layouts deliberately place actions before supporting detail", () => {
+test("mobile layouts preserve a clear decision point before course supporting detail", () => {
   const styles = read("app/globals.css");
   const course = read("app/cursos/[slug]/page.tsx");
   const contact = read("app/contacto/page.tsx");
 
   assert.match(styles, /grid-template-areas: "intro form" "info form"/);
   assert.match(styles, /grid-template-areas: "intro" "form" "info"/);
-  assert.match(styles, /grid-template-areas: "summary sidebar" "program sidebar"/);
-  assert.match(styles, /grid-template-areas: "summary" "sidebar" "program"/);
-  assert.match(course, /curso-detail-summary[\s\S]*curso-sidebar[\s\S]*curso-detail-program/);
+  assert.match(styles, /course-detail-overview-grid, \.course-detail-content-grid \{ grid-template-columns: minmax\(0, 1fr\); gap: 40px; \}/);
+  assert.match(course, /course-detail-facts[\s\S]*course-detail-decision[\s\S]*course-detail-content/);
   assert.match(contact, /contact-intro[\s\S]*PublicContactForm[\s\S]*contact-info/);
 });
 
