@@ -11,7 +11,7 @@ export const metadata = buildPrivateMetadata({
 
 export default function NotFound() {
   return (
-    <PublicRecoveryState icon={<SearchX size={27} />} eyebrow="Error 404" title="No encontramos esta página" actions={<><Link href="/">Ir al inicio</Link><Link href="/cursos">Ver cursos</Link><Link href="/soluciones">Ver soluciones</Link></>}>
+    <PublicRecoveryState icon={<SearchX size={27} />} eyebrow="Error 404" title="No encontramos esta página" actionsLabel="Rutas para continuar" actions={<><Link href="/">Ir al inicio</Link><Link href="/cursos">Ver cursos</Link><Link href="/soluciones">Ver soluciones</Link></>}>
       Revisa la dirección o continúa desde una de las rutas principales.
     </PublicRecoveryState>
   );
