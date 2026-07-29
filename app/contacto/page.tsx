@@ -1,4 +1,5 @@
 import { PublicContactForm } from "@/components/public-contact-form";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { getPublicCourseBySlug } from "@/lib/courses";
 import { getPublicSolutionBySlug } from "@/lib/solutions";
 
@@ -43,9 +44,7 @@ export default async function ContactoPage({
         <div className="contact-grid">
           <header className="contact-intro">
             <span className="section-kicker">Contacto</span>
-            <h1 className="contact-title">
-              Escríbenos y compártenos qué necesitas aprender o resolver
-            </h1>
+            <h1 className="contact-title">Conversemos sobre lo que necesitas resolver</h1>
             <p className="contact-lede">
               Cuéntanos el contexto. ELSI podrá orientar el curso, la solución o
               el programa adecuado.
@@ -65,21 +64,14 @@ export default async function ContactoPage({
             idPrefix="contact"
             statusClassName="contact-sent"
           />
-          <div className="contact-info" aria-label="Canales de contacto">
-            <div>
-              <strong>Teléfono:</strong>{" "}
-              <a href="tel:+523921104719">392-110-4719</a>
-            </div>
-            <div>
-              <strong>Correo:</strong>{" "}
-              <a href="mailto:instituteelsi@gmail.com">
-                instituteelsi@gmail.com
-              </a>
-            </div>
-            <div>
-              <strong>Ubicación:</strong> Guanajuato, México
-            </div>
-          </div>
+          <aside className="contact-info" aria-label="Canales de contacto">
+            <p className="contact-info-title">También puedes contactarnos por</p>
+            <ul>
+              <li><Phone aria-hidden="true" size={17} /><a href="tel:+523921104719"><span>Teléfono</span>392-110-4719</a></li>
+              <li><Mail aria-hidden="true" size={17} /><a href="mailto:instituteelsi@gmail.com"><span>Correo</span>instituteelsi@gmail.com</a></li>
+              <li><MapPin aria-hidden="true" size={17} /><p><span>Ubicación</span>Guanajuato, México</p></li>
+            </ul>
+          </aside>
         </div>
       </section>
     </main>

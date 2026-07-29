@@ -1199,15 +1199,23 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .page-header p { margin: 0; font-size: 15.5px; color: var(--text-muted); max-width: 680px; line-height: 1.6; }
 
 /* ---- CONTACTO ---- */
-.contact-section { min-height: calc(100dvh - var(--header-height) - 220px); display: flex; align-items: center; padding: 56px 0; }
-.contact-grid { width: 100%; max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "intro form" "info form"; gap: 24px 56px; align-items: center; padding: 0 48px; }
-.contact-intro { grid-area: intro; align-self: end; }
-.contact-title { margin: 0 0 16px; font-family: var(--font-sora), sans-serif; font-size: 32px; font-weight: 700; line-height: 1.18; }
-.contact-lede { margin: 0 0 32px; max-width: 460px; color: var(--text-muted); font-size: 15px; line-height: 1.6; }
-.contact-context { width: fit-content; max-width: 100%; margin: -16px 0 28px; padding: 9px 12px; border-left: 3px solid var(--primary); background: var(--primary-light); color: var(--text-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.contact-section { min-height: calc(100dvh - var(--header-height) - 180px); padding: clamp(3rem, 7vw, 6.5rem) 0; background: var(--surface-editorial); }
+.contact-grid { width: 100%; max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, .82fr) minmax(22rem, .98fr); grid-template-areas: "intro form" "info form"; gap: 34px clamp(3rem, 8vw, 8rem); align-items: start; padding: 0 48px; }
+.contact-intro { grid-area: intro; min-width: 0; }
+.contact-title { max-width: 14ch; margin: 0; font-family: var(--font-sora), sans-serif; font-size: clamp(2.2rem, 1.75rem + 2vw, 3.7rem); font-weight: 700; line-height: 1.04; letter-spacing: -.04em; }
+.contact-lede { max-width: 34rem; margin: 22px 0 0; color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+.contact-context { max-width: 34rem; margin: 24px 0 0; padding: 11px 14px; border-left: 3px solid var(--primary); background: var(--primary-light); color: var(--text-muted); font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
 .contact-context strong { color: var(--text); }
-.contact-info { grid-area: info; display: flex; flex-direction: column; align-self: start; gap: 14px; color: #3a3f39; font-size: .875rem; overflow-wrap: anywhere; }
-.contact-form { grid-area: form; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-card); }
+.contact-info { grid-area: info; max-width: 34rem; padding-top: 6px; border-top: 1px solid var(--border); color: var(--text); overflow-wrap: anywhere; }
+.contact-info-title { margin: 15px 0 12px; color: var(--text-muted); font-size: 12px; font-weight: 800; letter-spacing: var(--type-meta-tracking); text-transform: uppercase; }
+.contact-info ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.contact-info li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; align-items: start; }
+.contact-info svg { margin-top: 3px; color: var(--secondary-foreground); }
+.contact-info a, .contact-info li p { display: grid; gap: 1px; margin: 0; color: var(--text); font-size: 13px; font-weight: 700; line-height: 1.5; }
+.contact-info a span, .contact-info li p span { color: var(--text-muted); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.contact-info a:focus-visible { outline-offset: 3px; }
+.contact-form { grid-area: form; padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; gap: 16px; }
+.contact-form [data-slot="field"] { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
 .contact-sent { background: var(--primary-light); color: var(--primary-hover); border-radius: 8px; padding: 14px; font-size: 13.5px; font-weight: 700; text-align: center; }
 .contact-submit { width: 100%; }
 
@@ -1721,8 +1729,8 @@ body[data-section-labels="true"] section[data-section-label]::before {
   .feature-item:nth-child(2) { border-right: none; }
   .cursos-catalogo-grid { grid-template-columns: 1fr; }
   .contact-section { min-height: auto; padding: 40px 0 72px; }
-  .contact-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "form" "info"; gap: 28px; padding: 0 20px; }
-  .contact-form { padding: 22px; }
+  .contact-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "form" "info"; gap: 34px; padding: 0 20px; }
+  .contact-title { max-width: 16ch; }
   .cta-grid { grid-template-columns: 1fr; gap: 28px; text-align: center; }
   .cta-copy h2, .cta-copy p { margin-left: auto; margin-right: auto; }
   .cta-form { padding: 22px; text-align: left; }
