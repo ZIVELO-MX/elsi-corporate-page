@@ -94,7 +94,7 @@ function UpcomingCard({ c }: { c: ProfileUpcoming }) {
   }
   const online = c.modality === "online";
   return (
-    <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+    <article className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="mb-1 text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--primary-hover)]">Próximo curso</p>
