@@ -1233,6 +1233,17 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .privacy-content a { color: var(--primary-hover); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .privacy-updated { margin-top: 38px !important; color: var(--text-muted); font-size: .82rem !important; font-style: italic; }
 
+/* ---- ESTADOS PÚBLICOS ---- */
+.public-recovery { display: grid; min-height: 55dvh; place-items: center; padding: clamp(3rem, 8vw, 7rem) 20px; background: var(--surface-editorial); }
+.public-recovery-content { width: min(100%, 42rem); text-align: center; }
+.public-recovery-icon { display: inline-grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--primary-hover); }
+.public-recovery-kicker { margin: 20px 0 0; color: var(--secondary-foreground); font-size: var(--type-meta-size); font-weight: 800; letter-spacing: var(--type-meta-tracking); text-transform: uppercase; }
+.public-recovery h1 { max-width: 16ch; margin: 12px auto 0; color: var(--text); font-family: var(--font-sora), sans-serif; font-size: clamp(2rem, 1.7rem + 1.4vw, 3rem); font-weight: 700; line-height: 1.08; letter-spacing: -.035em; }
+.public-recovery-content > p { max-width: 34rem; margin: 16px auto 0; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+.public-recovery-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
+.public-recovery-actions a, .public-recovery-actions button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 10px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--text); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.public-recovery-actions > :first-child { border-color: var(--primary-hover); background: var(--primary-hover); color: #fff; }
+
 /* ---- CATALOGO ---- */
 .cursos-catalogo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .catalog-course-link { display: block; height: 100%; border-radius: 10px; }
