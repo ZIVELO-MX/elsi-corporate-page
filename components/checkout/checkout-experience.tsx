@@ -416,7 +416,6 @@ function CheckoutEmptyState() {
         <Link
           className={styles.backLink}
           href="/cursos"
-          style={{ color: "var(--accent)" }}
         >
           <ArrowLeft aria-hidden="true" />
           Volver a cursos
@@ -521,7 +520,6 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
         <Link
           className={styles.backLink}
           href="/cursos"
-          style={{ color: "var(--accent)" }}
         >
           <ArrowLeft aria-hidden="true" />
           Volver al curso

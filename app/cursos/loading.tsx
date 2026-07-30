@@ -2,19 +2,18 @@
 // client navigation). Neutral skeleton so it fits both catalog and detail.
 export default function Loading() {
   return (
-    <main aria-busy="true">
-      <section style={{ padding: "48px 0 72px" }}>
-        <div className="shell flex flex-col gap-5">
-          <div className="h-8 w-56 animate-pulse motion-reduce:animate-none rounded-[var(--radius-sm)] bg-[var(--muted)]" />
-          <div className="h-11 max-w-xl animate-pulse motion-reduce:animate-none rounded-[var(--radius-sm)] bg-[var(--muted)]" />
-          <div className="aspect-[16/7] animate-pulse motion-reduce:animate-none rounded-[var(--radius-md)] bg-[var(--muted)]" />
-          <div className="grid gap-2.5">
+    <main className="public-loading" aria-busy="true" aria-labelledby="courses-loading-title">
+      <section className="shell public-loading-content">
+        <h1 id="courses-loading-title" className="sr-only">Cargando cursos</h1>
+        <div className="public-loading-heading" aria-hidden="true" />
+        <div className="public-loading-summary" aria-hidden="true" />
+        <div className="public-loading-feature" aria-hidden="true" />
+        <div className="public-loading-list" aria-hidden="true">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-[84px] animate-pulse motion-reduce:animate-none rounded-[var(--radius-md)] bg-[var(--muted)]" />
+              <div key={i} className="public-loading-row" />
             ))}
-          </div>
-          <span className="sr-only">Cargando…</span>
         </div>
+        <span className="sr-only">Cargando cursos.</span>
       </section>
     </main>
   );
