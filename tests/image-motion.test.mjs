@@ -147,6 +147,7 @@ test("static surfaces stay still and loaders retain accessible status", () => {
   assert.doesNotMatch(styles, /admin-skeleton-shimmer/);
   assert.match(courseLoading, /aria-busy="true"/);
   assert.match(courseLoading, /Cargando cursos\./);
+  assert.doesNotMatch(courseLoading, /<h1/);
   assert.match(styles, /prefers-reduced-motion: reduce[\s\S]*\.public-loading-heading,[\s\S]*animation: none/);
   assert.match(skeleton, /role="status"/);
   assert.match(skeleton, /aria-label="Cargando datos"/);
