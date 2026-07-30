@@ -49,7 +49,7 @@ jobs:
       - if: steps.credentials.outputs.skip != 'true' && steps.resolve.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
 
       - if: steps.credentials.outputs.skip != 'true' && steps.resolve.outputs.skip != 'true'

@@ -1,6 +1,6 @@
 # ELS-0070 — Runtime y dependencias reproducibles
 
-Estado: `planned`  
+Estado: `implemented — manual validation pending`
 Prioridad: P0  
 Rama: `chore/els-0070-runtime-baseline`  
 Base auditada: `257bfc0`
@@ -24,27 +24,32 @@ Todo clon limpio instala, valida y construye la aplicación con versiones fijada
 
 ## Pasos
 
-1. Auditar versiones soportadas por Next, React, OpenNext, Wrangler, TypeScript y Node.
-2. Sustituir `latest` por versiones exactas o rangos deliberados y declarar `packageManager`/`engines`.
-3. Regenerar el lockfile desde una instalación limpia y comprobar que no cambia en una segunda instalación.
-4. Alinear CI con `corepack`, versión de Node fijada, `pnpm install --frozen-lockfile` y caché segura.
-5. Ejecutar en orden lint, tipos, unitarias, build Next y build Cloudflare.
-6. Documentar los comandos, la política de actualización y el diagnóstico de dependencias faltantes.
+- [x] Auditar versiones soportadas por Next, React, OpenNext, Wrangler, TypeScript y Node.
+- [x] Sustituir `latest` por versiones exactas y declarar `packageManager`/`engines`.
+- [x] Regenerar el lockfile desde una instalación limpia y comprobar que no cambia en una segunda instalación.
+- [x] Alinear CI con versión de Node fijada, `pnpm install --frozen-lockfile` y caché segura.
+- [x] Ejecutar lint, tipos, unitarias, build Next y build Cloudflare.
+- [x] Documentar los comandos, la política de actualización y el diagnóstico de dependencias faltantes.
 
 ## Validación automatizada
 
-- [ ] `pnpm install --frozen-lockfile` funciona desde un clon limpio.
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm test`
-- [ ] `pnpm build`
-- [ ] `pnpm cloudflare:build`
-- [ ] Una segunda instalación no modifica `pnpm-lock.yaml`.
+- [x] `pnpm install --frozen-lockfile` funciona desde un clon limpio.
+- [x] `pnpm lint` (3 warnings preexistentes, 0 errores).
+- [x] `pnpm typecheck`
+- [x] `pnpm test` (84/84).
+- [x] `pnpm build`
+- [x] `pnpm cloudflare:build`
+- [x] Una segunda instalación no modifica `pnpm-lock.yaml`.
 
 ## Validación manual
 
 - [ ] Arrancar `pnpm dev` y abrir Home, Cursos, Login, Perfil y Admin sin errores de runtime.
 - [ ] Confirmar que Cloudflare Preview arranca con el artefacto generado.
+
+## Evidencia automatizada
+
+- PR #57: https://github.com/ZIVELO-MX/elsi-corporate-page/pull/57
+- El pipeline debe repetir `quality`, `rendered-seo` y `screenshots` sobre el commit de implementación.
 
 ## Pendiente del propietario
 
@@ -52,5 +57,4 @@ No requiere credenciales nuevas. Si el repositorio debe usar una versión corpor
 
 ## Terminado cuando
 
-CI está verde en un entorno limpio, la documentación reproduce el resultado y no se incluyó `next-env.d.ts` ni cambios funcionales.
-
+CI está verde en un entorno limpio, la documentación reproduce el resultado y no se incluyó `next-env.d.ts` ni cambios funcionales. La misión conserva pendientes las dos validaciones manuales para la futura sesión de QA.

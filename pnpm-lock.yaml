@@ -12,71 +12,71 @@ importers:
         specifier: 1.20.1
         version: 1.20.1(next@16.2.6(@babel/core@7.29.7)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(wrangler@4.114.0)
       class-variance-authority:
-        specifier: latest
+        specifier: 0.7.1
         version: 0.7.1
       clsx:
-        specifier: latest
+        specifier: 2.1.1
         version: 2.1.1
       lucide-react:
-        specifier: latest
+        specifier: 1.14.0
         version: 1.14.0(react@19.2.6)
       next:
-        specifier: latest
+        specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.7)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       next-themes:
-        specifier: ^0.4.6
+        specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       radix-ui:
-        specifier: ^1.6.1
+        specifier: 1.6.1
         version: 1.6.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react:
-        specifier: latest
+        specifier: 19.2.6
         version: 19.2.6
       react-dom:
-        specifier: latest
+        specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
       sonner:
-        specifier: latest
+        specifier: 2.0.7
         version: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       tailwind-merge:
-        specifier: latest
+        specifier: 3.6.0
         version: 3.6.0
       tw-animate-css:
-        specifier: latest
+        specifier: 1.4.0
         version: 1.4.0
     devDependencies:
       '@playwright/test':
-        specifier: ^1.60.0
+        specifier: 1.60.0
         version: 1.60.0
       '@tailwindcss/postcss':
-        specifier: latest
+        specifier: 4.3.0
         version: 4.3.0
       '@types/node':
-        specifier: latest
+        specifier: 25.7.0
         version: 25.7.0
       '@types/react':
-        specifier: latest
+        specifier: 19.2.14
         version: 19.2.14
       '@types/react-dom':
-        specifier: latest
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
       eslint:
-        specifier: ^9.39.4
+        specifier: 9.39.4
         version: 9.39.4(jiti@2.7.0)
       eslint-config-next:
-        specifier: latest
+        specifier: 16.2.9
         version: 16.2.9(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@6.0.3))(eslint@9.39.4(jiti@2.7.0))(typescript@6.0.3)
       sharp:
-        specifier: ^0.34.5
+        specifier: 0.34.5
         version: 0.34.5
       tailwindcss:
-        specifier: latest
+        specifier: 4.3.0
         version: 4.3.0
       typescript:
-        specifier: latest
+        specifier: 6.0.3
         version: 6.0.3
       wrangler:
-        specifier: ^4.114.0
+        specifier: 4.114.0
         version: 4.114.0
 
 packages:

@@ -14,6 +14,20 @@ Sitio web corporativo de ELSI Academy. Incluye landing, catálogo de cursos, blo
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
+## Runtime local
+
+El repositorio fija Node en `.node-version` y pnpm en `package.json`. Usa
+Corepack antes de instalar dependencias para reproducir el entorno de CI:
+
+```bash
+corepack enable
+corepack install
+pnpm install --frozen-lockfile
+```
+
+Si el entorno reporta una versión distinta, cambia a Node 22.14.0 y pnpm
+10.12.1 antes de diagnosticar errores de instalación o build.
+
 ## Publicación e indexación
 
 La indexación falla de forma segura. `robots` y los datos estructurados solo se
