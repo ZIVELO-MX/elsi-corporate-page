@@ -22,6 +22,10 @@ test("runtime versions are pinned across manifests and CI", async () => {
   assert.equal(nodeVersion.trim(), "22.14.0");
   assert.equal(packageJson.packageManager, "pnpm@10.12.1");
   assert.equal(packageJson.dependencies.next, "16.2.7");
+  assert.equal(
+    packageJson.scripts.test,
+    "node --experimental-strip-types --test tests/*.test.mjs",
+  );
   assert.deepEqual(packageJson.engines, {
     node: ">=22.14.0 <25",
     pnpm: "10.12.1",
