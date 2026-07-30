@@ -29,6 +29,7 @@
   margin-bottom: 1.25rem;
   font-size: 0.8125rem;
   font-weight: 800;
+  color: var(--accent);
   text-decoration: none;
   transition: color 160ms var(--ease-out), transform 160ms var(--ease-out);
 }

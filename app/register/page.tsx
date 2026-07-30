@@ -105,7 +105,7 @@ export default function RegisterPage() {
 
       <p className="mt-6 text-center text-[12px] text-[var(--text-muted)]">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/login" className="font-bold pointer-fine:hover:underline" style={{ color: "var(--accent)" }}>
+        <Link href="/login" className="accent-link font-bold pointer-fine:hover:underline">
           Inicia sesión
         </Link>
       </p>

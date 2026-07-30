@@ -34,6 +34,7 @@ test("user menu motion stays anchored, symmetric, and reduced-motion safe", () =
 
 test("login keeps the approved email and password flow accessible", () => {
   const login = read("app/login/page.tsx");
+  const styles = read("app/globals.css");
 
   assert.match(login, /<label[^>]+htmlFor="email"/);
   assert.match(login, /<label[^>]+htmlFor="password"/);
@@ -45,6 +46,7 @@ test("login keeps the approved email and password flow accessible", () => {
   assert.match(login, /aria-describedby=\{errors\.password/);
   assert.match(login, /role="alert"/);
   assert.match(login, /pointer-fine:hover:/);
-  assert.match(login, /style=\{\{ color: "var\(--accent\)" \}\}/);
+  assert.match(login, /className="accent-link/);
+  assert.match(styles, /\.accent-link \{ color: var\(--accent\); \}/);
   assert.doesNotMatch(login, /oauth|google/i);
 });

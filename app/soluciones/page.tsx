@@ -119,7 +119,7 @@ export default function SolucionesPage() {
                   <Button asChild variant={solution.layout === "technical" ? "inverse" : "primary"}>
                     <Link
                       href={`/soluciones/${solution.slug}`}
-                      style={solution.layout === "technical" ? { color: "var(--primary-hover)" } : undefined}
+                      className={solution.layout === "technical" ? "primary-link" : undefined}
                     >
                       Conocer {solution.title.toLocaleLowerCase("es-MX")} <ArrowRight data-icon="inline-end" />
                     </Link>

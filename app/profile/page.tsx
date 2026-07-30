@@ -84,8 +84,7 @@ function UpcomingCard({ c }: { c: ProfileUpcoming }) {
         </p>
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
-          style={{ color: "var(--primary-hover)" }}
-        className={`${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-extrabold pointer-fine:hover:bg-[var(--primary-light)]`}
+          className={`primary-link ${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--primary)] px-3 text-[12px] font-extrabold pointer-fine:hover:bg-[var(--primary-light)]`}
         >
           Contactar soporte
         </a>
@@ -154,10 +153,7 @@ function Discover({ empty = false }: { empty?: boolean }) {
       <p className="text-[10px] font-extrabold uppercase tracking-[.1em] text-white/70">{empty ? "Aún no tienes cursos" : "Sigue aprendiendo"}</p>
       <h2 className="mt-2 font-heading text-[18px] font-bold">Descubre nuevos cursos</h2>
       <p className="mt-2 max-w-md text-[12px] leading-5 text-white/80">Explora la oferta disponible y elige tu próxima experiencia de aprendizaje.</p>
-      {/* Inline color: globals.css `a { color: inherit }` is unlayered and beats
-          Tailwind's layered color utilities, so a link on the navy card would
-          otherwise inherit white-on-white. Inline wins the cascade. */}
-      <Link href="/cursos" style={{ color: "var(--accent)" }} className={`${styles.control} mt-4 inline-flex items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold`}>Ver cursos</Link>
+      <Link href="/cursos" className={`accent-link ${styles.control} mt-4 inline-flex items-center rounded-[var(--radius-sm)] bg-white px-3 text-[12px] font-extrabold`}>Ver cursos</Link>
     </article>
   );
 }

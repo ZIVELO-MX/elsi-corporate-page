@@ -56,7 +56,7 @@ export function CourseMedia({
       height={asset.height}
       loading={loading}
       sizes={sizes}
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      className="course-media-image"
       fallback={fallback}
     />
   );

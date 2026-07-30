@@ -142,8 +142,7 @@ function FeaturedCard({ course }: { course: Course }) {
           </div>
           <Link
             href={`/cursos/${course.slug}`}
-            style={{ color: "#fff" }}
-            className="inline-flex min-h-10 items-center rounded-[8px] bg-[var(--primary-hover)] px-4 text-[13px] font-extrabold transition-transform active:scale-[.97]"
+            className="on-primary-link inline-flex min-h-10 items-center rounded-[8px] bg-[var(--primary-hover)] px-4 text-[13px] font-extrabold transition-transform active:scale-[.97]"
           >
             Ver curso
           </Link>
@@ -177,10 +176,7 @@ function CompactRow({ course }: { course: Course }) {
         <span className="text-[13px] font-bold text-[var(--primary-hover)]">
           {money(course.price)}
         </span>
-        <span
-          style={{ color: "var(--primary-hover)" }}
-          className="mt-0.5 block text-[11px] font-extrabold"
-        >
+        <span className="primary-link mt-0.5 block text-[11px] font-extrabold">
           Ver curso →
         </span>
       </div>
@@ -223,7 +219,7 @@ export default async function CursosPage({
       {indexable && verifiedCourses.length >= 3 ? (
         <StructuredData value={buildCourseListJsonLd(verifiedCourses)} />
       ) : null}
-      <div className="shell page-header" style={{ paddingBottom: 0 }}>
+      <div className="shell page-header course-catalog-header">
         <span className="section-kicker">Oferta formativa</span>
         <h1>Catálogo de cursos</h1>
         <p>
@@ -239,7 +235,7 @@ export default async function CursosPage({
       <section
         aria-label="Catálogo de cursos"
         data-section-label="Cursos / Catálogo"
-        style={{ padding: "28px 0 72px" }}
+        className="course-catalog-section"
       >
         <div className="shell flex flex-col gap-6">
           <div className="flex flex-col gap-3">
@@ -315,8 +311,7 @@ export default async function CursosPage({
               {allCourses.length > 0 ? (
                 <Link
                   href="/cursos"
-                  style={{ color: "var(--primary-hover)" }}
-                  className="mt-3 inline-flex min-h-10 items-center text-[13px] font-extrabold"
+                  className="primary-link mt-3 inline-flex min-h-10 items-center text-[13px] font-extrabold"
                 >
                   Limpiar filtros
                 </Link>
