@@ -11,7 +11,7 @@ Todo clon limpio instala, valida y construye la aplicación con versiones fijada
 
 ## Estado actual
 
-- `package.json` usa varios rangos `latest`, por lo que una instalación futura puede cambiar el runtime sin revisión.
+- `package.json` usaba varios rangos `latest`, por lo que una instalación futura podía cambiar el runtime sin revisión.
 - Cloudflare/OpenNext, TypeScript, ESLint y Playwright requieren una matriz de versiones explícita.
 - El árbol local puede pasar pruebas aunque le falten dependencias instaladas; un clon limpio debe ser la referencia.
 - `next-env.d.ts` tiene un cambio local ajeno a esta rama y no debe incorporarse.
@@ -26,6 +26,7 @@ Todo clon limpio instala, valida y construye la aplicación con versiones fijada
 
 - [x] Auditar versiones soportadas por Next, React, OpenNext, Wrangler, TypeScript y Node.
 - [x] Sustituir `latest` por versiones exactas y declarar `packageManager`/`engines`.
+- [x] Actualizar Next a la versión estable más reciente publicada (`16.2.7`); `16.2.11` aún no está disponible en el registro configurado.
 - [x] Regenerar el lockfile desde una instalación limpia y comprobar que no cambia en una segunda instalación.
 - [x] Alinear CI con versión de Node fijada, `pnpm install --frozen-lockfile` y caché segura.
 - [x] Ejecutar lint, tipos, unitarias, build Next y build Cloudflare.
@@ -40,6 +41,10 @@ Todo clon limpio instala, valida y construye la aplicación con versiones fijada
 - [x] `pnpm build`
 - [x] `pnpm cloudflare:build`
 - [x] Una segunda instalación no modifica `pnpm-lock.yaml`.
+
+## Auditoría de seguridad
+
+`pnpm audit --prod --audit-level high` sigue reportando vulnerabilidades altas en Next (<16.2.11), Sharp (<0.35.0), PostCSS transitivo y dependencias transitivas de OpenNext. Las versiones corregidas indicadas por los advisories todavía no están disponibles en el registro configurado; el detalle y la mitigación quedan documentados para la siguiente actualización coordinada de Next/OpenNext. No se marca este criterio como completo.
 
 ## Validación manual
 
