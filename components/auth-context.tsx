@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
 
 export type User = {
   id: string;
@@ -24,6 +24,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/auth/session")
+      .then((res) => res.ok ? res.json() : { user: null })
+      .then((data) => { if (active) setUser(data.user ?? null); })
+      .catch(() => { if (active) setUser(null); });
+    return () => { active = false; };
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -32,7 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) throw new Error("Credenciales inválidas");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Credenciales inválidas");
+      }
       const data = await res.json();
       setUser(data.user);
       return data.user;
@@ -49,7 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, phone, password }),
       });
-      if (!res.ok) throw new Error("Error al registrarse");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Error al registrarse");
+      }
     } finally {
       setLoading(false);
     }
