@@ -19,3 +19,10 @@ test("content mutations require admin role and protect duplicate sections", asyn
   assert.match(item, /update/);
   assert.match(testimonial, /validateTestimonial/);
 });
+
+test("admin content screen hydrates from Supabase and persists edits with a prototype fallback", async () => {
+  const source = await read("app/admin/contenido/page.tsx");
+  assert.match(source, /fetch\("\/api\/admin\/content"/);
+  assert.match(source, /\/api\/admin\/content\/\$\{section\.id\}/);
+  assert.match(source, /persistedSections \?\? sections/);
+});
