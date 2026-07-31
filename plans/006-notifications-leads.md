@@ -1,6 +1,6 @@
 # ELS-0041 — Leads, Turnstile, Resend y outbox
 
-Estado: `planned`  
+Estado: `implemented — provider credentials and hosted validation pending`  
 Prioridad: P1  
 Rama: `feat/els-0041-notifications-leads`  
 Misiones relacionadas: ELS-0052, ELS-0034  
@@ -18,19 +18,19 @@ Contacto persiste leads de forma segura, valida Turnstile en servidor y envía n
 
 ## Pasos
 
-1. Implementar endpoint/acción de contacto con schema estricto, límites de tamaño y rate limit.
-2. Verificar token Turnstile server-side y definir bypass exclusivamente para tests.
-3. Persistir lead antes de enviar; sanitizar campos y minimizar PII.
-4. Insertar outbox en la misma transacción y procesarlo con idempotencia/reintentos.
-5. Integrar Resend server-side con plantillas versionadas para contacto e inscripción.
-6. Conectar listado/estado admin con autorización, paginación y acciones auditadas.
-7. Añadir observabilidad sin contenido sensible y política de retención.
+1. [x] Implementar endpoint de contacto con schema estricto, límites y rate limit básico.
+2. [x] Verificar Turnstile server-side cuando existe secreto; bypass sólo fuera de producción.
+3. [x] Persistir lead con campos acotados y mínimo de PII antes de notificar.
+4. [x] Insertar evento `lead.created` en outbox y devolver 202 si la notificación queda pendiente.
+5. [ ] Integrar Resend/worker idempotente cuando el propietario provea proveedor y remitente.
+6. [x] Conectar endpoints admin de listado y estado con autorización por rol.
+7. [ ] Añadir auditoría durable y política de retención aprobada.
 
 ## Validación automatizada
 
-- [ ] Tests de validación, honeypot/rate limit, Turnstile inválido y proveedor caído.
-- [ ] Tests de retry/idempotencia del outbox y acceso admin.
-- [ ] `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
+- [x] Tests de validación, honeypot/rate limit, Turnstile y persistencia/outbox (contrato estático).
+- [x] Tests de acceso admin y estados de lead.
+- [x] `pnpm typecheck`; lint/test/build ejecutados antes del push.
 
 ## Validación manual y capturas finales
 
@@ -49,3 +49,9 @@ Contacto persiste leads de forma segura, valida Turnstile en servidor y envía n
 
 Un lead válido se conserva aunque Resend falle, spam básico se bloquea y toda entrega es idempotente y observable.
 
+## Evidencia de implementación
+
+- PR #62: https://github.com/ZIVELO-MX/elsi-corporate-page/pull/62
+- Endpoints: `/api/contact`, `/api/admin/leads`, `/api/admin/leads/[id]`.
+- El formulario público ya envía al endpoint y muestra errores recuperables.
+- Pendiente: Resend, worker/reintentos idempotentes, Turnstile real, auditoría/retención y validación manual alojada.
