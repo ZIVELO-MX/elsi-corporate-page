@@ -31,3 +31,12 @@ test("admin enrollment screen uses persistent endpoints with fixture fallback", 
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /persistedEnrollments \?\? enrollments/);
 });
+
+test("admin users endpoint and screen use Supabase data without exposing service role", async () => {
+  const [route, screen] = await Promise.all([read("app/api/admin/users/route.ts"), read("app/admin/usuarios/page.tsx")]);
+  assert.match(route, /createSupabaseAdminClient/);
+  assert.match(route, /auth\.admin\.listUsers/);
+  assert.match(route, /role/);
+  assert.match(screen, /fetch\("\/api\/admin\/users"\)/);
+  assert.match(screen, /persistedUsers \?\? users/);
+});
