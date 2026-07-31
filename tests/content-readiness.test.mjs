@@ -73,5 +73,5 @@ test("mission checkout capture selects a fixture course explicitly", () => {
     targets,
     /path: "\/checkout\?curso=manejo-integral-de-residuos"/,
   );
-  assert.match(targets, /selector: section\("Pago \/ Checkout Conekta"\)/);
+  assert.match(targets, /selector: section\("Pago \/ Checkout Stripe"\)/);
 });
