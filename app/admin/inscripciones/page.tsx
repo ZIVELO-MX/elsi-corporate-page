@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Upload, CheckCircle2, Search, SearchX, ClipboardList } from "lucide-react";
-import { useAdminData, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
+import { useAdminData, type AdminCourse, type AdminUser, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,30 @@ import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todas" | "en-curso" | "realizado";
 type SourceFilter = "todas" | EnrollmentSource;
+
+type PersistedEnrollment = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  source: "internal" | "external";
+  status: "in_progress" | "completed";
+  enrolled_at: string;
+};
+
+function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses: AdminCourse[]): Enrollment {
+  const user = users.find(item => item.id === row.user_id);
+  const course = courses.find(item => item.id === row.course_id);
+  return {
+    id: row.id,
+    userId: row.user_id,
+    userName: user?.name ?? `Alumno ${row.user_id.slice(0, 8)}`,
+    courseId: row.course_id,
+    courseName: course?.title ?? `Curso ${row.course_id.slice(0, 8)}`,
+    enrolledAt: row.enrolled_at.slice(0, 10),
+    source: row.source === "external" ? "externa" : "interna",
+    status: row.status === "completed" ? "realizado" : "en-curso",
+  };
+}
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
 const certListStyle: React.CSSProperties = { listStyle: "none", margin: "0 0 1rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem", maxHeight: "10rem", overflowY: "auto" };
@@ -108,19 +132,50 @@ export default function AdminEnrollments() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todas");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("todas");
   const [manualTarget, setManualTarget] = useState<Enrollment | null>(null);
+  const [persistedEnrollments, setPersistedEnrollments] = useState<Enrollment[] | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/enrollments")
+      .then(async response => response.ok ? response.json() : null)
+      .then(payload => {
+        if (!cancelled && payload?.enrollments) {
+          setPersistedEnrollments((payload.enrollments as PersistedEnrollment[]).map(row => enrollmentFromRow(row, users, courses)));
+        }
+      })
+      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+    return () => { cancelled = true; };
+  }, [courses, users]);
+
+  const displayedEnrollments = persistedEnrollments ?? enrollments;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedCourse) {
       toast({ title: "Selecciona un alumno y un curso.", variant: "error" });
       return;
     }
-    const already = enrollments.some(en => en.userId === selectedUser && en.courseId === selectedCourse);
+    const already = displayedEnrollments.some(en => en.userId === selectedUser && en.courseId === selectedCourse);
     if (already) {
       toast({ title: "Ese alumno ya está inscrito en el curso.", variant: "error" });
       return;
     }
-    addEnrollment(selectedUser, selectedCourse, source);
+    if (persistedEnrollments) {
+      const response = await fetch("/api/admin/enrollments", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ userId: selectedUser, courseId: selectedCourse, source: source === "externa" ? "external" : "internal" }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        toast({ title: payload?.error ?? "No fue posible registrar la inscripción.", variant: "error" });
+        return;
+      }
+      const payload = await response.json() as { enrollment: PersistedEnrollment };
+      setPersistedEnrollments(prev => [...(prev ?? []), enrollmentFromRow(payload.enrollment, users, courses)]);
+    } else {
+      addEnrollment(selectedUser, selectedCourse, source);
+    }
     toast({ title: "Inscripción registrada.", variant: "success" });
     setSelectedUser("");
     setSelectedCourse("");
@@ -129,13 +184,13 @@ export default function AdminEnrollments() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return enrollments.filter(e => {
+    return displayedEnrollments.filter(e => {
       if (statusFilter !== "todas" && e.status !== statusFilter) return false;
       if (sourceFilter !== "todas" && e.source !== sourceFilter) return false;
       if (!q) return true;
       return e.userName.toLowerCase().includes(q) || e.courseName.toLowerCase().includes(q);
     });
-  }, [enrollments, query, statusFilter, sourceFilter]);
+  }, [displayedEnrollments, query, statusFilter, sourceFilter]);
 
   const selectableUsers = useMemo(() => users.filter((user) => user.role === "user"), [users]);
   const activeCourses = useMemo(() => courses.filter((course) => course.status === "active"), [courses]);
@@ -154,12 +209,23 @@ export default function AdminEnrollments() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  const confirmCertificates = () => {
+  const confirmCertificates = async () => {
     if (certificateTarget.length > 1) {
-      completeEnrollmentsBulk(certificateTarget.map(e => e.id));
+      if (persistedEnrollments) {
+        const responses = await Promise.all(certificateTarget.map(e => fetch(`/api/admin/enrollments/${e.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })));
+        if (responses.some(response => !response.ok)) {
+          toast({ title: "No fue posible actualizar todas las inscripciones.", variant: "error" });
+          return;
+        }
+        setPersistedEnrollments(prev => (prev ?? []).map(e => certificateTarget.some(target => target.id === e.id) ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
+      } else completeEnrollmentsBulk(certificateTarget.map(e => e.id));
       toast({ title: `${certificateTarget.length} constancias cargadas.`, variant: "success" });
     } else if (certificateTarget[0]) {
-      completeEnrollment(certificateTarget[0].id, "constancia");
+      if (persistedEnrollments) {
+        const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) });
+        if (!response.ok) { toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }); return; }
+        setPersistedEnrollments(prev => (prev ?? []).map(e => e.id === certificateTarget[0]?.id ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
+      } else completeEnrollment(certificateTarget[0].id, "constancia");
       toast({ title: isReplace ? "Constancia reemplazada." : "Constancia cargada.", variant: "success" });
     }
     setSelectedIds([]);
@@ -172,9 +238,9 @@ export default function AdminEnrollments() {
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 className="admin-page-title">Inscripciones</h1>
         <p className="admin-page-sub">
-          {filtered.length === enrollments.length
-            ? `${enrollments.length} inscripciones registradas`
-            : `${filtered.length} de ${enrollments.length} inscripciones`}
+          {filtered.length === displayedEnrollments.length
+            ? `${displayedEnrollments.length} inscripciones registradas`
+            : `${filtered.length} de ${displayedEnrollments.length} inscripciones`}
         </p>
       </div>
 
@@ -241,7 +307,7 @@ export default function AdminEnrollments() {
           </span>
           <Button
             type="button" variant="primary" size="sm"
-            onClick={() => setCertificateTarget(enrollments.filter(e => selectedSet.has(e.id)))}
+            onClick={() => setCertificateTarget(displayedEnrollments.filter(e => selectedSet.has(e.id)))}
           >
             <Upload size={14} /> Cargar constancias
           </Button>
@@ -319,7 +385,7 @@ export default function AdminEnrollments() {
             </>
           )}
           empty={
-            enrollments.length === 0 ? (
+            displayedEnrollments.length === 0 ? (
               <EmptyState
                 icon={<ClipboardList size={20} aria-hidden="true" />}
                 title="Sin inscripciones todavía"
@@ -353,8 +419,18 @@ export default function AdminEnrollments() {
         onClose={() => setManualTarget(null)}
         onConfirm={() => {
           if (manualTarget) {
-            completeEnrollment(manualTarget.id, "manual");
-            toast({ title: "Curso marcado como realizado.", variant: "success" });
+            if (persistedEnrollments) {
+              fetch(`/api/admin/enrollments/${manualTarget.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })
+                .then(async response => {
+                  if (!response.ok) throw new Error("No fue posible actualizar la inscripción");
+                  setPersistedEnrollments(prev => (prev ?? []).map(e => e.id === manualTarget.id ? { ...e, status: "realizado" } : e));
+                  toast({ title: "Curso marcado como realizado.", variant: "success" });
+                })
+                .catch(() => toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }));
+            } else {
+              completeEnrollment(manualTarget.id, "manual");
+              toast({ title: "Curso marcado como realizado.", variant: "success" });
+            }
           }
           setManualTarget(null);
         }}
