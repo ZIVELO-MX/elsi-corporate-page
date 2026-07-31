@@ -35,6 +35,12 @@ export type Database = {
         Update: { id?: string; aggregate_type?: string; aggregate_id?: string | null; event_type?: string; payload?: Json; status?: Database["public"]["Enums"]["outbox_status"]; attempts?: number; available_at?: string; locked_at?: string | null; processed_at?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
+      orders: {
+        Row: { id: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency: string; status: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id: string | null; stripe_payment_intent_id: string | null; livemode: boolean; expires_at: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; user_id?: string; course_id?: string; course_title?: string; amount_cents?: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key?: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
+        Relationships: [];
+      };
       page_sections: {
         Row: { id: string; section_key: string; title: string; body: Json; is_active: boolean; sort_order: number; created_at: string; updated_at: string };
         Insert: { id?: string; section_key: string; title: string; body?: Json; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
@@ -68,7 +74,7 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed" };
+    Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed"; order_status: "pending" | "paid" | "failed" | "canceled" };
     CompositeTypes: Record<string, never>;
   };
 };

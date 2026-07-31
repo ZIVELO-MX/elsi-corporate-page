@@ -8,6 +8,7 @@ do $$ begin create type public.enrollment_source as enum ('internal', 'external'
 do $$ begin create type public.enrollment_status as enum ('in_progress', 'completed'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.lead_status as enum ('new', 'contacted', 'closed'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.outbox_status as enum ('pending', 'processing', 'processed', 'failed'); exception when duplicate_object then null; end $$;
+do $$ begin create type public.order_status as enum ('pending', 'paid', 'failed', 'canceled'); exception when duplicate_object then null; end $$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -141,12 +142,32 @@ create table if not exists public.outbox_events (
   unique (aggregate_type, aggregate_id, event_type)
 );
 
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete restrict,
+  course_id uuid not null references public.courses(id) on delete restrict,
+  course_title text not null,
+  amount_cents integer not null check (amount_cents >= 0),
+  currency text not null default 'MXN' check (currency = 'MXN'),
+  status public.order_status not null default 'pending',
+  idempotency_key text not null,
+  stripe_checkout_session_id text unique,
+  stripe_payment_intent_id text unique,
+  livemode boolean not null default false,
+  expires_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, idempotency_key)
+);
+
 create index if not exists courses_public_idx on public.courses (is_active, content_status, sort_order);
 create index if not exists enrollments_user_idx on public.enrollments (user_id, status);
 create index if not exists enrollments_course_idx on public.enrollments (course_id, status);
 create index if not exists solution_items_solution_idx on public.solution_items (solution_id, sort_order);
 create index if not exists leads_status_idx on public.contact_leads (status, created_at desc);
 create index if not exists outbox_pending_idx on public.outbox_events (status, available_at);
+create index if not exists orders_user_idx on public.orders (user_id, created_at desc);
+create index if not exists orders_status_idx on public.orders (status, created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public as $$
@@ -154,7 +175,7 @@ begin new.updated_at = now(); return new; end;
 $$;
 
 do $$ declare table_name text; begin
-  foreach table_name in array array['profiles','courses','enrollments','certificates','page_sections','solutions','solution_items','testimonials','contact_leads','outbox_events'] loop
+  foreach table_name in array array['profiles','courses','enrollments','certificates','page_sections','solutions','solution_items','testimonials','contact_leads','outbox_events','orders'] loop
     execute format('drop trigger if exists set_updated_at on public.%I', table_name);
     execute format('create trigger set_updated_at before update on public.%I for each row execute function public.set_updated_at()', table_name);
   end loop;
@@ -188,6 +209,14 @@ alter table public.solution_items enable row level security;
 alter table public.testimonials enable row level security;
 alter table public.contact_leads enable row level security;
 alter table public.outbox_events enable row level security;
+alter table public.orders enable row level security;
+
+drop policy if exists orders_select_owner_or_admin on public.orders;
+create policy orders_select_owner_or_admin on public.orders for select using (user_id = auth.uid() or public.is_admin());
+drop policy if exists orders_insert_owner on public.orders;
+create policy orders_insert_owner on public.orders for insert with check (user_id = auth.uid());
+drop policy if exists orders_admin_write on public.orders;
+create policy orders_admin_write on public.orders for update using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists profiles_select_self_or_admin on public.profiles;
 create policy profiles_select_self_or_admin on public.profiles for select using (id = auth.uid() or public.is_admin());

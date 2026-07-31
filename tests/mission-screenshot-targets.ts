@@ -63,9 +63,9 @@ export const captureProfiles: Record<CaptureProfileName, CaptureTarget[]> = {
     {
       profile: "public",
       key: "checkout-payment",
-      title: "Pago — Checkout Conekta",
+      title: "Pago — Checkout Stripe",
       path: "/checkout?curso=manejo-integral-de-residuos",
-      selector: section("Pago / Checkout Conekta"),
+      selector: section("Pago / Checkout Stripe"),
     },
   ],
   account: [
