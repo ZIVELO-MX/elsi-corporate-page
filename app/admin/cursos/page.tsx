@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX } from "lucide-react";
 import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
@@ -30,6 +30,78 @@ type CourseForm = {
   presencialTime: string;
   presencialInfo: string;
 };
+
+type PersistedCourse = {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string;
+  description: string | null;
+  duration_hours: number | null;
+  audience: string | null;
+  syllabus: unknown;
+  modality: "online" | "in_person";
+  location: string | null;
+  starts_at: string | null;
+  enrollment_link: string | null;
+  price_cents: number;
+  is_active: boolean;
+  created_at: string;
+};
+
+function courseFromRow(row: PersistedCourse): AdminCourse {
+  const syllabus = row.syllabus && typeof row.syllabus === "object" && !Array.isArray(row.syllabus)
+    ? row.syllabus as Record<string, unknown>
+    : {};
+  const curriculum = typeof syllabus.curriculum === "string" ? syllabus.curriculum : "";
+  const presencialInfo = typeof syllabus.presencialInfo === "string" ? syllabus.presencialInfo : "";
+  const startsAt = row.starts_at ?? "";
+  const startDate = startsAt ? startsAt.slice(0, 10) : "";
+  const startTime = startsAt.includes("T") ? startsAt.slice(11, 16) : "";
+  return {
+    id: row.id,
+    title: row.title,
+    category: typeof syllabus.category === "string" ? syllabus.category : "General",
+    slug: row.slug,
+    price: row.price_cents / 100,
+    status: row.is_active ? "active" : "inactive",
+    externalUrl: row.enrollment_link ?? "",
+    students: 0,
+    createdAt: row.created_at.slice(0, 10),
+    synopsis: row.short_description,
+    duration: row.duration_hours ? `${row.duration_hours} horas` : "",
+    targetAudience: row.audience ?? "",
+    curriculum,
+    modality: row.modality === "in_person" ? "presencial" : "online",
+    presencialLocation: row.location ?? "",
+    presencialDate: startDate,
+    presencialTime: startTime,
+    presencialInfo,
+  };
+}
+
+function coursePayload(course: Omit<AdminCourse, "id" | "students" | "createdAt">) {
+  const duration = Number.parseFloat(course.duration.replace(",", "."));
+  const startsAt = course.modality === "presencial" && course.presencialDate
+    ? `${course.presencialDate}T${course.presencialTime || "00:00"}:00`
+    : null;
+  return {
+    slug: course.slug,
+    title: course.title,
+    shortDescription: course.synopsis,
+    description: course.synopsis,
+    durationHours: Number.isFinite(duration) ? duration : null,
+    audience: course.targetAudience,
+    syllabus: { category: course.category, curriculum: course.curriculum, presencialInfo: course.presencialInfo },
+    modality: course.modality,
+    location: course.modality === "presencial" ? course.presencialLocation : null,
+    startsAt,
+    enrollmentLink: course.externalUrl || null,
+    priceCents: Math.round(course.price * 100),
+    contentStatus: "fixture" as const,
+    isActive: course.status === "active",
+  };
+}
 
 const emptyForm = (): CourseForm => ({
   title: "", category: "", slug: "", price: 0, externalUrl: "",
@@ -61,15 +133,29 @@ export default function AdminCourses() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [persistedCourses, setPersistedCourses] = useState<AdminCourse[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/courses")
+      .then(async response => response.ok ? response.json() : null)
+      .then(payload => {
+        if (!cancelled && payload?.courses) setPersistedCourses((payload.courses as PersistedCourse[]).map(courseFromRow));
+      })
+      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const displayedCourses = persistedCourses ?? courses;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return courses.filter(c => {
+    return displayedCourses.filter(c => {
       if (statusFilter !== "todos" && c.status !== statusFilter) return false;
       if (!q) return true;
       return c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q);
     });
-  }, [courses, query, statusFilter]);
+  }, [displayedCourses, query, statusFilter]);
 
   const closeForm = () => {
     setShowForm(false);
@@ -92,21 +178,36 @@ export default function AdminCourses() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const slug = form.slug.trim().toLowerCase();
-    const slugTaken = courses.some(c => c.slug.toLowerCase() === slug && c.id !== editing);
+    const slugTaken = displayedCourses.some(c => c.slug.toLowerCase() === slug && c.id !== editing);
     if (slugTaken) {
       toast({ title: "Ya existe un curso con ese slug.", variant: "error" });
       return;
     }
-    if (editing) {
-      updateCourse(editing, form);
-      toast({ title: "Cambios guardados.", variant: "success" });
+    const nextCourse = { ...form, slug, status: editing ? displayedCourses.find(c => c.id === editing)?.status ?? "active" : "active" };
+    if (persistedCourses) {
+      const response = await fetch(editing ? `/api/admin/courses/${editing}` : "/api/admin/courses", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(coursePayload(nextCourse)),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        toast({ title: payload?.error ?? "No fue posible guardar el curso.", variant: "error" });
+        return;
+      }
+      const payload = await response.json() as { course: PersistedCourse };
+      setPersistedCourses(prev => editing
+        ? (prev ?? []).map(course => course.id === editing ? courseFromRow(payload.course) : course)
+        : [...(prev ?? []), courseFromRow(payload.course)]);
+    } else if (editing) {
+      updateCourse(editing, nextCourse);
     } else {
-      addCourse({ ...form, status: "active" });
-      toast({ title: "Curso creado.", variant: "success" });
+      addCourse(nextCourse);
     }
+    toast({ title: editing ? "Cambios guardados." : "Curso creado.", variant: "success" });
     closeForm();
   };
 
@@ -137,9 +238,9 @@ export default function AdminCourses() {
         <div>
           <h1 className="admin-page-title">Cursos</h1>
           <p className="admin-page-sub">
-            {filtered.length === courses.length
-              ? `${courses.length} cursos registrados`
-              : `${filtered.length} de ${courses.length} cursos`}
+            {filtered.length === displayedCourses.length
+              ? `${displayedCourses.length} cursos registrados`
+              : `${filtered.length} de ${displayedCourses.length} cursos`}
           </p>
         </div>
         <Button variant="primary" onClick={startCreate}>Crear curso</Button>
@@ -262,7 +363,15 @@ export default function AdminCourses() {
             {
               key: "status", header: "Estado",
               cell: (c) => (
-                <button type="button" onClick={() => toggleCourse(c.id)}
+                <button type="button" onClick={async () => {
+                  if (!persistedCourses) { toggleCourse(c.id); return; }
+                  const next: AdminCourse = { ...c, status: c.status === "active" ? "inactive" : "active" };
+                  const response = await fetch(`/api/admin/courses/${c.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(coursePayload(next)) });
+                  if (response.ok) {
+                    const payload = await response.json() as { course: PersistedCourse };
+                    setPersistedCourses(prev => (prev ?? []).map(course => course.id === c.id ? courseFromRow(payload.course) : course));
+                  } else toast({ title: "No fue posible cambiar el estado.", variant: "error" });
+                }}
                   aria-label={`Cambiar estado de ${c.title}; actualmente ${c.status === "active" ? "activo" : "inactivo"}`}
                   style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
                   <Badge variant={c.status === "active" ? "default" : "secondary"}>
