@@ -64,7 +64,7 @@ Un entorno local limpio se levanta sólo con migraciones/seed, RLS impide escala
 ## Evidencia de implementación
 
 - PR #58: https://github.com/ZIVELO-MX/elsi-corporate-page/pull/58
-- Commit de implementación: `pendiente de push en esta actualización`.
+- Commit de implementación: `c7d7d24`.
 - Dependencias fijadas: `@supabase/ssr@0.12.3`, `@supabase/supabase-js@2.110.8`.
 - Migración inicial: `supabase/migrations/20260731000000_initial_schema.sql`.
 - Validación: 85/85 tests, typecheck, lint, build Next y build OpenNext Cloudflare exitosos.
