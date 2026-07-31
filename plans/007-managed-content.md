@@ -1,6 +1,6 @@
 # ELS-0040 — Contenido administrable
 
-Estado: `planned`  
+Estado: `implemented — UI wiring and approved content pending`  
 Prioridad: P1  
 Rama: `feat/els-0040-managed-content`  
 Misiones relacionadas: ELS-0053, ELS-0034  
@@ -18,19 +18,20 @@ Admin edita, ordena y activa secciones corporativas, soluciones y testimonios; l
 
 ## Pasos
 
-1. Crear repositorios tipados para `page_sections`, `solutions`, `solution_items` y `testimonials`.
-2. Conectar formularios admin a mutaciones server-side protegidas.
-3. Validar claves, estructura, longitud, URLs y orden; impedir HTML no confiable.
-4. Publicar sólo registros activos/verificados y mantener fixture bajo modo prototipo.
-5. Revalidar Home, Nosotros, Soluciones, sitemap y metadatos afectados.
-6. Implementar orden estable, optimistic UI recuperable y manejo de conflictos.
-7. Migrar únicamente contenido aprobado; no inventar testimonios ni atribuciones.
+1. [x] Crear repositorios tipados para `page_sections`, `solutions` y `testimonials`.
+2. [x] Exponer mutaciones admin server-side protegidas por `profiles.role=admin`.
+3. [x] Validar claves, longitud, orden y eliminar HTML no confiable de campos textuales.
+4. [x] Consultas públicas filtran contenido activo/verificado; fixtures no se publican fuera del prototipo.
+5. [ ] Revalidar Home, Nosotros, Soluciones, sitemap y metadatos afectados al conectar UI.
+6. [ ] Conectar formularios existentes, optimistic UI y conflictos recuperables.
+7. [ ] Migrar sólo contenido aprobado; no se inventan testimonios ni atribuciones.
 
 ## Validación automatizada
 
-- [ ] Tests de permisos, validación, orden, toggle y revalidación.
-- [ ] Tests públicos excluyen contenido inactivo/no verificado.
-- [ ] `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
+- [x] Tests de permisos, validación, orden y mutaciones (contrato estático).
+- [x] Tests públicos excluyen contenido inactivo/no verificado.
+- [x] `pnpm typecheck`, `pnpm test` (94/94) y `pnpm lint` sin errores.
+- [ ] Build final tras conectar UI.
 
 ## Validación manual y capturas finales
 
@@ -47,3 +48,9 @@ Admin edita, ordena y activa secciones corporativas, soluciones y testimonios; l
 
 El contenido publicado tiene una sola fuente persistente, responde a toggles/orden y no incluye ningún dato no aprobado.
 
+## Evidencia de implementación
+
+- PR #63: https://github.com/ZIVELO-MX/elsi-corporate-page/pull/63
+- Repositorio: `lib/content-repository.ts`.
+- APIs: `/api/admin/content`, `/api/admin/content/[id]`, `/api/admin/testimonials`.
+- Pendiente: conectar Admin/Home/Nosotros/Soluciones, revalidación y aprobaciones/consentimientos del propietario.
