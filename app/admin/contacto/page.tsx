@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SearchX, Inbox, CheckCircle2, Mail, Phone } from "lucide-react";
 import { useAdminData, type Lead, type LeadStatus } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
@@ -12,6 +12,30 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todos" | LeadStatus;
+
+type PersistedLead = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  source: string | null;
+  status: "new" | "contacted" | "closed";
+  created_at: string;
+};
+
+function leadFromRow(row: PersistedLead): Lead {
+  return {
+    id: row.id,
+    name: row.full_name,
+    email: row.email,
+    phone: row.phone ?? "",
+    message: row.message,
+    courseSlug: row.source?.startsWith("course:") ? row.source.slice(7) : undefined,
+    createdAt: row.created_at.slice(0, 10),
+    status: row.status === "new" ? "nuevo" : "atendido",
+  };
+}
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
 
@@ -27,25 +51,46 @@ export default function AdminContacto() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [openLead, setOpenLead] = useState<Lead | null>(null);
+  const [persistedLeads, setPersistedLeads] = useState<Lead[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/leads")
+      .then(async response => response.ok ? response.json() : null)
+      .then(payload => {
+        if (!cancelled && payload?.leads) setPersistedLeads((payload.leads as PersistedLead[]).map(leadFromRow));
+      })
+      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const displayedLeads = persistedLeads ?? leads;
 
   const courseTitle = (slug?: string) => {
     if (!slug) return null;
     return courses.find((c) => c.slug === slug)?.title ?? slug.replaceAll("-", " ");
   };
 
-  const newCount = useMemo(() => leads.filter((l) => l.status === "nuevo").length, [leads]);
+  const newCount = useMemo(() => displayedLeads.filter((l) => l.status === "nuevo").length, [displayedLeads]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return leads.filter((l) => {
+    return displayedLeads.filter((l) => {
       if (statusFilter !== "todos" && l.status !== statusFilter) return false;
       if (!q) return true;
       return l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q) || l.message.toLowerCase().includes(q);
     });
-  }, [leads, query, statusFilter]);
+  }, [displayedLeads, query, statusFilter]);
 
-  const attend = (lead: Lead) => {
-    markLeadAttended(lead.id);
+  const attend = async (lead: Lead) => {
+    if (persistedLeads) {
+      const response = await fetch(`/api/admin/leads/${lead.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "contacted" }) });
+      if (!response.ok) {
+        toast({ title: "No fue posible actualizar el mensaje.", variant: "error" });
+        return;
+      }
+      setPersistedLeads(prev => (prev ?? []).map(item => item.id === lead.id ? { ...item, status: "atendido" } : item));
+    } else markLeadAttended(lead.id);
     toast({ title: "Mensaje marcado como atendido.", variant: "success" });
   };
 
@@ -57,9 +102,9 @@ export default function AdminContacto() {
           {newCount > 0 && <Badge variant="default" style={{ fontSize: "0.75rem" }}>{newCount} nuevo{newCount > 1 ? "s" : ""}</Badge>}
         </div>
         <p className="admin-page-sub" style={{ marginTop: "0.25rem" }}>
-          {filtered.length === leads.length
-            ? `${leads.length} mensaje${leads.length === 1 ? "" : "s"} del formulario de contacto`
-            : `${filtered.length} de ${leads.length} mensajes`}
+          {filtered.length === displayedLeads.length
+            ? `${displayedLeads.length} mensaje${displayedLeads.length === 1 ? "" : "s"} del formulario de contacto`
+            : `${filtered.length} de ${displayedLeads.length} mensajes`}
         </p>
       </div>
 
@@ -116,7 +161,7 @@ export default function AdminContacto() {
             </>
           )}
           empty={
-            leads.length === 0 ? (
+            displayedLeads.length === 0 ? (
               <EmptyState
                 icon={<Inbox size={20} aria-hidden="true" />}
                 title="Sin mensajes todavía"
