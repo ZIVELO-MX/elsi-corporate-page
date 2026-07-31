@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SearchX } from "lucide-react";
 import { useAdminData, type AdminUser } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
@@ -85,21 +85,35 @@ export default function AdminUsers() {
   const { loading, users, enrollments } = useAdminData();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [persistedUsers, setPersistedUsers] = useState<AdminUser[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/users")
+      .then(async response => response.ok ? response.json() : null)
+      .then(payload => {
+        if (!cancelled && payload?.users) setPersistedUsers(payload.users as AdminUser[]);
+      })
+      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const displayedUsers = persistedUsers ?? users;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
-  }, [users, query]);
+    if (!q) return displayedUsers;
+    return displayedUsers.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+  }, [displayedUsers, query]);
 
-  const enrollmentCount = (userId: string) => enrollments.filter(e => e.userId === userId).length;
+  const enrollmentCount = (user: AdminUser) => persistedUsers ? user.enrolledCourses : enrollments.filter(e => e.userId === user.id).length;
 
   return (
     <div>
       <div style={{ marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem" }}>
         <div>
           <h1 className="admin-page-title">Usuarios</h1>
-          <p className="admin-page-sub">{users.length} usuarios registrados</p>
+        <p className="admin-page-sub">{displayedUsers.length} usuarios registrados</p>
         </div>
         <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
@@ -145,7 +159,7 @@ export default function AdminUsers() {
                 </Badge>
               ),
             },
-            { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => enrollmentCount(u.id) },
+            { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => enrollmentCount(u) },
             {
               key: "created", header: "Registro",
               cell: (u) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{u.createdAt}</span>,
