@@ -39,6 +39,7 @@ export function PublicContactForm({
   const [values, setValues] = useState<ContactValues>({ name: "", email: "", message: defaultMessage });
   const [errors, setErrors] = useState<ContactErrors>({});
   const [sent, setSent] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const updateValue = (field: ContactField, value: string) => {
@@ -50,7 +51,7 @@ export function PublicContactForm({
     setErrors((current) => ({ ...current, [field]: validateContactField(field, value) }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const nextErrors = Object.fromEntries(
       fields.map((field) => [field, validateContactField(field, values[field])]),
     ) as ContactErrors;
@@ -59,6 +60,13 @@ export function PublicContactForm({
     const firstInvalid = fields.find((field) => nextErrors[field]);
     if (firstInvalid) {
       (formRef.current?.elements.namedItem(firstInvalid) as HTMLElement | null)?.focus();
+      return;
+    }
+    setSubmitError(null);
+    const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: values.name, email: values.email, message: values.message, source: context ? `${context.type}:${context.id}` : "contact" }) });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setSubmitError(result.error || "No fue posible enviar el mensaje.");
       return;
     }
     setSent(true);
@@ -129,6 +137,7 @@ export function PublicContactForm({
           Vista previa completada. El envío se habilitará al conectar el canal de contacto.
         </div>
       ) : null}
+      {submitError ? <p role="alert" className="text-sm text-red-700">{submitError}</p> : null}
       <Button type="submit" disabled={sent} variant="primary" className={buttonClassName}>
         {sent ? "Solicitud registrada" : buttonLabel}
       </Button>
