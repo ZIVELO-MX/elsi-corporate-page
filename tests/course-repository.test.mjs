@@ -21,3 +21,11 @@ test("course admin routes require an authenticated admin and soft-delete", async
   }
   assert.match(item, /is_active: false/);
 });
+
+test("public catalog and detail prefer verified Supabase courses with fixture fallback", async () => {
+  const [catalog, detail] = await Promise.all([read("app/cursos/page.tsx"), read("app/cursos/[slug]/page.tsx")]);
+  assert.match(catalog, /listPublicCourses/);
+  assert.match(catalog, /persisted\?\.length \? persisted : getPublicCourses/);
+  assert.match(detail, /getPublicCourse\(slug\)/);
+  assert.match(detail, /persisted \?\? getPublicCourseBySlug/);
+});

@@ -23,14 +23,17 @@ import {
   indexable,
 } from "@/lib/seo";
 import { buildContactPath } from "@/lib/agentic-navigation";
+import { getPublicCourse, listPublicCourses } from "@/lib/courses-repository";
 
-export function generateStaticParams() {
-  return getPublicCourses().map((course) => ({ slug: course.slug }));
+export async function generateStaticParams() {
+  const persisted = await listPublicCourses();
+  return (persisted?.length ? persisted : getPublicCourses()).map((course) => ({ slug: course.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getPublicCourseBySlug(slug);
+  const persisted = await getPublicCourse(slug);
+  const course = persisted ?? getPublicCourseBySlug(slug);
   if (!course) {
     return buildPrivateMetadata({
       title: "Curso no encontrado",
@@ -73,7 +76,8 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 
 export default async function CursoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getPublicCourseBySlug(slug);
+  const persisted = await getPublicCourse(slug);
+  const course = persisted ?? getPublicCourseBySlug(slug);
   if (!course) notFound();
 
   const state = publishState(course);
