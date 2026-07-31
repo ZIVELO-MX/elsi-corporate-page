@@ -24,3 +24,10 @@ test("admin leads are protected and status transitions are constrained", async (
   assert.match(update, /new.*contacted.*closed/);
   assert.match(form, /\/api\/contact/);
 });
+
+test("admin contact screen hydrates leads and persists attendance", async () => {
+  const source = await read("app/admin/contacto/page.tsx");
+  assert.match(source, /fetch\("\/api\/admin\/leads"\)/);
+  assert.match(source, /\/api\/admin\/leads\/\$\{lead\.id\}/);
+  assert.match(source, /persistedLeads \?\? leads/);
+});
