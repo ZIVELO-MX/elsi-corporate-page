@@ -25,7 +25,7 @@ El único entorno alojado pasa de pagos desactivados a Stripe test y luego live 
 
 - [x] Suite local de PRs precedentes: install reproducible, lint, typecheck, 100 tests y build verificados en PR #65.
 - [x] Contratos de migración/RLS y Stripe añadidos y verificados estáticamente.
-- [ ] `pnpm cloudflare:build` final desde rama de go-live.
+- [x] `pnpm cloudflare:build` final desde rama de go-live (OpenNext bundle completo).
 - [ ] Migraciones/RLS contra Supabase alojado y pruebas Stripe contractuales.
 - [ ] Escaneo final confirma ausencia de secretos en Git, bundle, logs y artefactos.
 
