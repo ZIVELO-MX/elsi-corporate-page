@@ -68,13 +68,13 @@ const STATUS_COPY: Record<PaymentState, StatusCopy> = {
   },
   "loading-provider": {
     eyebrow: "Paso 2 de 2",
-    title: "Conectando con Conekta",
-    description: "El proveedor está preparando el espacio protegido de pago.",
+    title: "Conectando con Stripe",
+    description: "Stripe está preparando el espacio protegido de pago.",
   },
   ready: {
     eyebrow: "Paso 2 de 2",
     title: "Realiza tu pago",
-    description: "Este prototipo representa el espacio que ocupará Conekta Checkout Component.",
+    description: "El Payment Element de Stripe aparecerá aquí cuando los pagos estén habilitados.",
   },
   processing: {
     eyebrow: "Procesando",
@@ -165,7 +165,7 @@ function OrderSummary({
 
       <div className={styles.securityNote}>
         <LockKeyhole aria-hidden="true" />
-        <p>Conekta procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
+        <p>Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
       </div>
     </aside>
   );
@@ -272,12 +272,12 @@ function ProviderPanel({
   const isProcessing = state === "processing";
 
   return (
-    <div className={styles.providerArea} aria-label="Área segura de pago de Conekta">
+    <div className={styles.providerArea} aria-label="Área segura de pago de Stripe">
       <div className={styles.providerHeader}>
         <div>
           <span className={styles.providerName}>
             <LockKeyhole aria-hidden="true" />
-            Conekta Checkout
+            Stripe Payment Element
           </span>
           <small>Prototipo visual · no realiza cargos</small>
         </div>
@@ -289,7 +289,7 @@ function ProviderPanel({
           <CreditCard aria-hidden="true" />
           <div>
             <strong>Tarjeta y métodos compatibles</strong>
-            <span>El formulario cifrado se cargará desde Conekta.</span>
+            <span>El formulario cifrado se cargará desde Stripe.</span>
           </div>
           <Check aria-hidden="true" />
         </div>
@@ -514,7 +514,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     <main className={styles.checkoutPage}>
       <section
         className={styles.checkoutShell}
-        data-section-label="Pago / Checkout Conekta"
+        data-section-label="Pago / Checkout Stripe"
         aria-labelledby="checkout-title"
       >
         <Link
