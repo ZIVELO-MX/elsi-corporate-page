@@ -1,13 +1,15 @@
 import type { MetadataRoute } from "next";
 import { SITE, indexable, PUBLIC_ROUTES } from "@/lib/seo";
 import { getVerifiedCourses } from "@/lib/courses";
+import { listPublicCourses } from "@/lib/courses-repository";
 import { getVerifiedSolutions } from "@/lib/solutions";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!indexable) return [];
 
   const abs = (path: string) => `${SITE.url}${path === "/" ? "" : path}`;
-  const courses = getVerifiedCourses();
+  const persistedCourses = await listPublicCourses();
+  const courses = persistedCourses === null ? getVerifiedCourses() : persistedCourses;
   const solutions = getVerifiedSolutions();
   const publicRoutes = PUBLIC_ROUTES.filter((path) => {
     if (path === "/cursos") return courses.length > 0;

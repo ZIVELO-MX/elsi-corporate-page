@@ -27,13 +27,13 @@ import { getPublicCourse, listPublicCourses } from "@/lib/courses-repository";
 
 export async function generateStaticParams() {
   const persisted = await listPublicCourses();
-  return (persisted?.length ? persisted : getPublicCourses()).map((course) => ({ slug: course.slug }));
+  return (persisted === null ? getPublicCourses() : persisted).map((course) => ({ slug: course.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const persisted = await getPublicCourse(slug);
-  const course = persisted ?? getPublicCourseBySlug(slug);
+  const course = persisted === null ? getPublicCourseBySlug(slug) : persisted;
   if (!course) {
     return buildPrivateMetadata({
       title: "Curso no encontrado",
@@ -77,7 +77,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 export default async function CursoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const persisted = await getPublicCourse(slug);
-  const course = persisted ?? getPublicCourseBySlug(slug);
+  const course = persisted === null ? getPublicCourseBySlug(slug) : persisted;
   if (!course) notFound();
 
   const state = publishState(course);

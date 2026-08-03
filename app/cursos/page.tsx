@@ -196,7 +196,7 @@ export default async function CursosPage({
   const query = normalizeCatalogQuery(first(params.q));
   const normalizedQuery = query.toLocaleLowerCase("es-MX");
   const persisted = await listPublicCourses();
-  const allCourses = persisted?.length ? persisted : getPublicCourses();
+  const allCourses = persisted === null ? getPublicCourses() : persisted;
   const visible = allCourses.filter(
     (course) =>
       publishState(course) !== "draft" &&
