@@ -8,7 +8,7 @@ Predecesora: ELS-0038
 
 ## Resultado
 
-Contacto persiste leads de forma segura, valida Turnstile en servidor y envía notificaciones por Resend mediante un outbox reintentable. Los fallos del proveedor no pierden el lead ni duplican correos.
+Contacto persiste leads de forma segura, valida Turnstile en servidor y deja notificaciones preparadas en un outbox reintentable. La entrega por Resend permanece desactivada hasta que ELSI provea y valide un proveedor.
 
 ## Estado actual
 
@@ -25,6 +25,15 @@ Contacto persiste leads de forma segura, valida Turnstile en servidor y envía n
 5. [ ] Integrar Resend/worker idempotente cuando el propietario provea proveedor y remitente.
 6. [x] Conectar endpoints admin de listado y estado con autorización por rol.
 7. [ ] Añadir auditoría durable y política de retención aprobada.
+
+## Entrega diferida
+
+La implementación de Resend, sus plantillas y el worker permanecen en el repositorio
+como código preparado para una fase posterior, pero la entrega está protegida por
+`NOTIFICATIONS_DELIVERY_ENABLED=false` y por la variable de repositorio equivalente
+del workflow. Mientras la bandera esté apagada, el worker no consulta ni modifica el
+outbox y GitHub Actions omite el job programado. Los leads y eventos siguen siendo
+persistidos para atención manual y para una futura integración de correo.
 
 ## Validación automatizada
 
