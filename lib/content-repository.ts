@@ -1,5 +1,9 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database, Json } from "@/lib/supabase/types";
+import { revalidatePath } from "next/cache";
+import type { Solution } from "@/lib/solutions";
+
+export type PublicContent = NonNullable<Awaited<ReturnType<typeof listPublicContent>>>;
 
 export function cleanText(value: unknown, max: number) {
   if (typeof value !== "string") throw new Error("Texto inválido");
@@ -38,4 +42,49 @@ export async function listPublicContent() {
   ]);
   if (sections.error || solutions.error || testimonials.error) throw new Error("No fue posible consultar contenido");
   return { sections: sections.data ?? [], solutions: solutions.data ?? [], testimonials: testimonials.data ?? [] };
+}
+
+function bodyRecord(body: Json) {
+  return body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, Json> : {};
+}
+
+export function sectionText(content: PublicContent | null, sectionKey: string, fallback: string) {
+  if (!content) return fallback;
+  const section = content.sections.find((item) => item.section_key === sectionKey);
+  if (!section) return fallback;
+  const text = bodyRecord(section.body).text;
+  return typeof text === "string" && text.trim() ? text.trim() : section.title || fallback;
+}
+
+export function mapPublicSolutions(content: PublicContent | null, fallback: readonly Solution[]) {
+  if (!content) return fallback;
+  return content.solutions.flatMap((row) => {
+    const original = fallback.find((solution) => solution.slug === row.slug);
+    if (!original) return [];
+    const body = bodyRecord(row.body);
+    const text = (key: string, value: string) => typeof body[key] === "string" && body[key] ? body[key] as string : value;
+    const items = Array.isArray(body.items) ? body.items.filter((item): item is string => typeof item === "string") : original.items;
+    return [{
+      ...original,
+      title: row.title,
+      description: text("description", row.summary),
+      eyebrow: text("eyebrow", original.eyebrow),
+      audience: text("audience", original.audience),
+      imageCaption: text("imageCaption", original.imageCaption),
+      intro: text("intro", original.intro),
+      approach: text("approach", original.approach),
+      delivery: text("delivery", original.delivery),
+      items,
+      contentStatus: "verified" as const,
+      updatedAt: row.updated_at,
+    } satisfies Solution];
+  });
+}
+
+export function revalidatePublicContent(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/nosotros");
+  revalidatePath("/soluciones");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/soluciones/${slug}`);
 }
