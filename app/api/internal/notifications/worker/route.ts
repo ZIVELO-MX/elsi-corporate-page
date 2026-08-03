@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/types";
+import {
+  LEAD_NOTIFICATION_TEMPLATE_VERSION,
+  renderLeadNotification,
+} from "@/lib/notifications/templates";
 
 const BATCH_SIZE = 10;
 const MAX_ATTEMPTS = 5;
@@ -36,16 +40,6 @@ function recipients() {
     .filter((value) => /^\S+@\S+\.\S+$/.test(value));
 }
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>'"]/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;",
-  })[character] ?? character);
-}
-
 function leadId(event: OutboxEvent) {
   if (event.aggregate_id) return event.aggregate_id;
   if (typeof event.payload === "object" && event.payload !== null && !Array.isArray(event.payload)) {
@@ -78,7 +72,8 @@ async function sendLeadNotification(lead: Lead, eventId: string) {
       to,
       reply_to: lead.email,
       subject: `Nuevo contacto de ${lead.full_name}`,
-      html: `<h1>Nuevo contacto</h1><p><strong>Nombre:</strong> ${escapeHtml(lead.full_name)}</p><p><strong>Email:</strong> ${escapeHtml(lead.email)}</p><p><strong>Empresa:</strong> ${escapeHtml(lead.company ?? "No indicada")}</p><p>${escapeHtml(lead.message).replace(/\n/g, "<br>")}</p>`,
+      html: renderLeadNotification(lead),
+      headers: { "X-ELSI-Template-Version": LEAD_NOTIFICATION_TEMPLATE_VERSION },
     }),
   });
   if (!response.ok) throw new Error(`Resend respondió ${response.status}`);
