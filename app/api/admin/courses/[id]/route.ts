@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { hasSupabasePublicConfig } from "@/lib/supabase/env";
 import { mapCourseInput, validateCourseInput } from "@/lib/courses-repository";
@@ -13,14 +14,23 @@ async function requireAdmin() {
   return profile?.role === "admin" ? client : null;
 }
 
+function revalidateCourseSurfaces(slug?: string, previousSlug?: string) {
+  revalidatePath("/cursos");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/cursos/${slug}`);
+  if (previousSlug && previousSlug !== slug) revalidatePath(`/cursos/${previousSlug}`);
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const client = await requireAdmin();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   try {
     const input = validateCourseInput(await request.json());
     const { id } = await params;
+    const { data: previous } = await client.from("courses").select("slug").eq("id", id).maybeSingle();
     const { data, error } = await client.from("courses").update(mapCourseInput(input)).eq("id", id).select().single();
     if (error) return NextResponse.json({ error: error.code === "23505" ? "El slug ya existe" : "No fue posible actualizar el curso" }, { status: error.code === "23505" ? 409 : 400 });
+    revalidateCourseSurfaces(data.slug, previous?.slug);
     return NextResponse.json({ course: data });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Datos inválidos" }, { status: 400 });
@@ -31,7 +41,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const client = await requireAdmin();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const { id } = await params;
-  const { data, error } = await client.from("courses").update({ is_active: false }).eq("id", id).select("id,is_active").single();
+  const { data: previous } = await client.from("courses").select("slug").eq("id", id).maybeSingle();
+  const { data, error } = await client.from("courses").update({ is_active: false }).eq("id", id).select("id,is_active,slug").single();
   if (error) return NextResponse.json({ error: "No fue posible desactivar el curso" }, { status: 400 });
+  revalidateCourseSurfaces(previous?.slug);
   return NextResponse.json({ course: data });
 }
