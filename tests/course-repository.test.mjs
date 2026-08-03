@@ -20,12 +20,15 @@ test("course admin routes require an authenticated admin and soft-delete", async
     assert.match(source, /role.*admin/);
   }
   assert.match(item, /is_active: false/);
+  assert.match(collection, /revalidatePath\("\/sitemap\.xml"\)/);
+  assert.match(item, /revalidatePath\("\/cursos"\)/);
 });
 
-test("public catalog and detail prefer verified Supabase courses with fixture fallback", async () => {
+test("public catalog and detail use fixtures only when Supabase is unavailable", async () => {
   const [catalog, detail] = await Promise.all([read("app/cursos/page.tsx"), read("app/cursos/[slug]/page.tsx")]);
   assert.match(catalog, /listPublicCourses/);
-  assert.match(catalog, /persisted\?\.length \? persisted : getPublicCourses/);
+  assert.match(catalog, /persisted === null \? getPublicCourses\(\) : persisted/);
   assert.match(detail, /getPublicCourse\(slug\)/);
-  assert.match(detail, /persisted \?\? getPublicCourseBySlug/);
+  assert.match(detail, /persisted === null \? getPublicCourseBySlug\(slug\) : persisted/);
+  assert.match(detail, /persisted === null \? getPublicCourses\(\) : persisted/);
 });

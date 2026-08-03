@@ -24,3 +24,13 @@ test("order lookup is owner-scoped and checkout UI identifies Stripe", async () 
   assert.match(ui, /Stripe Payment Element/);
   assert.doesNotMatch(ui, /Conekta/);
 });
+
+test("checkout keeps Stripe.js behind the public payment flag and preserves demo fallback", async () => {
+  const ui = await read("components/checkout/checkout-experience.tsx");
+  assert.match(ui, /NEXT_PUBLIC_PAYMENTS_ENABLED/);
+  assert.match(ui, /https:\/\/js\.stripe\.com\/clover\/stripe\.js/);
+  assert.match(ui, /\/api\/payments\/checkout/);
+  assert.match(ui, /Idempotency-Key/);
+  assert.match(ui, /createPaymentElement/);
+  assert.match(ui, /createMockPaymentGateway/);
+});

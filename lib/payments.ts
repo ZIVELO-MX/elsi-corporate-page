@@ -49,6 +49,7 @@ export type CheckoutSession = {
   course: CheckoutCourse;
   buyer: PaymentBuyer;
   status: "pending";
+  clientSecret?: string | null;
 };
 
 export type PaymentResult = {
