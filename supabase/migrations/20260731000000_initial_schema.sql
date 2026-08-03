@@ -141,7 +141,7 @@ create table if not exists public.outbox_events (
   unique (aggregate_type, aggregate_id, event_type)
 );
 
-create index if not exists courses_public_idx on public.courses (is_active, content_status, sort_order);
+create index if not exists courses_public_idx on public.courses (is_active, content_status);
 create index if not exists enrollments_user_idx on public.enrollments (user_id, status);
 create index if not exists enrollments_course_idx on public.enrollments (course_id, status);
 create index if not exists solution_items_solution_idx on public.solution_items (solution_id, sort_order);
