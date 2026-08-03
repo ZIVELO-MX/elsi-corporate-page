@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { hasSupabasePublicConfig } from "@/lib/supabase/env";
 
@@ -27,5 +28,14 @@ export async function POST(request: Request) {
   if (typeof body.userId !== "string" || typeof body.courseId !== "string" || !["internal", "external"].includes(body.source ?? "internal")) return NextResponse.json({ error: "Alumno, curso y origen son requeridos" }, { status: 400 });
   const { data, error } = await client.from("enrollments").insert({ user_id: body.userId, course_id: body.courseId, source: body.source ?? "internal" }).select().single();
   if (error) return NextResponse.json({ error: error.code === "23505" ? "El alumno ya está inscrito en este curso" : "No fue posible registrar la inscripción" }, { status: error.code === "23505" ? 409 : 400 });
+  const adminClient = createSupabaseAdminClient();
+  if (adminClient) {
+    await adminClient.from("outbox_events").insert({
+      aggregate_type: "enrollment",
+      aggregate_id: data.id,
+      event_type: "enrollment.created",
+      payload: { enrollmentId: data.id },
+    });
+  }
   return NextResponse.json({ enrollment: data }, { status: 201 });
 }
