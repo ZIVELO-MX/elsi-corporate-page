@@ -138,6 +138,7 @@ function CertificateCard({ c }: { c: ProfileCertificate }) {
       <button
         type="button"
         aria-label={`Descargar constancia de ${c.course}`}
+        onClick={() => { window.open(`/api/certificates/${c.id}/download`, "_blank", "noopener,noreferrer"); }}
         className={`${styles.control} inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[11px] font-extrabold text-white`}
       >
         <Download size={16} aria-hidden="true" />
