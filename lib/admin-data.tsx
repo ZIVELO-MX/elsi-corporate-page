@@ -48,6 +48,7 @@ export type Enrollment = {
   source: EnrollmentSource;
   status: EnrollmentStatus;
   certificateStatus?: CertificateStatus;
+  certificateId?: string;
 };
 
 export type Sale = {
