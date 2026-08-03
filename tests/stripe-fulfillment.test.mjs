@@ -41,3 +41,14 @@ test("Stripe recovery marks failed or expired orders and reconciles stale pendin
   assert.match(reconcile, /status: "canceled"/);
   assert.match(env, /PAYMENTS_RECONCILE_SECRET/);
 });
+
+test("payment reconciliation has a scheduled and manually triggerable workflow", async () => {
+  const workflow = await read(".github/workflows/reconcile-payments.yml");
+  assert.match(workflow, /schedule:/);
+  assert.match(workflow, /cron:.*\*\/15/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /ELSI_APP_URL/);
+  assert.match(workflow, /PAYMENTS_RECONCILE_SECRET/);
+  assert.match(workflow, /api\/internal\/payments\/reconcile/);
+  assert.match(workflow, /curl --fail-with-body/);
+});
