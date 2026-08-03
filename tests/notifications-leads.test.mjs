@@ -43,4 +43,8 @@ test("notification worker claims outbox events and retries Resend idempotently",
   assert.match(source, /Idempotency-Key/);
   assert.match(source, /lead\.created\//);
   assert.match(source, /available_at/);
+  const template = await read("lib/notifications/templates.ts");
+  assert.match(template, /LEAD_NOTIFICATION_TEMPLATE_VERSION/);
+  assert.match(template, /renderLeadNotification/);
+  assert.match(source, /X-ELSI-Template-Version/);
 });
