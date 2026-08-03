@@ -15,7 +15,7 @@ async function requireAdmin() {
 export async function GET() {
   const client = await requireAdmin();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { data, error } = await client.from("enrollments").select("id,user_id,course_id,source,status,enrolled_at,completed_at").order("enrolled_at", { ascending: false });
+  const { data, error } = await client.from("enrollments").select("id,user_id,course_id,source,status,enrolled_at,completed_at,certificates(id,status,storage_path)").order("enrolled_at", { ascending: false });
   if (error) return NextResponse.json({ error: "No fue posible consultar inscripciones" }, { status: 500 });
   return NextResponse.json({ enrollments: data ?? [] });
 }

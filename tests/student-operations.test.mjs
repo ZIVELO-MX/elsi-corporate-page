@@ -40,3 +40,24 @@ test("admin users endpoint and screen use Supabase data without exposing service
   assert.match(screen, /fetch\("\/api\/admin\/users"\)/);
   assert.match(screen, /persistedUsers \?\? users/);
 });
+
+test("certificate storage stays private and owner-scoped", async () => {
+  const [upload, download, publish, migration, screen] = await Promise.all([
+    read("app/api/admin/enrollments/[id]/certificate/route.ts"),
+    read("app/api/certificates/[id]/download/route.ts"),
+    read("app/api/admin/certificates/[id]/route.ts"),
+    read("supabase/migrations/20260804000000_certificates_storage.sql"),
+    read("app/admin/inscripciones/page.tsx"),
+  ]);
+  assert.match(upload, /createSupabaseAdminClient/);
+  assert.match(upload, /application\/pdf/);
+  assert.match(upload, /MAX_BYTES/);
+  assert.match(upload, /storage\.from/);
+  assert.match(upload, /status: "pending"/);
+  assert.match(download, /enrollment\.user_id !== auth\.user\.id/);
+  assert.match(download, /createSignedUrl/);
+  assert.match(download, /NextResponse\.redirect/);
+  assert.match(publish, /Primero carga el archivo/);
+  assert.match(migration, /public = false/);
+  assert.match(screen, /\/api\/admin\/enrollments\/\$\{e\.id\}\/certificate/);
+});

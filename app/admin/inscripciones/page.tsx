@@ -22,6 +22,7 @@ type PersistedEnrollment = {
   source: "internal" | "external";
   status: "in_progress" | "completed";
   enrolled_at: string;
+  certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }[];
 };
 
 function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses: AdminCourse[]): Enrollment {
@@ -36,6 +37,8 @@ function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses
     enrolledAt: row.enrolled_at.slice(0, 10),
     source: row.source === "external" ? "externa" : "interna",
     status: row.status === "completed" ? "realizado" : "en-curso",
+    certificateId: row.certificates?.[0]?.id,
+    certificateStatus: row.certificates?.[0]?.status === "available" ? "disponible" : row.certificates?.[0] ? "pendiente" : undefined,
   };
 }
 
@@ -69,12 +72,14 @@ function StatusCell({ enrollment }: { enrollment: Enrollment }) {
 }
 
 function CertificateDialog({
-  enrollments, isReplace, onClose, onConfirm,
+  enrollments, isReplace, files, onFiles, onClose, onConfirm,
 }: {
   enrollments: Enrollment[];
   isReplace: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  files: File[];
+  onFiles: (files: File[]) => void;
+  onConfirm: (files: File[]) => void;
 }) {
   const isBulk = enrollments.length > 1;
   const title = isBulk ? `Cargar constancias (${enrollments.length})` : isReplace ? "Reemplazar constancia" : "Cargar constancia";
@@ -105,12 +110,13 @@ function CertificateDialog({
           <span style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>
             {isBulk ? "Arrastra los archivos o hacé click para elegirlos" : "Arrastra el archivo o hacé click para elegirlo"}
           </span>
-          <input type="file" multiple={isBulk} accept=".pdf,.png,.jpg" style={{ display: "none" }} />
+          <input type="file" multiple={isBulk} accept=".pdf" style={{ display: "none" }} onChange={(event) => onFiles(Array.from(event.target.files ?? []))} />
         </label>
+        {files.length > 0 && <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{files.map(file => file.name).join(" · ")}</p>}
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
           <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button type="button" variant="primary" onClick={onConfirm}>
+          <Button type="button" variant="primary" onClick={() => onConfirm(files)} disabled={files.length === 0}>
             {isBulk ? "Cargar constancias" : isReplace ? "Reemplazar constancia" : "Cargar constancia"}
           </Button>
         </div>
@@ -127,6 +133,7 @@ export default function AdminEnrollments() {
   const [source, setSource] = useState<EnrollmentSource>("interna");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [certificateTarget, setCertificateTarget] = useState<Enrollment[]>([]);
+  const [certificateFiles, setCertificateFiles] = useState<File[]>([]);
   const [isReplace, setIsReplace] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todas");
@@ -209,10 +216,11 @@ export default function AdminEnrollments() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  const confirmCertificates = async () => {
+  const confirmCertificates = async (files: File[]) => {
     if (certificateTarget.length > 1) {
       if (persistedEnrollments) {
-        const responses = await Promise.all(certificateTarget.map(e => fetch(`/api/admin/enrollments/${e.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })));
+        if (files.length !== certificateTarget.length) { toast({ title: "Selecciona un PDF por inscripción.", variant: "error" }); return; }
+        const responses = await Promise.all(certificateTarget.map((e, index) => { const form = new FormData(); form.set("file", files[index]); return fetch(`/api/admin/enrollments/${e.id}/certificate`, { method: "POST", body: form }); }));
         if (responses.some(response => !response.ok)) {
           toast({ title: "No fue posible actualizar todas las inscripciones.", variant: "error" });
           return;
@@ -222,7 +230,9 @@ export default function AdminEnrollments() {
       toast({ title: `${certificateTarget.length} constancias cargadas.`, variant: "success" });
     } else if (certificateTarget[0]) {
       if (persistedEnrollments) {
-        const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) });
+        if (files.length !== 1) { toast({ title: "Selecciona un PDF.", variant: "error" }); return; }
+        const form = new FormData(); form.set("file", files[0]);
+        const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}/certificate`, { method: "POST", body: form });
         if (!response.ok) { toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }); return; }
         setPersistedEnrollments(prev => (prev ?? []).map(e => e.id === certificateTarget[0]?.id ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
       } else completeEnrollment(certificateTarget[0].id, "constancia");
@@ -230,6 +240,7 @@ export default function AdminEnrollments() {
     }
     setSelectedIds([]);
     setCertificateTarget([]);
+    setCertificateFiles([]);
     setIsReplace(false);
   };
 
@@ -307,7 +318,7 @@ export default function AdminEnrollments() {
           </span>
           <Button
             type="button" variant="primary" size="sm"
-            onClick={() => setCertificateTarget(displayedEnrollments.filter(e => selectedSet.has(e.id)))}
+            onClick={() => { setCertificateFiles([]); setCertificateTarget(displayedEnrollments.filter(e => selectedSet.has(e.id))); }}
           >
             <Upload size={14} /> Cargar constancias
           </Button>
@@ -355,7 +366,7 @@ export default function AdminEnrollments() {
             <>
               {e.status === "en-curso" && (
                 <>
-                  <Button type="button" variant="outline" size="sm" onClick={() => { setIsReplace(false); setCertificateTarget([e]); }}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setCertificateFiles([]); setIsReplace(false); setCertificateTarget([e]); }}>
                     <Upload size={12} /> Constancia
                   </Button>
                   <Button
@@ -370,13 +381,20 @@ export default function AdminEnrollments() {
               {e.status === "realizado" && (
                 <>
                   {e.certificateStatus === "pendiente" && (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => { markCertificateAvailable(e.id); toast({ title: "Constancia publicada.", variant: "success" }); }}>
+                    <Button type="button" variant="ghost" size="sm" onClick={async () => {
+                      if (persistedEnrollments && e.certificateId) {
+                        const response = await fetch(`/api/admin/certificates/${e.certificateId}`, { method: "PATCH" });
+                        if (!response.ok) { toast({ title: "Primero carga la constancia.", variant: "error" }); return; }
+                        setPersistedEnrollments(prev => (prev ?? []).map(item => item.id === e.id ? { ...item, certificateStatus: "disponible" } : item));
+                      } else markCertificateAvailable(e.id);
+                      toast({ title: "Constancia publicada.", variant: "success" });
+                    }}>
                       <CheckCircle2 size={12} /> Marcar disponible
                     </Button>
                   )}
                   <Button
                     type="button" variant="outline" size="sm"
-                    onClick={() => { setIsReplace(!!e.certificateStatus); setCertificateTarget([e]); }}
+                    onClick={() => { setCertificateFiles([]); setIsReplace(!!e.certificateStatus); setCertificateTarget([e]); }}
                   >
                     <Upload size={12} /> {e.certificateStatus ? "Reemplazar" : "Cargar constancia"}
                   </Button>
@@ -405,7 +423,9 @@ export default function AdminEnrollments() {
       <CertificateDialog
         enrollments={certificateTarget}
         isReplace={isReplace}
-        onClose={() => { setCertificateTarget([]); setIsReplace(false); }}
+        files={certificateFiles}
+        onFiles={setCertificateFiles}
+        onClose={() => { setCertificateTarget([]); setCertificateFiles([]); setIsReplace(false); }}
         onConfirm={confirmCertificates}
       />
 
