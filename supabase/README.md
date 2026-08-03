@@ -29,3 +29,12 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-local>
 
 En el entorno alojado, aplica migraciones con un pipeline aprobado, revisa RLS
 en Studio y configura backups antes de ejecutar cualquier seed.
+
+## Smoke test de RLS
+
+`supabase/tests/rls-smoke.sql` deja consultas reproducibles para comprobar
+aislamiento de alumno, visibilidad administrativa y lectura de auditoría. Antes
+de ejecutarlo contra un proyecto alojado, reemplaza los tres UUID de prueba por
+usuarios anonimizados existentes y usa una conexión con el rol
+`authenticated`; el script termina con `rollback` y nunca requiere una
+`service_role` key.
