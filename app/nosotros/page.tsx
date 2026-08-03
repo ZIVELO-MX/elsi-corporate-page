@@ -9,6 +9,7 @@ import {
 } from "@/lib/about";
 import { siteImages } from "@/lib/image-assets";
 import { buildMetadata, indexable } from "@/lib/seo";
+import { listPublicContent, sectionText } from "@/lib/content-repository";
 
 export const metadata = buildMetadata({
   title: "Nosotros",
@@ -18,8 +19,18 @@ export const metadata = buildMetadata({
   allowIndexing: indexable && isAboutContentVerified(),
 });
 
-export default function NosotrosPage() {
-  const content = getPublicAboutContent();
+export default async function NosotrosPage() {
+  const persistedContent = await listPublicContent();
+  const fixture = getPublicAboutContent();
+  const content = fixture
+    ? {
+        ...fixture,
+        title: sectionText(persistedContent, "about-title", fixture.title),
+        introduction: sectionText(persistedContent, "about-intro", fixture.introduction),
+        journeyTitle: sectionText(persistedContent, "about-journey", fixture.journeyTitle),
+        principlesTitle: sectionText(persistedContent, "about-principles", fixture.principlesTitle),
+      }
+    : undefined;
 
   if (!content) {
     return (
