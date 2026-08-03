@@ -22,3 +22,6 @@ public/images/*
 .dev.vars
 cloudflare-env.d.ts
 # zivelo-cloudflare-preview:end
+
+# Supabase CLI link metadata and local service versions.
+supabase/.temp/
