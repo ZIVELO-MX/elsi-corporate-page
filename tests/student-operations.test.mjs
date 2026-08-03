@@ -72,3 +72,15 @@ test("Supabase audit events record actor and resource changes without payload PI
   assert.match(migration, /audit_row_change/);
   assert.doesNotMatch(migration, /email|message|full_name/);
 });
+
+test("RLS smoke test documents hosted student/admin isolation without secrets", async () => {
+  const smoke = await read("supabase/tests/rls-smoke.sql");
+  const readme = await read("supabase/README.md");
+  assert.match(smoke, /set local role authenticated/);
+  assert.match(smoke, /request\.jwt\.claim\.sub/);
+  assert.match(smoke, /student_foreign_enrollments/);
+  assert.match(smoke, /admin_audit_events_visible/);
+  assert.match(smoke, /rollback/);
+  assert.match(readme, /Smoke test de RLS/);
+  assert.doesNotMatch(smoke, /service_role|SUPABASE_SERVICE_ROLE_KEY/);
+});
