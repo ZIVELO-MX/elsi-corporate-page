@@ -58,3 +58,14 @@ test("notification worker claims outbox events and retries Resend idempotently",
   assert.match(enrollment, /enrollment\.created/);
   assert.match(certificate, /certificate\.available/);
 });
+
+test("notification worker has a scheduled and manually triggerable delivery workflow", async () => {
+  const workflow = await read(".github/workflows/process-notifications.yml");
+  assert.match(workflow, /schedule:/);
+  assert.match(workflow, /cron:.*\*\/5/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /ELSI_APP_URL/);
+  assert.match(workflow, /NOTIFICATIONS_WORKER_SECRET/);
+  assert.match(workflow, /api\/internal\/notifications\/worker/);
+  assert.match(workflow, /curl --fail-with-body/);
+});
