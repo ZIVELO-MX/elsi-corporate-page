@@ -15,6 +15,19 @@ supabase db reset
 supabase gen types typescript --local > lib/supabase/types.ts
 ```
 
+## Smoke test de RLS
+
+Con Supabase local iniciado, exporta las claves que muestra `supabase status`
+(`SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`) y ejecuta:
+
+```bash
+pnpm smoke:supabase-rls
+```
+
+El script rechaza URLs remotas, crea tres usuarios temporales, valida acceso
+anónimo/alumno/admin y escrituras protegidas, y elimina los datos al terminar.
+No lo ejecutes contra un proyecto alojado.
+
 Para detener el entorno local usa `supabase stop`. La migración se aplica en
 orden desde `supabase/migrations/`; `supabase/seed.sql` contiene únicamente
 fixtures sin PII.
