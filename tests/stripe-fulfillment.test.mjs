@@ -21,6 +21,8 @@ test("fulfillment is monotonic, idempotent and creates enrollment/outbox transac
   assert.match(migration, /status = 'paid'/);
   assert.match(migration, /on conflict \(user_id, course_id\) do nothing/);
   assert.match(migration, /enrollment\.created/);
+  assert.match(migration, /values \('enrollment', created_enrollment\.id/);
+  assert.match(migration, /enrollmentId/);
   assert.match(migration, /for update/);
 });
 

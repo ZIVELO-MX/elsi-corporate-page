@@ -238,6 +238,7 @@ create policy orders_admin_write on public.orders for update using (public.is_ad
 create or replace function public.fulfill_stripe_order(p_order_id uuid, p_event_id text, p_payload jsonb)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare current_order public.orders;
+declare created_enrollment public.enrollments;
 begin
   select * into current_order from public.orders where id = p_order_id for update;
   if not found then raise exception 'order_not_found'; end if;
@@ -249,8 +250,11 @@ begin
   insert into public.enrollments (user_id, course_id, source, status)
     values (current_order.user_id, current_order.course_id, 'stripe', 'in_progress')
     on conflict (user_id, course_id) do nothing;
+  select * into created_enrollment
+    from public.enrollments
+    where user_id = current_order.user_id and course_id = current_order.course_id;
   insert into public.outbox_events (aggregate_type, aggregate_id, event_type, payload)
-    values ('order', p_order_id, 'enrollment.created', jsonb_build_object('orderId', p_order_id, 'eventId', p_event_id))
+    values ('enrollment', created_enrollment.id, 'enrollment.created', jsonb_build_object('enrollmentId', created_enrollment.id, 'orderId', p_order_id, 'eventId', p_event_id))
     on conflict (aggregate_type, aggregate_id, event_type) do nothing;
   update public.stripe_events set status = 'processed', processed_at = now(), updated_at = now() where event_id = p_event_id;
   return jsonb_build_object('status', 'fulfilled', 'order_id', p_order_id);
