@@ -9,6 +9,7 @@ import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { buildMetadata, indexable } from "@/lib/seo";
+import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
 
 export const metadata = buildMetadata({
   title: "Soluciones",
@@ -17,15 +18,16 @@ export const metadata = buildMetadata({
   allowIndexing: indexable && getVerifiedSolutions().length > 0,
 });
 
-const publicSolutions = getPublicSolutions();
-
 const solutionIcons: Record<Solution["slug"], LucideIcon> = {
   capacitacion: GraduationCap,
   "soluciones-ambientales": Building2,
   "educacion-universitaria": Sprout,
 };
 
-export default function SolucionesPage() {
+export default async function SolucionesPage() {
+  const persistedContent = await listPublicContent();
+  const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
+  const introduction = sectionText(persistedContent, "solutions-intro", "Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias.");
   return (
     <main>
       <section className="solutions-editorial-hero" data-section-label="Soluciones / Introducción">
@@ -41,7 +43,7 @@ export default function SolucionesPage() {
           <div className="solutions-editorial-lede">
             <p>
               {publicSolutions.length > 0
-                ? "Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias."
+                ? introduction
                 : "Las rutas aparecerán cuando ELSI valide su alcance, modalidad y entregables."}
             </p>
             {publicSolutions.length > 0 ? (

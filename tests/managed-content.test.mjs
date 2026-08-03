@@ -26,3 +26,23 @@ test("admin content screen hydrates from Supabase and persists edits with a prot
   assert.match(source, /\/api\/admin\/content\/\$\{section\.id\}/);
   assert.match(source, /persistedSections \?\? sections/);
 });
+
+test("public editorial pages prefer persisted content and invalidate public routes", async () => {
+  const [repository, home, about, solutions, sitemap, api] = await Promise.all([
+    read("lib/content-repository.ts"),
+    read("app/page.tsx"),
+    read("app/nosotros/page.tsx"),
+    read("app/soluciones/page.tsx"),
+    read("app/sitemap.ts"),
+    read("app/api/admin/content/[id]/route.ts"),
+  ]);
+  assert.match(repository, /sectionText/);
+  assert.match(repository, /mapPublicSolutions/);
+  assert.match(repository, /revalidatePath\("\/soluciones"\)/);
+  assert.match(home, /listPublicContent/);
+  assert.match(home, /sectionText/);
+  assert.match(about, /listPublicContent/);
+  assert.match(solutions, /mapPublicSolutions/);
+  assert.match(sitemap, /listPublicContent/);
+  assert.match(api, /revalidatePublicContent/);
+});

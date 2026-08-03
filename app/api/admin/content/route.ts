@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminContentClient, validateSection } from "@/lib/content-repository";
+import { requireAdminContentClient, revalidatePublicContent, validateSection } from "@/lib/content-repository";
 
 export async function GET() {
   const client = await requireAdminContentClient();
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const section = validateSection(await request.json());
     const { data, error } = await client.from("page_sections").insert(section).select().single();
     if (error) return NextResponse.json({ error: error.code === "23505" ? "La clave ya existe" : "No fue posible guardar la sección" }, { status: error.code === "23505" ? 409 : 400 });
+    revalidatePublicContent();
     return NextResponse.json({ section: data }, { status: 201 });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Datos inválidos" }, { status: 400 }); }
 }
