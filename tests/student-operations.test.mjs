@@ -61,3 +61,14 @@ test("certificate storage stays private and owner-scoped", async () => {
   assert.match(migration, /public = false/);
   assert.match(screen, /\/api\/admin\/enrollments\/\$\{e\.id\}\/certificate/);
 });
+
+test("Supabase audit events record actor and resource changes without payload PII", async () => {
+  const migration = await read("supabase/migrations/20260805000000_audit_events.sql");
+  assert.match(migration, /create table if not exists public\.audit_events/);
+  assert.match(migration, /actor_id uuid/);
+  assert.match(migration, /resource_type text/);
+  assert.match(migration, /security definer/);
+  assert.match(migration, /auth\.uid\(\)/);
+  assert.match(migration, /audit_row_change/);
+  assert.doesNotMatch(migration, /email|message|full_name/);
+});
