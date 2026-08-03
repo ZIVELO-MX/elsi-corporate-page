@@ -31,3 +31,16 @@ test("admin contact screen hydrates leads and persists attendance", async () => 
   assert.match(source, /\/api\/admin\/leads\/\$\{lead\.id\}/);
   assert.match(source, /persistedLeads \?\? leads/);
 });
+
+test("notification worker claims outbox events and retries Resend idempotently", async () => {
+  const source = await read("app/api/internal/notifications/worker/route.ts");
+  assert.match(source, /NOTIFICATIONS_WORKER_SECRET/);
+  assert.match(source, /status.*processing/);
+  assert.match(source, /status.*pending/);
+  assert.match(source, /LOCK_TIMEOUT_MS/);
+  assert.match(source, /MAX_ATTEMPTS/);
+  assert.match(source, /https:\/\/api\.resend\.com\/emails/);
+  assert.match(source, /Idempotency-Key/);
+  assert.match(source, /lead\.created\//);
+  assert.match(source, /available_at/);
+});
