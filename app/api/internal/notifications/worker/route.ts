@@ -115,6 +115,12 @@ async function enrollmentContext(admin: ReturnType<typeof createSupabaseAdminCli
 }
 
 export async function POST(request: Request) {
+  // Delivery is intentionally disabled until ELSI provides and validates a
+  // production email provider. Keep the worker implementation in place so it
+  // can be re-enabled later without rebuilding the integration from zero.
+  if (process.env.NOTIFICATIONS_DELIVERY_ENABLED !== "true") {
+    return NextResponse.json({ error: "Entrega de notificaciones deshabilitada" }, { status: 404 });
+  }
   if (!authorized(request)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const admin = createSupabaseAdminClient();
   if (!admin) return NextResponse.json({ error: "Persistencia no configurada" }, { status: 503 });

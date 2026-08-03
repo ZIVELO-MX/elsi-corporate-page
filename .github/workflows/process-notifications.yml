@@ -10,6 +10,9 @@ permissions:
 
 jobs:
   worker:
+    # Keep delivery dormant until the owner explicitly enables the repository
+    # variable and configures the provider.
+    if: vars.NOTIFICATIONS_DELIVERY_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
