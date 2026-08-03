@@ -37,6 +37,10 @@ test("Stripe recovery marks failed or expired orders and reconciles stale pendin
   assert.match(webhook, /eq\("status", "pending"\)/);
   assert.match(webhook, /stripe_payment_intent_id/);
   assert.match(reconcile, /PAYMENTS_RECONCILE_SECRET/);
+  assert.match(reconcile, /checkout\.sessions\.retrieve/);
+  assert.match(reconcile, /payment_status.*paid/);
+  assert.match(reconcile, /fulfill_stripe_order/);
+  assert.match(reconcile, /amountMatches/);
   assert.match(reconcile, /expires_at/);
   assert.match(reconcile, /status: "canceled"/);
   assert.match(env, /PAYMENTS_RECONCILE_SECRET/);
