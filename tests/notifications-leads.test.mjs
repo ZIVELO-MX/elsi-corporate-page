@@ -47,4 +47,14 @@ test("notification worker claims outbox events and retries Resend idempotently",
   assert.match(template, /LEAD_NOTIFICATION_TEMPLATE_VERSION/);
   assert.match(template, /renderLeadNotification/);
   assert.match(source, /X-ELSI-Template-Version/);
+  assert.match(source, /enrollment\.created/);
+  assert.match(source, /certificate\.available/);
+  assert.match(source, /getUserById/);
+  assert.match(source, /ENROLLMENT_NOTIFICATION_TEMPLATE_VERSION/);
+  assert.match(source, /CERTIFICATE_NOTIFICATION_TEMPLATE_VERSION/);
+  const enrollment = await read("app/api/admin/enrollments/route.ts");
+  const certificate = await read("app/api/admin/certificates/[id]/route.ts");
+  assert.match(enrollment, /outbox_events/);
+  assert.match(enrollment, /enrollment\.created/);
+  assert.match(certificate, /certificate\.available/);
 });
