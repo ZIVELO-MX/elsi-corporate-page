@@ -69,3 +69,15 @@ test("notification worker has a scheduled and manually triggerable delivery work
   assert.match(workflow, /api\/internal\/notifications\/worker/);
   assert.match(workflow, /curl --fail-with-body/);
 });
+
+test("notification delivery stays hidden until explicitly enabled", async () => {
+  const [worker, workflow, env] = await Promise.all([
+    read("app/api/internal/notifications/worker/route.ts"),
+    read(".github/workflows/process-notifications.yml"),
+    read(".env.example"),
+  ]);
+  assert.match(worker, /NOTIFICATIONS_DELIVERY_ENABLED !== "true"/);
+  assert.match(worker, /Entrega de notificaciones deshabilitada/);
+  assert.match(workflow, /vars\.NOTIFICATIONS_DELIVERY_ENABLED == 'true'/);
+  assert.match(env, /NOTIFICATIONS_DELIVERY_ENABLED=false/);
+});
