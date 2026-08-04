@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-context";
 import { AuthShell } from "@/components/auth-shell";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type LoginField = "email" | "password";
 type LoginErrors = Partial<Record<LoginField, string>>;
@@ -65,6 +66,22 @@ export default function LoginPage() {
       setFormError("No pudimos iniciar sesión. Revisa tu correo y contraseña.");
       setInvalidCredentials((error as { status?: number }).status === 401);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    setFormError("");
+    setInvalidCredentials(false);
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      setFormError("El inicio de sesión con Google no está configurado.");
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/profile` },
+    });
+    if (error) setFormError("No pudimos iniciar sesión con Google. Intenta de nuevo.");
   };
 
   return (
@@ -130,6 +147,21 @@ export default function LoginPage() {
           disabled={loading}
         >
           {loading ? "Iniciando sesión…" : "Entrar"}
+        </button>
+
+        <div className="my-5 flex items-center gap-3 text-[11px] text-[var(--text-muted)]" aria-hidden="true">
+          <span className="h-px flex-1 bg-[var(--border)]" />
+          <span>o</span>
+          <span className="h-px flex-1 bg-[var(--border)]" />
+        </div>
+
+        <button
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--input)] bg-white px-4 text-[12px] font-extrabold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)] disabled:cursor-wait disabled:opacity-60"
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={loading}
+        >
+          Continuar con Google
         </button>
 
       </form>
