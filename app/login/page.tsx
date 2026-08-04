@@ -125,6 +125,10 @@ export default function LoginPage() {
         >
           {loading ? "Iniciando sesión…" : "Entrar"}
         </button>
+
+        <p className="mt-3 text-center text-[12px] text-[var(--text-muted)]">
+          ¿Olvidaste tu contraseña? La recuperación estará disponible cuando se habilite el envío de correos.
+        </p>
       </form>
 
       <p className="mt-6 text-center text-[12px] text-[var(--text-muted)]">
