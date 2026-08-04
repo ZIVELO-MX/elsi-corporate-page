@@ -29,6 +29,7 @@ import {
   normalizeCatalogCategory,
   normalizeCatalogQuery,
 } from "@/lib/agentic-navigation";
+import { listPublicCourses } from "@/lib/courses-repository";
 
 const catalogDescription =
   "Catálogo de cursos de ELSI: educación ambiental, normatividad y habilidades, en línea y presenciales.";
@@ -49,7 +50,8 @@ export async function generateMetadata({
 }) {
   const params = await searchParams;
   const hasFilters = Boolean(first(params.categoria) || first(params.q));
-  const hasVerifiedCatalog = getVerifiedCourses().some(
+  const persisted = await listPublicCourses();
+  const hasVerifiedCatalog = (persisted ?? getVerifiedCourses()).some(
     (course) => publishState(course) !== "draft",
   );
 
@@ -193,7 +195,8 @@ export default async function CursosPage({
   const category = normalizeCatalogCategory(first(params.categoria));
   const query = normalizeCatalogQuery(first(params.q));
   const normalizedQuery = query.toLocaleLowerCase("es-MX");
-  const allCourses = getPublicCourses();
+  const persisted = await listPublicCourses();
+  const allCourses = persisted === null ? getPublicCourses() : persisted;
   const visible = allCourses.filter(
     (course) =>
       publishState(course) !== "draft" &&
@@ -210,7 +213,7 @@ export default async function CursosPage({
     visible.find((course) => publishState(course) === "upcoming") ??
     visible[0];
   const rest = visible.filter((course) => course !== featured);
-  const verifiedCourses = getVerifiedCourses().filter(
+  const verifiedCourses = (persisted ?? getVerifiedCourses()).filter(
     (course) => publishState(course) !== "draft",
   );
 
