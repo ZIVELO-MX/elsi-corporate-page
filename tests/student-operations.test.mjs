@@ -70,6 +70,7 @@ test("Supabase audit events record actor and resource changes without payload PI
   assert.match(migration, /security definer/);
   assert.match(migration, /auth\.uid\(\)/);
   assert.match(migration, /audit_row_change/);
+  assert.match(migration, /to_regclass/);
   assert.doesNotMatch(migration, /email|message|full_name/);
 });
 
