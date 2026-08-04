@@ -28,3 +28,9 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient<Datab
     },
   });
 }
+
+export async function requireSupabaseServerClient(): Promise<SupabaseClient<Database>> {
+  const client = await createSupabaseServerClient();
+  if (!client) throw new Error("Supabase is not configured");
+  return client;
+}
