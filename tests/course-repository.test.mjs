@@ -32,3 +32,33 @@ test("public catalog and detail use fixtures only when Supabase is unavailable",
   assert.match(detail, /persisted === null \? getPublicCourseBySlug\(slug\) : persisted/);
   assert.match(detail, /persisted === null \? getPublicCourses\(\) : persisted/);
 });
+
+test("course CRUD smoke script is safe for hosted Supabase and cleans temporary data", async () => {
+  const smoke = await read("scripts/smoke-course-crud.mjs");
+
+  assert.match(smoke, /SUPABASE_RLS_ALLOW_REMOTE=true/);
+  assert.match(smoke, /content_status: "verified"/);
+  assert.match(smoke, /is_active: true/);
+  assert.match(smoke, /update\(\{ title: "Curso CRUD smoke actualizado" \}\)/);
+  assert.match(smoke, /update\(\{ is_active: false \}\)/);
+  assert.match(smoke, /assert\(hidden === null/);
+  assert.match(smoke, /finally/);
+  assert.match(smoke, /from\("courses"\)\.delete\(\)/);
+});
+
+test("course CRUD routes preserve validation, conflict handling, and revalidation contracts", async () => {
+  const [collection, item] = await Promise.all([
+    read("app/api/admin/courses/route.ts"),
+    read("app/api/admin/courses/[id]/route.ts"),
+  ]);
+
+  assert.match(collection, /validateCourseInput\(await request\.json\(\)\)/);
+  assert.match(collection, /mapCourseInput\(input\)/);
+  assert.match(collection, /error\.code === "23505"/);
+  assert.match(collection, /status: 201/);
+  assert.match(item, /validateCourseInput\(await request\.json\(\)\)/);
+  assert.match(item, /mapCourseInput\(input\)/);
+  assert.match(item, /status: error\.code === "23505" \? 409 : 400/);
+  assert.match(item, /update\(\{ is_active: false \}\)/);
+  assert.match(item, /revalidateCourseSurfaces\(previous\?\.slug\)/);
+});
