@@ -34,6 +34,7 @@ test("admin enrollment screen uses persistent endpoints with fixture fallback", 
   assert.match(source, /method: "POST"/);
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /persistedEnrollments \?\? enrollments/);
+  assert.match(source, /Array\.isArray\(row\.certificates\)/);
 });
 
 test("admin users endpoint and screen use Supabase data without exposing service role", async () => {

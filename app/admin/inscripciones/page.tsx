@@ -22,7 +22,8 @@ type PersistedEnrollment = {
   source: "internal" | "external";
   status: "in_progress" | "completed";
   enrolled_at: string;
-  certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }[];
+  certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }
+    | { id: string; status: "pending" | "available"; storage_path: string | null }[];
 };
 
 type PersistedCourse = {
@@ -64,6 +65,7 @@ function courseFromRow(row: PersistedCourse): AdminCourse {
 function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses: AdminCourse[]): Enrollment {
   const user = users.find(item => item.id === row.user_id);
   const course = courses.find(item => item.id === row.course_id);
+  const certificate = Array.isArray(row.certificates) ? row.certificates[0] : row.certificates;
   return {
     id: row.id,
     userId: row.user_id,
@@ -73,8 +75,8 @@ function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses
     enrolledAt: row.enrolled_at.slice(0, 10),
     source: row.source === "external" ? "externa" : "interna",
     status: row.status === "completed" ? "realizado" : "en-curso",
-    certificateId: row.certificates?.[0]?.id,
-    certificateStatus: row.certificates?.[0]?.status === "available" ? "disponible" : row.certificates?.[0] ? "pendiente" : undefined,
+    certificateId: certificate?.id,
+    certificateStatus: certificate?.status === "available" ? "disponible" : certificate ? "pendiente" : undefined,
   };
 }
 
