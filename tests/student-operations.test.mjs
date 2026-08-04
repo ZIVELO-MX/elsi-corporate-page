@@ -27,6 +27,10 @@ test("enrollment mutations require admin and enforce idempotent source/status co
 test("admin enrollment screen uses persistent endpoints with fixture fallback", async () => {
   const source = await read("app/admin/inscripciones/page.tsx");
   assert.match(source, /fetch\("\/api\/admin\/enrollments"\)/);
+  assert.match(source, /fetch\("\/api\/admin\/users"\)/);
+  assert.match(source, /fetch\("\/api\/admin\/courses"\)/);
+  assert.match(source, /setPersistedUsers/);
+  assert.match(source, /setPersistedCourses/);
   assert.match(source, /method: "POST"/);
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /persistedEnrollments \?\? enrollments/);
