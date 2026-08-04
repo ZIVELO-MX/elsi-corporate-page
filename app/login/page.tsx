@@ -31,6 +31,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<LoginErrors>({});
   const [formError, setFormError] = useState("");
+  const [invalidCredentials, setInvalidCredentials] = useState(false);
 
   const updateFieldError = (field: LoginField, value: string) => {
     setErrors((current) => ({ ...current, [field]: validateLoginField(field, value) }));
@@ -39,11 +40,13 @@ export default function LoginPage() {
   const clearFieldError = (field: LoginField) => {
     setErrors((current) => ({ ...current, [field]: undefined }));
     setFormError("");
+    setInvalidCredentials(false);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError("");
+    setInvalidCredentials(false);
 
     const nextErrors = {
       email: validateLoginField("email", email),
@@ -58,8 +61,9 @@ export default function LoginPage() {
     try {
       const user = await login(email, password);
       router.push(user.role === "admin" ? "/admin" : "/profile");
-    } catch {
+    } catch (error) {
       setFormError("No pudimos iniciar sesión. Revisa tu correo y contraseña.");
+      setInvalidCredentials((error as { status?: number }).status === 401);
     }
   };
 
@@ -68,7 +72,8 @@ export default function LoginPage() {
       <form className="w-full" onSubmit={handleSubmit} noValidate aria-busy={loading}>
         {formError ? (
           <p className="mb-4 rounded-[var(--radius-sm)] border border-[#E9C8C8] bg-[#FDF2F2] px-3 py-2.5 text-[12px] font-semibold text-[var(--destructive)]" role="alert">
-            {formError} ¿Olvidaste tu contraseña? <a className="underline" href={`mailto:${SUPPORT_EMAIL}`}>Contacta a ELSI</a>.
+            {formError}
+            {invalidCredentials ? <> ¿Olvidaste tu contraseña? <a className="underline" href={`mailto:${SUPPORT_EMAIL}`}>Contacta a ELSI</a>.</> : null}
           </p>
         ) : null}
 
