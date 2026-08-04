@@ -36,7 +36,7 @@ export async function GET() {
     id: profile.id,
     name: profile.full_name ?? "Usuario ELSI",
     email: emails.get(profile.id) ?? "",
-    role: profile.role,
+    role: profile.role === "admin" ? "admin" : "user",
     enrolledCourses: counts.get(profile.id) ?? 0,
     createdAt: profile.created_at.slice(0, 10),
   })) });

@@ -41,6 +41,7 @@ test("admin users endpoint and screen use Supabase data without exposing service
   assert.match(route, /createSupabaseAdminClient/);
   assert.match(route, /auth\.admin\.listUsers/);
   assert.match(route, /role/);
+  assert.match(route, /profile\.role === "admin" \? "admin" : "user"/);
   assert.match(screen, /fetch\("\/api\/admin\/users"\)/);
   assert.match(screen, /persistedUsers \?\? users/);
 });
