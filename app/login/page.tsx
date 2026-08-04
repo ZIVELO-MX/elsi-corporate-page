@@ -8,6 +8,7 @@ import { AuthShell } from "@/components/auth-shell";
 
 type LoginField = "email" | "password";
 type LoginErrors = Partial<Record<LoginField, string>>;
+const SUPPORT_EMAIL = "instituteelsi@gmail.com";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -67,7 +68,7 @@ export default function LoginPage() {
       <form className="w-full" onSubmit={handleSubmit} noValidate aria-busy={loading}>
         {formError ? (
           <p className="mb-4 rounded-[var(--radius-sm)] border border-[#E9C8C8] bg-[#FDF2F2] px-3 py-2.5 text-[12px] font-semibold text-[var(--destructive)]" role="alert">
-            {formError}
+            {formError} Si necesitas ayuda, <a className="underline" href={`mailto:${SUPPORT_EMAIL}`}>contacta a ELSI</a>.
           </p>
         ) : null}
 
@@ -126,9 +127,6 @@ export default function LoginPage() {
           {loading ? "Iniciando sesión…" : "Entrar"}
         </button>
 
-        <p className="mt-3 text-center text-[12px] text-[var(--text-muted)]">
-          ¿Olvidaste tu contraseña? La recuperación estará disponible cuando se habilite el envío de correos.
-        </p>
       </form>
 
       <p className="mt-6 text-center text-[12px] text-[var(--text-muted)]">
