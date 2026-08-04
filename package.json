@@ -14,6 +14,7 @@
     "audit:responsive": "node scripts/audit-responsive.mjs",
     "audit:seo": "node scripts/audit-seo.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "smoke:student-operations": "node scripts/smoke-student-operations.mjs",
     "test:checkout:compat": "pnpm build && playwright test --config=playwright.checkout.config.ts",
     "start": "next start",
     "lint": "eslint .",

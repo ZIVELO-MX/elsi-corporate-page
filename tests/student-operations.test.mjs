@@ -84,3 +84,17 @@ test("RLS smoke test documents hosted student/admin isolation without secrets", 
   assert.match(readme, /Smoke test de RLS/);
   assert.doesNotMatch(smoke, /service_role|SUPABASE_SERVICE_ROLE_KEY/);
 });
+
+test("hosted student operations smoke creates isolated records and cleans them up", async () => {
+  const smoke = await read("scripts/smoke-student-operations.mjs");
+  assert.match(smoke, /SUPABASE_RLS_ALLOW_REMOTE=true/);
+  assert.match(smoke, /createUser\("student-a"/);
+  assert.match(smoke, /createUser\("student-b"/);
+  assert.match(smoke, /update\(\{ role: "admin" \}\)/);
+  assert.match(smoke, /from\("enrollments"\)/);
+  assert.match(smoke, /student-b ve la inscripción/);
+  assert.match(smoke, /status: "completed"/);
+  assert.match(smoke, /status: "available"/);
+  assert.match(smoke, /finally/);
+  assert.match(smoke, /deleteUser\(user\.id\)/);
+});
