@@ -9,6 +9,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type RegistrationField, validateRegistrationField } from "@/lib/form-validation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type RegistrationValues = Record<RegistrationField, string>;
 type RegistrationErrors = Partial<Record<RegistrationField, string>>;
@@ -63,6 +64,21 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleRegistration = async () => {
+    setFormError("");
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      setFormError("El registro con Google no está configurado.");
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/profile` },
+    });
+    if (error) setFormError("No pudimos crear tu cuenta con Google. Intenta de nuevo.");
+  };
+
   return (
     <AuthShell title="Crear cuenta" subtitle="Regístrate para acceder a tus cursos.">
       <form className="w-full" onSubmit={handleSubmit} noValidate aria-busy={loading}>
@@ -101,6 +117,21 @@ export default function RegisterPage() {
         <Button type="submit" disabled={loading} variant="primary" className="mt-6 w-full">
           {loading ? "Creando cuenta…" : "Crear cuenta"}
         </Button>
+
+        <div className="my-5 flex items-center gap-3 text-[11px] text-[var(--text-muted)]" aria-hidden="true">
+          <span className="h-px flex-1 bg-[var(--border)]" />
+          <span>o</span>
+          <span className="h-px flex-1 bg-[var(--border)]" />
+        </div>
+
+        <button
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--input)] bg-white px-4 text-[12px] font-extrabold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)] disabled:cursor-wait disabled:opacity-60"
+          type="button"
+          onClick={handleGoogleRegistration}
+          disabled={loading}
+        >
+          Crear cuenta con Google
+        </button>
       </form>
 
       <p className="mt-6 text-center text-[12px] text-[var(--text-muted)]">
