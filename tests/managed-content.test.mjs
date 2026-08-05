@@ -46,3 +46,15 @@ test("public editorial pages prefer persisted content and invalidate public rout
   assert.match(sitemap, /listPublicContent/);
   assert.match(api, /revalidatePublicContent/);
 });
+
+test("managed content smoke test protects remote execution and cleans temporary sections", async () => {
+  const [script, packageJson] = await Promise.all([
+    read("scripts/smoke-managed-content.mjs"),
+    read("package.json").then(JSON.parse),
+  ]);
+  assert.match(script, /SUPABASE_RLS_ALLOW_REMOTE/);
+  assert.match(script, /is_active: false/);
+  assert.match(script, /is_active: true/);
+  assert.match(script, /\.delete\(\)\.eq\("id", sectionId\)/);
+  assert.equal(packageJson.scripts["smoke:managed-content"], "node scripts/smoke-managed-content.mjs");
+});
