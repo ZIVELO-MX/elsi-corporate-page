@@ -42,3 +42,12 @@ test("public course repository uses a request-independent client for build-time 
   assert.match(server, /createSupabasePublicClient/);
   assert.doesNotMatch(repository, /createSupabaseServerClient/);
 });
+
+test("paid published courses enter Stripe checkout only when the public flag is enabled", async () => {
+  const detail = await read("app/cursos/[slug]/page.tsx");
+  assert.match(detail, /NEXT_PUBLIC_PAYMENTS_ENABLED/);
+  assert.match(detail, /state === "published"/);
+  assert.match(detail, /course\.price > 0/);
+  assert.match(detail, /\/checkout\?curso=\$\{encodeURIComponent\(course\.slug\)\}/);
+  assert.match(detail, /Inscribirme y pagar/);
+});

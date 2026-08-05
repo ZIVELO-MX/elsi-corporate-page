@@ -83,6 +83,12 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const state = publishState(course);
   const availability = stateMeta(course).label;
   const online = course.modality !== "presencial";
+  const checkoutAvailable = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1"
+    && state === "published"
+    && course.price > 0;
+  const actionHref = checkoutAvailable
+    ? `/checkout?curso=${encodeURIComponent(course.slug)}`
+    : buildContactPath({ course: course.slug });
 
   return (
     <main>
@@ -129,11 +135,13 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             {course.priceLabel && course.price > 0 ? <p className="course-detail-price-note">{course.priceLabel}</p> : null}
             <p id="course-decision-title" className="course-detail-availability">Disponibilidad: {availability}</p>
             {course.certificateType ? <p className="course-detail-certificate">Incluye constancia {certType(course)}</p> : null}
-            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={buildContactPath({ course: course.slug })}>
-              {inquiryLabels[state]}
+            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
+              {checkoutAvailable ? "Inscribirme y pagar" : inquiryLabels[state]}
               <ArrowRight aria-hidden="true" size={16} />
             </Link>
-            <p className="course-detail-action-note">ELSI confirmará disponibilidad y los siguientes pasos por correo.</p>
+            <p className="course-detail-action-note">
+              {checkoutAvailable ? "Completa tus datos para continuar al pago seguro con Stripe." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
+            </p>
           </aside>
         </div>
       </section>
