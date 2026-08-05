@@ -36,9 +36,15 @@ export async function POST(request: Request) {
   const client = await createSupabaseServerClient();
   if (!client) return NextResponse.json({ error: "Servicio no disponible" }, { status: 503 });
   const source = typeof body.source === "string" ? body.source.slice(0, 120) : "contact";
-  const { data: lead, error } = await client.from("contact_leads").insert({ full_name: name, email, phone: typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : null, company: typeof body.company === "string" ? body.company.trim().slice(0, 120) : null, message, source, turnstile_verified: Boolean(process.env.TURNSTILE_SECRET_KEY) }).select("id").single();
-  if (error || !lead) return NextResponse.json({ error: "No fue posible registrar el mensaje." }, { status: 500 });
-  const { error: outboxError } = await client.from("outbox_events").insert({ aggregate_type: "contact_lead", aggregate_id: lead.id, event_type: "lead.created", payload: { leadId: lead.id } });
-  if (outboxError) return NextResponse.json({ error: "Mensaje registrado; la notificación queda pendiente." }, { status: 202 });
+  const { error } = await client.rpc("submit_contact_lead", {
+    p_full_name: name,
+    p_email: email,
+    p_message: message,
+    p_phone: typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : null,
+    p_company: typeof body.company === "string" ? body.company.trim().slice(0, 120) : null,
+    p_source: source,
+    p_turnstile_verified: Boolean(process.env.TURNSTILE_SECRET_KEY),
+  });
+  if (error) return NextResponse.json({ error: "No fue posible registrar el mensaje." }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

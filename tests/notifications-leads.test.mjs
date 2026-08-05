@@ -6,12 +6,14 @@ const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("contact endpoint validates, rate-limits, verifies anti-spam and writes lead/outbox", async () => {
   const source = await read("app/api/contact/route.ts");
+  const migration = await read("supabase/migrations/20260806000000_contact_submission.sql");
   assert.match(source, /MAX_REQUESTS/);
   assert.match(source, /website/);
   assert.match(source, /turnstile/);
-  assert.match(source, /contact_leads/);
-  assert.match(source, /outbox_events/);
-  assert.match(source, /lead\.created/);
+  assert.match(migration, /contact_leads/);
+  assert.match(migration, /outbox_events/);
+  assert.match(migration, /lead\.created/);
+  assert.match(source, /submit_contact_lead/);
 });
 
 test("admin leads are protected and status transitions are constrained", async () => {
