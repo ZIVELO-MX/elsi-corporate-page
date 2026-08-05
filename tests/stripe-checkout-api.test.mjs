@@ -34,3 +34,14 @@ test("checkout keeps Stripe.js behind the public payment flag and preserves demo
   assert.match(ui, /createPaymentElement/);
   assert.match(ui, /createMockPaymentGateway/);
 });
+
+test("checkout resolves persisted public courses before the fixture fallback", async () => {
+  const [page, payments] = await Promise.all([
+    read("app/checkout/page.tsx"),
+    read("lib/payments.ts"),
+  ]);
+  assert.match(page, /getPublicCourse/);
+  assert.match(page, /mapPublicCourseToCheckoutCourse/);
+  assert.match(payments, /mapPublicCourseToCheckoutCourse/);
+  assert.match(payments, /Math\.round\(course\.price \* 100\)/);
+});
