@@ -38,7 +38,9 @@ do $$
 declare table_name text;
 begin
   foreach table_name in array array['courses','enrollments','certificates','page_sections','solutions','testimonials','contact_leads','orders'] loop
-    execute format('drop trigger if exists audit_row_change on public.%I', table_name);
-    execute format('create trigger audit_row_change after insert or update or delete on public.%I for each row execute function public.audit_row_change()', table_name);
+    if to_regclass(format('public.%I', table_name)) is not null then
+      execute format('drop trigger if exists audit_row_change on public.%I', table_name);
+      execute format('create trigger audit_row_change after insert or update or delete on public.%I for each row execute function public.audit_row_change()', table_name);
+    end if;
   end loop;
 end $$;

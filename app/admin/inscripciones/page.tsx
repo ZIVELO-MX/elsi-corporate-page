@@ -22,12 +22,50 @@ type PersistedEnrollment = {
   source: "internal" | "external";
   status: "in_progress" | "completed";
   enrolled_at: string;
-  certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }[];
+  certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }
+    | { id: string; status: "pending" | "available"; storage_path: string | null }[];
 };
+
+type PersistedCourse = {
+  id: string;
+  title: string;
+  short_description: string;
+  duration_hours: number | null;
+  audience: string | null;
+  modality: "online" | "in_person";
+  location: string | null;
+  price_cents: number;
+  is_active: boolean;
+  created_at: string;
+};
+
+function courseFromRow(row: PersistedCourse): AdminCourse {
+  return {
+    id: row.id,
+    title: row.title,
+    category: "General",
+    slug: row.id,
+    price: row.price_cents / 100,
+    status: row.is_active ? "active" : "inactive",
+    externalUrl: "",
+    students: 0,
+    createdAt: row.created_at.slice(0, 10),
+    synopsis: row.short_description,
+    duration: row.duration_hours ? `${row.duration_hours} horas` : "",
+    targetAudience: row.audience ?? "",
+    curriculum: "",
+    modality: row.modality === "in_person" ? "presencial" : "online",
+    presencialLocation: row.location ?? "",
+    presencialDate: "",
+    presencialTime: "",
+    presencialInfo: "",
+  };
+}
 
 function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses: AdminCourse[]): Enrollment {
   const user = users.find(item => item.id === row.user_id);
   const course = courses.find(item => item.id === row.course_id);
+  const certificate = Array.isArray(row.certificates) ? row.certificates[0] : row.certificates;
   return {
     id: row.id,
     userId: row.user_id,
@@ -37,8 +75,8 @@ function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses
     enrolledAt: row.enrolled_at.slice(0, 10),
     source: row.source === "external" ? "externa" : "interna",
     status: row.status === "completed" ? "realizado" : "en-curso",
-    certificateId: row.certificates?.[0]?.id,
-    certificateStatus: row.certificates?.[0]?.status === "available" ? "disponible" : row.certificates?.[0] ? "pendiente" : undefined,
+    certificateId: certificate?.id,
+    certificateStatus: certificate?.status === "available" ? "disponible" : certificate ? "pendiente" : undefined,
   };
 }
 
@@ -140,21 +178,41 @@ export default function AdminEnrollments() {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("todas");
   const [manualTarget, setManualTarget] = useState<Enrollment | null>(null);
   const [persistedEnrollments, setPersistedEnrollments] = useState<Enrollment[] | null>(null);
+  const [persistedUsers, setPersistedUsers] = useState<AdminUser[] | null>(null);
+  const [persistedCourses, setPersistedCourses] = useState<AdminCourse[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/admin/enrollments")
-      .then(async response => response.ok ? response.json() : null)
+    Promise.all([
+      fetch("/api/admin/enrollments"),
+      fetch("/api/admin/users"),
+      fetch("/api/admin/courses"),
+    ])
+      .then(async ([enrollmentsResponse, usersResponse, coursesResponse]) => {
+        if (!enrollmentsResponse.ok || !usersResponse.ok || !coursesResponse.ok) return null;
+        return Promise.all([enrollmentsResponse.json(), usersResponse.json(), coursesResponse.json()]);
+      })
       .then(payload => {
-        if (!cancelled && payload?.enrollments) {
-          setPersistedEnrollments((payload.enrollments as PersistedEnrollment[]).map(row => enrollmentFromRow(row, users, courses)));
+        if (!cancelled && payload) {
+          const [enrollmentsPayload, usersPayload, coursesPayload] = payload as [
+            { enrollments?: PersistedEnrollment[] },
+            { users?: AdminUser[] },
+            { courses?: PersistedCourse[] },
+          ];
+          const nextUsers = usersPayload.users ?? [];
+          const nextCourses = (coursesPayload.courses ?? []).map(courseFromRow);
+          setPersistedUsers(nextUsers);
+          setPersistedCourses(nextCourses);
+          setPersistedEnrollments((enrollmentsPayload.enrollments ?? []).map(row => enrollmentFromRow(row, nextUsers, nextCourses)));
         }
       })
       .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
     return () => { cancelled = true; };
-  }, [courses, users]);
+  }, []);
 
   const displayedEnrollments = persistedEnrollments ?? enrollments;
+  const availableUsers = persistedUsers ?? users;
+  const availableCourses = persistedCourses ?? courses;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,8 +257,8 @@ export default function AdminEnrollments() {
     });
   }, [displayedEnrollments, query, statusFilter, sourceFilter]);
 
-  const selectableUsers = useMemo(() => users.filter((user) => user.role === "user"), [users]);
-  const activeCourses = useMemo(() => courses.filter((course) => course.status === "active"), [courses]);
+  const selectableUsers = useMemo(() => availableUsers.filter((user) => user.role === "user"), [availableUsers]);
+  const activeCourses = useMemo(() => availableCourses.filter((course) => course.status === "active"), [availableCourses]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const pendingIds = useMemo(
     () => filtered.flatMap((enrollment) => enrollment.status === "en-curso" ? [enrollment.id] : []),

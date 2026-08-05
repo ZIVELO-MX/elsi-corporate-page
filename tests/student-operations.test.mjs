@@ -27,9 +27,14 @@ test("enrollment mutations require admin and enforce idempotent source/status co
 test("admin enrollment screen uses persistent endpoints with fixture fallback", async () => {
   const source = await read("app/admin/inscripciones/page.tsx");
   assert.match(source, /fetch\("\/api\/admin\/enrollments"\)/);
+  assert.match(source, /fetch\("\/api\/admin\/users"\)/);
+  assert.match(source, /fetch\("\/api\/admin\/courses"\)/);
+  assert.match(source, /setPersistedUsers/);
+  assert.match(source, /setPersistedCourses/);
   assert.match(source, /method: "POST"/);
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /persistedEnrollments \?\? enrollments/);
+  assert.match(source, /Array\.isArray\(row\.certificates\)/);
 });
 
 test("admin users endpoint and screen use Supabase data without exposing service role", async () => {
@@ -37,6 +42,7 @@ test("admin users endpoint and screen use Supabase data without exposing service
   assert.match(route, /createSupabaseAdminClient/);
   assert.match(route, /auth\.admin\.listUsers/);
   assert.match(route, /role/);
+  assert.match(route, /profile\.role === "admin" \? "admin" : "user"/);
   assert.match(screen, /fetch\("\/api\/admin\/users"\)/);
   assert.match(screen, /persistedUsers \?\? users/);
 });
@@ -70,6 +76,7 @@ test("Supabase audit events record actor and resource changes without payload PI
   assert.match(migration, /security definer/);
   assert.match(migration, /auth\.uid\(\)/);
   assert.match(migration, /audit_row_change/);
+  assert.match(migration, /to_regclass/);
   assert.doesNotMatch(migration, /email|message|full_name/);
 });
 
@@ -83,4 +90,18 @@ test("RLS smoke test documents hosted student/admin isolation without secrets", 
   assert.match(smoke, /rollback/);
   assert.match(readme, /Smoke test de RLS/);
   assert.doesNotMatch(smoke, /service_role|SUPABASE_SERVICE_ROLE_KEY/);
+});
+
+test("hosted student operations smoke creates isolated records and cleans them up", async () => {
+  const smoke = await read("scripts/smoke-student-operations.mjs");
+  assert.match(smoke, /SUPABASE_RLS_ALLOW_REMOTE=true/);
+  assert.match(smoke, /createUser\("student-a"/);
+  assert.match(smoke, /createUser\("student-b"/);
+  assert.match(smoke, /update\(\{ role: "admin" \}\)/);
+  assert.match(smoke, /from\("enrollments"\)/);
+  assert.match(smoke, /student-b ve la inscripción/);
+  assert.match(smoke, /status: "completed"/);
+  assert.match(smoke, /status: "available"/);
+  assert.match(smoke, /finally/);
+  assert.match(smoke, /deleteUser\(user\.id\)/);
 });

@@ -43,7 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Credenciales inválidas");
+        const error = new Error(data.error || "Credenciales inválidas") as Error & { status?: number };
+        error.status = res.status;
+        throw error;
       }
       const data = await res.json();
       setUser(data.user);

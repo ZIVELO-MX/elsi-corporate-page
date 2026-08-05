@@ -47,8 +47,8 @@ test("login keeps the approved email and password flow accessible", () => {
   assert.match(login, /role="alert"/);
   assert.match(login, /pointer-fine:hover:/);
   assert.match(login, /className="accent-link/);
-  assert.match(styles, /\.accent-link \{ color: var\(--accent\); \}/);
   assert.match(login, /signInWithOAuth/);
   assert.match(login, /provider: "google"/);
   assert.match(login, /Continuar con Google/);
+  assert.match(styles, /\.accent-link \{ color: var\(--accent\); \}/);
 });
