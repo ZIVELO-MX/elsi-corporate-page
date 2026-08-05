@@ -41,6 +41,7 @@ test("Supabase foundation keeps schema, RLS, and secrets separated", async () =>
 
   assert.doesNotMatch(browser, /SERVICE_ROLE/);
   assert.match(admin, /getSupabaseServiceRoleKey/);
+  assert.match(env, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
   assert.match(env, /NEXT_PUBLIC_SUPABASE_ANON_KEY/);
   assert.match(env, /SUPABASE_SERVICE_ROLE_KEY/);
   assert.equal(packageJson.dependencies["@supabase/ssr"], "0.12.3");
