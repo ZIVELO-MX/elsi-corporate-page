@@ -67,7 +67,20 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      submit_contact_lead: {
+        Args: {
+          p_full_name: string;
+          p_email: string;
+          p_message: string;
+          p_phone?: string | null;
+          p_company?: string | null;
+          p_source?: string;
+          p_turnstile_verified?: boolean;
+        };
+        Returns: string;
+      };
+    };
     Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed" };
     CompositeTypes: Record<string, never>;
   };

@@ -5,7 +5,9 @@ export type SupabasePublicConfig = {
 
 const publicUrl = () => process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
 const publicAnonKey = () =>
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim()
+  ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+  ?? "";
 
 export function getSupabasePublicConfig(): SupabasePublicConfig | null {
   const url = publicUrl();

@@ -1,0 +1,36 @@
+name: Process notifications outbox
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  worker:
+    # Keep delivery dormant until the owner explicitly enables the repository
+    # variable and configures the provider.
+    if: vars.NOTIFICATIONS_DELIVERY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check notification secrets
+        env:
+          ELSI_APP_URL: ${{ secrets.ELSI_APP_URL }}
+          NOTIFICATIONS_WORKER_SECRET: ${{ secrets.NOTIFICATIONS_WORKER_SECRET }}
+        run: |
+          test -n "$ELSI_APP_URL" || { echo "ELSI_APP_URL is not configured"; exit 1; }
+          test -n "$NOTIFICATIONS_WORKER_SECRET" || { echo "NOTIFICATIONS_WORKER_SECRET is not configured"; exit 1; }
+
+      - name: Claim and deliver pending events
+        env:
+          ELSI_APP_URL: ${{ secrets.ELSI_APP_URL }}
+          NOTIFICATIONS_WORKER_SECRET: ${{ secrets.NOTIFICATIONS_WORKER_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${NOTIFICATIONS_WORKER_SECRET}" \
+            --header "Accept: application/json" \
+            --url "${ELSI_APP_URL%/}/api/internal/notifications/worker"
