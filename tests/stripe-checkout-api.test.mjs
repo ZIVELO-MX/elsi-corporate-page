@@ -11,6 +11,8 @@ test("Stripe checkout is feature-flagged, authenticated and price-canonical", as
   assert.match(route, /Idempotency-Key/);
   assert.match(route, /price_cents/);
   assert.match(route, /checkout\.sessions\.create/);
+  assert.match(route, /ui_mode: "elements"/);
+  assert.doesNotMatch(route, /ui_mode: "custom"/);
   assert.match(route, /stripe_checkout_session_id/);
   assert.match(stripe, /STRIPE_SECRET_KEY/);
   assert.match(migration, /create table if not exists public\.orders/);
