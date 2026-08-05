@@ -28,6 +28,8 @@ test("admin content screen hydrates from Supabase and persists edits with a prot
   assert.match(source, /Guardar/);
   assert.match(source, /Cancelar/);
   assert.match(source, /setDrafts/);
+  assert.match(source, /useToast/);
+  assert.match(source, /Cambios guardados/);
 });
 
 test("public editorial pages prefer persisted content and invalidate public routes", async () => {

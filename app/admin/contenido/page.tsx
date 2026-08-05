@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAdminData, type PageSection } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 
 const toggleBtnStyle: React.CSSProperties = {
   position: "relative", width: "2.5rem", height: "1.5rem", borderRadius: "1rem",
@@ -16,6 +17,7 @@ const sectionTextareaStyle: React.CSSProperties = {
 
 export default function AdminContent() {
   const { sections, updateSection } = useAdminData();
+  const { toast } = useToast();
   const [persistedSections, setPersistedSections] = useState<PageSection[] | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Pick<PageSection, "content" | "active">>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -55,7 +57,9 @@ export default function AdminContent() {
       body: JSON.stringify({ sectionKey: section.key, title: section.label, body: { text: draft.content }, isActive: draft.active }),
     });
     if (!response.ok) {
-      setSaveError(`No se pudo guardar “${section.label}”.`);
+      const message = `No se pudo guardar “${section.label}”.`;
+      setSaveError(message);
+      toast({ title: message, variant: "error" });
       setSavingId(null);
       return;
     }
@@ -63,6 +67,7 @@ export default function AdminContent() {
     setPersistedSections((current) => (current ? current.map((item) => item.id === section.id ? { ...item, ...draft } : item) : current));
     setDrafts((current) => { const next = { ...current }; delete next[section.id]; return next; });
     setSavingId(null);
+    toast({ title: "Cambios guardados.", variant: "success" });
   };
 
   return (
