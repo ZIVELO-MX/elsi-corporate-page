@@ -49,13 +49,27 @@ type StripePaymentElement = {
   destroy?: () => void;
 };
 
+type StripeCheckoutError = {
+  message?: string;
+};
+
+type StripeCheckoutActions = {
+  confirm: () => Promise<
+    | { type: "success" }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
+};
+
 type StripeCheckout = {
   createPaymentElement: () => StripePaymentElement;
-  confirm: () => Promise<{ error?: { message?: string } }>;
+  loadActions: () => Promise<
+    | { type: "success"; actions: StripeCheckoutActions }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
 };
 
 type StripeClient = {
-  initCheckout: (options: { clientSecret: string }) => Promise<StripeCheckout>;
+  initCheckout: (options: { clientSecret: string }) => StripeCheckout;
 };
 
 declare global {
@@ -402,11 +416,18 @@ function StripePaymentElement({
         return;
       }
       try {
-        const checkout = await window.Stripe(publishableKey).initCheckout({ clientSecret });
+        const checkout = window.Stripe(publishableKey).initCheckout({ clientSecret });
+        const actionsResult = await checkout.loadActions();
+        if (actionsResult.type !== "success") {
+          throw new Error(actionsResult.error?.message ?? "Stripe no pudo preparar la confirmación.");
+        }
         if (disposed || !elementRef.current) return;
         paymentElement = checkout.createPaymentElement();
         paymentElement.mount(elementRef.current);
-        onConfirmReady(() => checkout.confirm());
+        onConfirmReady(async () => {
+          const result = await actionsResult.actions.confirm();
+          return result.type === "error" ? { error: result.error } : {};
+        });
       } catch {
         setError("No fue posible cargar el formulario seguro de Stripe.");
       }

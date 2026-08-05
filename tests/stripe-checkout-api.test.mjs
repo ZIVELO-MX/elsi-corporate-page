@@ -34,6 +34,9 @@ test("checkout keeps Stripe.js behind the public payment flag and preserves demo
   assert.match(ui, /\/api\/payments\/checkout/);
   assert.match(ui, /Idempotency-Key/);
   assert.match(ui, /createPaymentElement/);
+  assert.match(ui, /loadActions/);
+  assert.match(ui, /actionsResult\.actions\.confirm/);
+  assert.doesNotMatch(ui, /checkout\.confirm\(\)/);
   assert.match(ui, /createMockPaymentGateway/);
 });
 
