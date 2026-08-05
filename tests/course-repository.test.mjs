@@ -32,3 +32,13 @@ test("public catalog and detail use fixtures only when Supabase is unavailable",
   assert.match(detail, /persisted === null \? getPublicCourseBySlug\(slug\) : persisted/);
   assert.match(detail, /persisted === null \? getPublicCourses\(\) : persisted/);
 });
+
+test("public course repository uses a request-independent client for build-time params", async () => {
+  const [repository, server] = await Promise.all([
+    read("lib/courses-repository.ts"),
+    read("lib/supabase/server.ts"),
+  ]);
+  assert.match(repository, /createSupabasePublicClient/);
+  assert.match(server, /createSupabasePublicClient/);
+  assert.doesNotMatch(repository, /createSupabaseServerClient/);
+});
