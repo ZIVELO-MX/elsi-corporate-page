@@ -25,6 +25,9 @@ test("admin content screen hydrates from Supabase and persists edits with a prot
   assert.match(source, /fetch\("\/api\/admin\/content"/);
   assert.match(source, /\/api\/admin\/content\/\$\{section\.id\}/);
   assert.match(source, /persistedSections \?\? sections/);
+  assert.match(source, /Guardar/);
+  assert.match(source, /Cancelar/);
+  assert.match(source, /setDrafts/);
 });
 
 test("public editorial pages prefer persisted content and invalidate public routes", async () => {
