@@ -45,3 +45,10 @@ test("checkout resolves persisted public courses before the fixture fallback", a
   assert.match(payments, /mapPublicCourseToCheckoutCourse/);
   assert.match(payments, /Math\.round\(course\.price \* 100\)/);
 });
+
+test("checkout logs a safe Stripe failure diagnostic without exposing credentials", async () => {
+  const route = await read("app/api/payments/checkout/route.ts");
+  assert.match(route, /Stripe session creation failed/);
+  assert.match(route, /requestId/);
+  assert.doesNotMatch(route, /console\.log\([^)]*STRIPE_SECRET_KEY/);
+});

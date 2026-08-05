@@ -29,7 +29,15 @@ export async function POST(request: Request) {
     const expiresAt = session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null;
     await client.from("orders").update({ stripe_checkout_session_id: session.id, expires_at: expiresAt }).eq("id", order.id);
     return NextResponse.json({ orderId: order.id, clientSecret: session.client_secret, amount: order.amount_cents, currency: order.currency, status: order.status, expiresAt });
-  } catch {
+  } catch (error) {
+    const stripeError = error as { type?: string; code?: string; message?: string; statusCode?: number; requestId?: string };
+    console.error("[payments/checkout] Stripe session creation failed", {
+      type: stripeError.type,
+      code: stripeError.code,
+      statusCode: stripeError.statusCode,
+      requestId: stripeError.requestId,
+      message: stripeError.message,
+    });
     await client.from("orders").update({ status: "failed" }).eq("id", order.id);
     return NextResponse.json({ error: "Stripe no está disponible; inténtalo más tarde" }, { status: 502 });
   }
