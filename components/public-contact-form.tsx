@@ -39,6 +39,7 @@ export function PublicContactForm({
   const [values, setValues] = useState<ContactValues>({ name: "", email: "", message: defaultMessage });
   const [errors, setErrors] = useState<ContactErrors>({});
   const [sent, setSent] = useState(false);
+  const [prototypeResponse, setPrototypeResponse] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -69,6 +70,7 @@ export function PublicContactForm({
       setSubmitError(result.error || "No fue posible enviar el mensaje.");
       return;
     }
+    setPrototypeResponse(result.prototype === true);
     setSent(true);
   };
 
@@ -134,7 +136,9 @@ export function PublicContactForm({
       </Field>
       {sent ? (
         <div className={statusClassName} role="status">
-          Vista previa completada. El envío se habilitará al conectar el canal de contacto.
+          {prototypeResponse
+            ? "Vista previa completada. El envío se habilitará al conectar el canal de contacto."
+            : "Mensaje registrado. Nuestro equipo dará seguimiento a tu solicitud."}
         </div>
       ) : null}
       {submitError ? <p role="alert" className="text-sm text-red-700">{submitError}</p> : null}
