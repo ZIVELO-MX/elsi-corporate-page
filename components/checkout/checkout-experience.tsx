@@ -54,6 +54,10 @@ type StripeCheckoutError = {
 };
 
 type StripeCheckoutActions = {
+  updateEmail?: (email: string) => Promise<
+    | { type: "success" }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
   confirm: () => Promise<
     | { type: "success" }
     | { type: "error"; error?: StripeCheckoutError }
@@ -295,6 +299,7 @@ function ProviderPanel({
   scenario,
   formattedAmount,
   clientSecret,
+  buyerEmail,
   realPayments,
   scriptReady,
   onConfirmReady,
@@ -306,6 +311,7 @@ function ProviderPanel({
   scenario: PaymentScenario;
   formattedAmount: string;
   clientSecret: string | null;
+  buyerEmail: string;
   realPayments: boolean;
   scriptReady: boolean;
   onConfirmReady: (confirm: (() => Promise<{ error?: { message?: string } }>) | null) => void;
@@ -329,7 +335,7 @@ function ProviderPanel({
       </div>
 
       {realPayments && clientSecret ? (
-        <StripePaymentElement clientSecret={clientSecret} scriptReady={scriptReady} onConfirmReady={onConfirmReady} />
+        <StripePaymentElement clientSecret={clientSecret} buyerEmail={buyerEmail} scriptReady={scriptReady} onConfirmReady={onConfirmReady} />
       ) : (
         <div className={styles.providerPlaceholder}>
           <div className={styles.providerMethod}>
@@ -395,10 +401,12 @@ function ProviderPanel({
 
 function StripePaymentElement({
   clientSecret,
+  buyerEmail,
   scriptReady,
   onConfirmReady,
 }: {
   clientSecret: string;
+  buyerEmail: string;
   scriptReady: boolean;
   onConfirmReady: (confirm: (() => Promise<{ error?: { message?: string } }>) | null) => void;
 }) {
@@ -425,6 +433,10 @@ function StripePaymentElement({
         paymentElement = checkout.createPaymentElement();
         paymentElement.mount(elementRef.current);
         onConfirmReady(async () => {
+          if (actionsResult.actions.updateEmail) {
+            const emailResult = await actionsResult.actions.updateEmail(buyerEmail);
+            if (emailResult.type === "error") return { error: emailResult.error };
+          }
           const result = await actionsResult.actions.confirm();
           return result.type === "error" ? { error: result.error } : {};
         });
@@ -620,8 +632,12 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
 
     setState("processing");
     if (realPayments) {
-      const result = await stripeConfirmRef.current?.();
-      setState(!result ? "unavailable" : result.error ? "declined" : "pending");
+      try {
+        const result = await stripeConfirmRef.current?.();
+        setState(!result ? "unavailable" : result.error ? "declined" : "pending");
+      } catch {
+        setState("unavailable");
+      }
       return;
     }
     const result = await gateway.confirmPayment(session, scenario);
@@ -698,6 +714,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
                     scenario={scenario}
                     formattedAmount={formattedAmount}
                     clientSecret={session?.clientSecret ?? null}
+                    buyerEmail={session?.buyer.email ?? ""}
                     realPayments={realPayments}
                     scriptReady={stripeReady}
                     onConfirmReady={setStripeConfirm}
