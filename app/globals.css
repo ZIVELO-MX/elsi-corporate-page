@@ -1122,6 +1122,7 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .course-detail-price-note, .course-detail-availability, .course-detail-certificate, .course-detail-action-note { margin: 8px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.55; }
 .course-detail-availability { color: var(--text); font-weight: 800; }
 .course-enrollment-badge { display: inline-flex; align-items: center; margin-top: 10px; padding: 4px 9px; border: 1px solid #b9d4b3; border-radius: 999px; background: #edf3e8; color: var(--moss); font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.toaster [data-sonner-toast][data-styled='true'] [data-description] { color: #000; }
 .course-detail-certificate { color: var(--moss); font-weight: 700; }
 .course-detail-action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin-top: 18px; padding: 10px 16px; border: 1px solid var(--primary-hover); border-radius: 8px; background: var(--primary-hover); color: #fff; font-size: 13px; font-weight: 800; line-height: 1.2; transition: background var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out); }
 .course-detail-action.is-secondary { background: transparent; color: var(--primary-hover); }

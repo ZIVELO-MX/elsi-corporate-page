@@ -32,4 +32,6 @@ test("success toast uses a defined surface color", async () => {
   const toaster = await read("components/ui/sonner.tsx");
   assert.match(toaster, /"--normal-bg": "var\(--card\)"/);
   assert.match(toaster, /"--normal-text": "var\(--text\)"/);
+  const styles = await read("app/globals.css");
+  assert.match(styles, /\[data-description\]\s*\{ color: #000; \}/);
 });
