@@ -418,7 +418,11 @@ function StripePaymentElement({
     let paymentElement: StripePaymentElement | undefined;
     async function mount() {
       const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
-      if (!scriptReady) return;
+      if (!scriptReady) {
+        setError("Cargando el formulario seguro de Stripe…");
+        return;
+      }
+      setError(null);
       if (!publishableKey || !window.Stripe || !elementRef.current) {
         setError("Stripe no está configurado para este entorno.");
         return;
@@ -456,7 +460,7 @@ function StripePaymentElement({
   return (
     <div className={styles.providerPlaceholder}>
       <div ref={elementRef} aria-label="Formulario seguro de pago" />
-      {error ? <p role="alert">{error}</p> : <p>El formulario es alojado y cifrado por Stripe.</p>}
+      {error ? <p role={error.startsWith("Cargando") ? "status" : "alert"}>{error}</p> : <p>El formulario es alojado y cifrado por Stripe.</p>}
     </div>
   );
 }
@@ -652,7 +656,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
 
   return (
     <main className={styles.checkoutPage}>
-      {realPayments ? <Script src="https://js.stripe.com/clover/stripe.js" strategy="afterInteractive" onLoad={() => setStripeReady(true)} onError={() => setStripeReady(false)} /> : null}
+      {realPayments ? <Script src="https://js.stripe.com/clover/stripe.js" strategy="afterInteractive" onLoad={() => setStripeReady(true)} onReady={() => setStripeReady(true)} onError={() => setStripeReady(false)} /> : null}
       <section
         className={styles.checkoutShell}
         data-section-label="Pago / Checkout Stripe"
