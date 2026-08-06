@@ -1,5 +1,6 @@
 import { CheckoutExperience } from "@/components/checkout/checkout-experience";
-import { getCheckoutCourseBySlug } from "@/lib/payments";
+import { getCheckoutCourseBySlug, mapPublicCourseToCheckoutCourse } from "@/lib/payments";
+import { getPublicCourse } from "@/lib/courses-repository";
 import { buildPrivateMetadata } from "@/lib/seo";
 
 export const metadata = buildPrivateMetadata({
@@ -15,5 +16,10 @@ export default async function CheckoutPage({
 }) {
   const { curso } = await searchParams;
 
-  return <CheckoutExperience course={getCheckoutCourseBySlug(curso)} />;
+  const persisted = curso ? await getPublicCourse(curso) : null;
+  const course = persisted
+    ? mapPublicCourseToCheckoutCourse(persisted)
+    : getCheckoutCourseBySlug(curso);
+
+  return <CheckoutExperience course={course} />;
 }
