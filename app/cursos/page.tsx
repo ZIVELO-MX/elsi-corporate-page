@@ -30,6 +30,7 @@ import {
   normalizeCatalogQuery,
 } from "@/lib/agentic-navigation";
 import { listPublicCourses } from "@/lib/courses-repository";
+import { getCurrentUserEnrollmentCourseIds } from "@/lib/enrollments-repository";
 
 const catalogDescription =
   "Catálogo de cursos de ELSI: educación ambiental, normatividad y habilidades, en línea y presenciales.";
@@ -69,8 +70,15 @@ const TONE: Record<string, string> = {
   muted: "bg-[var(--muted)] text-[var(--text-muted)]",
 };
 
-function StateBadge({ course }: { course: Course }) {
+function StateBadge({ course, enrolled = false }: { course: Course; enrolled?: boolean }) {
   const meta = stateMeta(course);
+  if (enrolled) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-[#edf3e8] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] text-[var(--moss)]">
+        Ya inscrito
+      </span>
+    );
+  }
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[.06em] ${TONE[meta.tone]}`}
@@ -80,7 +88,7 @@ function StateBadge({ course }: { course: Course }) {
   );
 }
 
-function FeaturedCard({ course }: { course: Course }) {
+function FeaturedCard({ course, enrolled }: { course: Course; enrolled: boolean }) {
   return (
     <article className="course-feature-card grid w-full min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)] md:grid-cols-[1.05fr_1fr]">
       <div className="course-feature-media relative min-w-0 aspect-[16/10] md:aspect-auto">
@@ -95,7 +103,7 @@ function FeaturedCard({ course }: { course: Course }) {
           <span className="text-[10px] font-extrabold uppercase tracking-[.1em] text-[var(--primary-hover)]">
             Curso destacado
           </span>
-          <StateBadge course={course} />
+          <StateBadge course={course} enrolled={enrolled} />
         </div>
         <h2 className="font-heading text-[20px] font-bold leading-[1.15] text-[var(--text)]">
           {course.title}
@@ -154,7 +162,7 @@ function FeaturedCard({ course }: { course: Course }) {
   );
 }
 
-function CompactRow({ course }: { course: Course }) {
+function CompactRow({ course, enrolled }: { course: Course; enrolled: boolean }) {
   return (
     <Link
       href={`/cursos/${course.slug}`}
@@ -165,7 +173,7 @@ function CompactRow({ course }: { course: Course }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1">
-          <StateBadge course={course} />
+          <StateBadge course={course} enrolled={enrolled} />
         </div>
         <h3 className="truncate text-[14px] font-bold text-[var(--text)]">
           {course.title}
@@ -196,6 +204,7 @@ export default async function CursosPage({
   const query = normalizeCatalogQuery(first(params.q));
   const normalizedQuery = query.toLocaleLowerCase("es-MX");
   const persisted = await listPublicCourses();
+  const enrolledCourseIds = await getCurrentUserEnrollmentCourseIds();
   const allCourses = persisted === null ? getPublicCourses() : persisted;
   const visible = allCourses.filter(
     (course) =>
@@ -322,11 +331,11 @@ export default async function CursosPage({
             </div>
           ) : (
             <div className="flex flex-col gap-5">
-              {featured ? <FeaturedCard course={featured} /> : null}
+              {featured ? <FeaturedCard course={featured} enrolled={enrolledCourseIds.has(featured.id)} /> : null}
               {rest.length > 0 ? (
                 <div className="grid min-w-0 gap-2.5">
                   {rest.map((course) => (
-                    <CompactRow key={course.id} course={course} />
+                    <CompactRow key={course.id} course={course} enrolled={enrolledCourseIds.has(course.id)} />
                   ))}
                 </div>
               ) : null}
