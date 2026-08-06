@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -26,6 +27,15 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient<Datab
         }
       },
     },
+  });
+}
+
+/** Public read-only client for build-time and request-independent queries. */
+export function createSupabasePublicClient(): SupabaseClient<Database> | null {
+  const config = getSupabasePublicConfig();
+  if (!config) return null;
+  return createClient<Database>(config.url, config.anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
 }
 

@@ -32,3 +32,22 @@ test("public catalog and detail use fixtures only when Supabase is unavailable",
   assert.match(detail, /persisted === null \? getPublicCourseBySlug\(slug\) : persisted/);
   assert.match(detail, /persisted === null \? getPublicCourses\(\) : persisted/);
 });
+
+test("public course repository uses a request-independent client for build-time params", async () => {
+  const [repository, server] = await Promise.all([
+    read("lib/courses-repository.ts"),
+    read("lib/supabase/server.ts"),
+  ]);
+  assert.match(repository, /createSupabasePublicClient/);
+  assert.match(server, /createSupabasePublicClient/);
+  assert.doesNotMatch(repository, /createSupabaseServerClient/);
+});
+
+test("paid published courses enter Stripe checkout only when the public flag is enabled", async () => {
+  const detail = await read("app/cursos/[slug]/page.tsx");
+  assert.match(detail, /NEXT_PUBLIC_PAYMENTS_ENABLED/);
+  assert.match(detail, /state === "published"/);
+  assert.match(detail, /course\.price > 0/);
+  assert.match(detail, /\/checkout\?curso=\$\{encodeURIComponent\(course\.slug\)\}/);
+  assert.match(detail, /Inscribirme y pagar/);
+});

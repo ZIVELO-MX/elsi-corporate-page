@@ -24,6 +24,7 @@ import {
 } from "@/lib/seo";
 import { buildContactPath } from "@/lib/agentic-navigation";
 import { getPublicCourse, listPublicCourses } from "@/lib/courses-repository";
+import { currentUserHasEnrollment } from "@/lib/enrollments-repository";
 
 export async function generateStaticParams() {
   const persisted = await listPublicCourses();
@@ -82,7 +83,17 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
 
   const state = publishState(course);
   const availability = stateMeta(course).label;
+  const alreadyEnrolled = await currentUserHasEnrollment(course.id);
   const online = course.modality !== "presencial";
+  const checkoutAvailable = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1"
+    && state === "published"
+    && course.price > 0
+    && !alreadyEnrolled;
+  const actionHref = alreadyEnrolled
+    ? "/profile"
+    : checkoutAvailable
+    ? `/checkout?curso=${encodeURIComponent(course.slug)}`
+    : buildContactPath({ course: course.slug });
 
   return (
     <main>
@@ -128,12 +139,15 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             <p className="course-detail-price">{money(course.price)}</p>
             {course.priceLabel && course.price > 0 ? <p className="course-detail-price-note">{course.priceLabel}</p> : null}
             <p id="course-decision-title" className="course-detail-availability">Disponibilidad: {availability}</p>
+            {alreadyEnrolled ? <span className="course-enrollment-badge">Ya inscrito</span> : null}
             {course.certificateType ? <p className="course-detail-certificate">Incluye constancia {certType(course)}</p> : null}
-            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={buildContactPath({ course: course.slug })}>
-              {inquiryLabels[state]}
+            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
+              {alreadyEnrolled ? "Ver mi perfil" : checkoutAvailable ? "Inscribirme y pagar" : inquiryLabels[state]}
               <ArrowRight aria-hidden="true" size={16} />
             </Link>
-            <p className="course-detail-action-note">ELSI confirmará disponibilidad y los siguientes pasos por correo.</p>
+            <p className="course-detail-action-note">
+              {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : checkoutAvailable ? "Completa tus datos para continuar al pago seguro con Stripe." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
+            </p>
           </aside>
         </div>
       </section>
