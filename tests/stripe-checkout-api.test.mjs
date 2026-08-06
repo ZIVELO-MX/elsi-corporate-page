@@ -14,6 +14,9 @@ test("Stripe checkout is feature-flagged, authenticated and price-canonical", as
   assert.match(route, /ui_mode: "elements"/);
   assert.doesNotMatch(route, /ui_mode: "custom"/);
   assert.match(route, /stripe_checkout_session_id/);
+  assert.match(route, /from\("enrollments"\)/);
+  assert.match(route, /Ya estás inscrito en este curso/);
+  assert.match(route, /status: 409/);
   assert.match(route, /select\("id,slug,title,price_cents,currency,is_active,content_status"\)/);
   assert.match(route, /new URL\("\/profile"/);
   assert.match(route, /searchParams\.set\("checkout", "success"\)/);
