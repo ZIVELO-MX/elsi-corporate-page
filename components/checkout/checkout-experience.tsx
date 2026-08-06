@@ -51,7 +51,32 @@ type StripePaymentElement = {
 
 type StripeCheckoutError = {
   message?: string;
+  code?: string;
+  decline_code?: string;
+  type?: string;
 };
+
+function getStripeErrorCopy(error?: StripeCheckoutError) {
+  const code = error?.decline_code ?? error?.code;
+
+  switch (code) {
+    case "insufficient_funds":
+      return "Tu banco rechazó el pago por fondos insuficientes. Usa otra tarjeta o método de pago.";
+    case "expired_card":
+      return "La tarjeta está vencida. Revisa la fecha o usa otra tarjeta.";
+    case "incorrect_cvc":
+      return "El código de seguridad de la tarjeta no es correcto.";
+    case "authentication_required":
+    case "payment_intent_authentication_failure":
+      return "La autenticación 3D Secure no se completó. Inténtalo nuevamente o usa otra tarjeta.";
+    case "processing_error":
+      return "Stripe tuvo un problema al procesar el pago. Inténtalo nuevamente.";
+    case "card_declined":
+      return "El banco rechazó la tarjeta. Usa otra tarjeta o método de pago.";
+    default:
+      return "Stripe rechazó el pago. Revisa los datos o usa otro método de pago.";
+  }
+}
 
 type StripeCheckoutActions = {
   updateEmail?: (email: string) => Promise<
@@ -314,7 +339,7 @@ function ProviderPanel({
   buyerEmail: string;
   realPayments: boolean;
   scriptReady: boolean;
-  onConfirmReady: (confirm: (() => Promise<{ error?: { message?: string } }>) | null) => void;
+  onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
   onScenarioChange: (scenario: PaymentScenario) => void;
   onEdit: () => void;
   onPay: () => void;
@@ -408,7 +433,7 @@ function StripePaymentElement({
   clientSecret: string;
   buyerEmail: string;
   scriptReady: boolean;
-  onConfirmReady: (confirm: (() => Promise<{ error?: { message?: string } }>) | null) => void;
+  onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -468,11 +493,13 @@ function StripePaymentElement({
 function CheckoutResult({
   state,
   session,
+  errorMessage,
   headingRef,
   onRetry,
 }: {
   state: (typeof TERMINAL_STATES)[number];
   session: CheckoutSession | null;
+  errorMessage?: string | null;
   headingRef: RefObject<HTMLHeadingElement | null>;
   onRetry: () => void;
 }) {
@@ -498,6 +525,7 @@ function CheckoutResult({
         {copy.title}
       </h2>
       <p>{copy.description}</p>
+      {errorMessage ? <p className={styles.resultDetail}>{errorMessage}</p> : null}
 
       {session && (
         <div className={styles.orderReference}>
@@ -570,9 +598,10 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [scenario, setScenario] = useState<PaymentScenario>("succeeded");
   const [stripeReady, setStripeReady] = useState(false);
-  const stripeConfirmRef = useRef<(() => Promise<{ error?: { message?: string } }>) | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const stripeConfirmRef = useRef<(() => Promise<{ error?: StripeCheckoutError }>) | null>(null);
   const realPayments = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1";
-  const setStripeConfirm = useMemo(() => (confirm: (() => Promise<{ error?: { message?: string } }>) | null) => {
+  const setStripeConfirm = useMemo(() => (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => {
     stripeConfirmRef.current = confirm;
   }, []);
 
@@ -605,6 +634,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     }
 
     setState("creating-session");
+    setPaymentError(null);
     try {
       if (realPayments) {
         const response = await fetch("/api/payments/checkout", {
@@ -613,7 +643,9 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
           body: JSON.stringify({ courseId: course.id }),
         });
         const payload = await response.json().catch(() => null);
-        if (!response.ok || typeof payload?.clientSecret !== "string") throw new Error(payload?.error ?? "No fue posible preparar Stripe");
+        if (!response.ok || typeof payload?.clientSecret !== "string") {
+          throw new Error(payload?.error ?? "No fue posible preparar Stripe");
+        }
         setSession({ orderId: payload.orderId, checkoutRequestId: payload.orderId, course, buyer: normalizeBuyer(buyer), status: "pending", clientSecret: payload.clientSecret });
         setState("ready");
       } else {
@@ -623,7 +655,8 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
         await gateway.loadProvider(checkoutSession);
       }
       setState("ready");
-    } catch {
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : "No fue posible preparar el pago.");
       setState("unavailable");
     }
   }
@@ -635,11 +668,21 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     }
 
     setState("processing");
+    setPaymentError(null);
     if (realPayments) {
       try {
         const result = await stripeConfirmRef.current?.();
-        setState(!result ? "unavailable" : result.error ? "declined" : "pending");
+        if (!result) {
+          setPaymentError("No fue posible conectar con Stripe. Inténtalo nuevamente.");
+          setState("unavailable");
+        } else if (result.error) {
+          setPaymentError(getStripeErrorCopy(result.error));
+          setState("declined");
+        } else {
+          setState("pending");
+        }
       } catch {
+        setPaymentError("No fue posible confirmar el pago con Stripe. Inténtalo nuevamente.");
         setState("unavailable");
       }
       return;
@@ -650,6 +693,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
 
   function resetCheckout() {
     setErrors({});
+    setPaymentError(null);
     setSession(null);
     setState("collecting");
   }
@@ -734,6 +778,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
               <CheckoutResult
                 state={state}
                 session={session}
+                errorMessage={paymentError}
                 headingRef={resultHeadingRef}
                 onRetry={
                   state === "declined" ? () => setState("ready") : resetCheckout
