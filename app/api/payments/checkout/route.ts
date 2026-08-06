@@ -25,9 +25,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No fue posible crear la orden" }, { status: 500 });
   }
   try {
-    const returnUrl = new URL("/checkout", new URL(request.url).origin);
-    returnUrl.searchParams.set("curso", course.slug);
-    returnUrl.searchParams.set("session_id", "{CHECKOUT_SESSION_ID}");
+    const returnUrl = new URL("/profile", new URL(request.url).origin);
+    returnUrl.searchParams.set("checkout", "success");
+    returnUrl.searchParams.set("order_id", order.id);
     const session = await stripe.checkout.sessions.create({ mode: "payment", ui_mode: "elements", line_items: [{ price_data: { currency: course.currency.toLowerCase(), product_data: { name: course.title }, unit_amount: course.price_cents }, quantity: 1 }], return_url: returnUrl.toString(), metadata: { orderId: order.id, courseId: course.id, userId: auth.user.id }, expires_at: Math.floor(Date.now() / 1000) + 30 * 60 }, { idempotencyKey });
     const expiresAt = session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null;
     await client.from("orders").update({ stripe_checkout_session_id: session.id, expires_at: expiresAt }).eq("id", order.id);
