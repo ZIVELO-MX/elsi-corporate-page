@@ -140,7 +140,7 @@ const STATUS_COPY: Record<PaymentState, StatusCopy> = {
   ready: {
     eyebrow: "Paso 2 de 2",
     title: "Realiza tu pago",
-    description: "El Payment Element de Stripe aparecerá aquí cuando los pagos estén habilitados.",
+    description: "Revisa el importe y confirma tus datos para continuar.",
   },
   processing: {
     eyebrow: "Procesando",

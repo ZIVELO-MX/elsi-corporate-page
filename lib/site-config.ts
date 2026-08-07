@@ -20,6 +20,4 @@ export const siteConfig = {
   indexingReady,
   previewMode: !indexingReady,
   sectionLabels: enabled(process.env.NEXT_PUBLIC_SECTION_LABELS),
-  prototypeMessage:
-    "Prototipo de validación. La navegación está disponible; inscripciones y envíos permanecen desactivados.",
 } as const;

@@ -35,7 +35,7 @@ test("prototype state is centralized and can be disabled", () => {
 
   assert.match(config, /NEXT_PUBLIC_PROTOTYPE_MODE/);
   assert.match(config, /prototypeMode/);
-  assert.match(layout, /<PrototypeNotice \/>/);
+  assert.doesNotMatch(layout, /PrototypeNotice/);
   assert.doesNotMatch(footer, /Prototipo de validación/);
 });
 
