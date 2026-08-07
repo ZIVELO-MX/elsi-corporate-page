@@ -5,13 +5,14 @@ import test from "node:test";
 const read = (path) => readFile(path, "utf8");
 
 test("Supabase foundation keeps schema, RLS, and secrets separated", async () => {
-  const [migration, seed, browser, admin, env, packageJson] = await Promise.all([
+  const [migration, seed, browser, admin, env, packageJson, canonicalSeed] = await Promise.all([
     read("supabase/migrations/20260731000000_initial_schema.sql"),
     read("supabase/seed.sql"),
     read("lib/supabase/browser.ts"),
     read("lib/supabase/admin.ts"),
     read("lib/supabase/env.ts"),
     read("package.json").then(JSON.parse),
+    read("supabase/migrations/20260812000000_canonical_seed.sql"),
   ]);
 
   for (const table of [
@@ -38,8 +39,11 @@ test("Supabase foundation keeps schema, RLS, and secrets separated", async () =>
   assert.match(migration, /create policy contact_leads_admin_only/);
   assert.match(migration, /create table if not exists public\.orders/);
   assert.match(migration, /orders_select_owner_or_admin/);
-  assert.match(seed, /fixture/);
+  assert.doesNotMatch(seed, /insert into/i);
   assert.doesNotMatch(seed, /@|service_role/i);
+  assert.match(canonicalSeed, /'verified'/);
+  assert.match(canonicalSeed, /on conflict \(slug\) do nothing/);
+  assert.doesNotMatch(canonicalSeed, /insert into public\.testimonials/i);
 
   assert.doesNotMatch(browser, /SERVICE_ROLE/);
   assert.match(admin, /getSupabaseServiceRoleKey/);

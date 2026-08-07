@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-context";
 import { AuthShell } from "@/components/auth-shell";
+import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type LoginField = "email" | "password";
@@ -141,13 +142,15 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <button
-          className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--primary-hover)] bg-[var(--primary-hover)] px-4 text-[12px] font-extrabold text-white transition-[background-color,border-color,color,transform] duration-[var(--motion-fast)] pointer-fine:hover:border-[var(--accent)] pointer-fine:hover:bg-[var(--accent)] pointer-fine:hover:text-white active:scale-[.98] disabled:cursor-wait disabled:opacity-60"
+        <Button
+          className="mt-6 w-full"
           type="submit"
+          variant="default"
+          size="default"
           disabled={loading}
         >
           {loading ? "Iniciando sesión…" : "Entrar"}
-        </button>
+        </Button>
 
         <div className="my-5 flex items-center gap-3 text-[11px] text-[var(--text-muted)]" aria-hidden="true">
           <span className="h-px flex-1 bg-[var(--border)]" />

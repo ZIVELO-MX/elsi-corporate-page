@@ -14,8 +14,6 @@ const routes = [
   "/register",
   "/profile",
   "/admin",
-  "/cursos/wireframes",
-  "/profile/wireframes",
 ];
 const port = Number(process.env.SEO_AUDIT_PORT ?? 3147);
 const baseUrl = `http://127.0.0.1:${port}`;
@@ -136,8 +134,6 @@ for (const route of [
   "/register",
   "/profile",
   "/admin",
-  "/cursos/wireframes",
-  "/profile/wireframes",
 ]) {
   const result = byRoute[route];
   assert.match(result.robots, /noindex/, `${route} must be noindex`);

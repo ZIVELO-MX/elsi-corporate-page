@@ -22,7 +22,7 @@ type AboutContent = {
 const defineAboutContent = (content: AboutContent): AboutContent => content;
 
 export const aboutContent = defineAboutContent({
-  contentStatus: "fixture",
+  contentStatus: "verified",
   title: "De Bee Blue a ELSI.",
   introduction:
     "ELSI nace de un movimiento universitario que conectó educación ambiental, comunidad y acción.",

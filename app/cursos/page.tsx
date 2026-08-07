@@ -17,6 +17,7 @@ import {
 } from "@/lib/courses";
 import { CourseMedia } from "@/components/course-media";
 import { PrototypeDataNote } from "@/components/prototype-data-note";
+import { Button } from "@/components/ui/button";
 import { StructuredData } from "@/components/structured-data";
 import {
   buildCourseListJsonLd,
@@ -275,12 +276,9 @@ export default async function CursosPage({
                   className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--input)] bg-[var(--paper)] pl-10 pr-3 text-[14px] text-[var(--text)]"
                 />
               </label>
-              <button
-                type="submit"
-                className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-5 text-[13px] font-extrabold text-white active:scale-[.98]"
-              >
+              <Button type="submit" variant="default" size="default">
                 Buscar
-              </button>
+              </Button>
             </form>
             <nav
               className="flex flex-wrap gap-2"

@@ -1,4 +1,5 @@
 import { createSupabasePublicClient } from "@/lib/supabase/server";
+import { CATALOG_CATEGORIES } from "@/lib/agentic-navigation";
 import type { Course, CourseModality, PublishState } from "@/lib/courses";
 import type { Database } from "@/lib/supabase/types";
 
@@ -30,18 +31,29 @@ export function validateCourseInput(input: CourseInput) {
   return { ...input, slug, title: input.title.trim(), shortDescription: input.shortDescription.trim(), priceCents: input.priceCents ?? 0 };
 }
 
+function resolveCategory(label: unknown): { category: string; cat: string; catLabel: string } {
+  const text = typeof label === "string" && label.trim() ? label.trim() : "";
+  const entry = CATALOG_CATEGORIES.find(
+    (item) => item.key !== "todos" && (item.label === text || text.startsWith(item.label)),
+  );
+  return { category: text, cat: entry?.key ?? "", catLabel: entry?.label ?? text };
+}
+
 function mapCourse(row: CourseRow): Course {
   const syllabus = row.syllabus && typeof row.syllabus === "object" && !Array.isArray(row.syllabus) ? row.syllabus as Record<string, unknown> : {};
   const moduleList = Array.isArray(syllabus.moduleList) ? syllabus.moduleList.filter((item): item is string => typeof item === "string") : [];
   const publishState = (syllabus.publishState as PublishState | undefined) ?? (row.is_active ? "published" : "draft");
+  const category = resolveCategory(syllabus.category);
+  const certificateType = typeof syllabus.certificateType === "string" && syllabus.certificateType.trim() ? syllabus.certificateType.trim() : undefined;
   return {
-    id: row.id, slug: row.slug, title: row.title, category: "", cat: "", catLabel: "",
+    id: row.id, slug: row.slug, title: row.title, category: category.category, cat: category.cat, catLabel: category.catLabel,
     duration: row.duration_hours ? `${row.duration_hours} horas` : "",
     modules: moduleList.length, status: publishState, students: 0,
     price: row.price_cents / 100, description: row.description ?? row.short_description,
     moduleList, publishState, modality: row.modality === "in_person" ? "presencial" : "online",
     place: row.location ?? undefined, priceLabel: undefined, featured: false,
     targetAudience: row.audience ? [row.audience] : undefined,
+    certificateType,
     contentStatus: row.content_status, updatedAt: row.updated_at,
   };
 }
