@@ -32,10 +32,10 @@ type OrderResponse = {
   };
 };
 
-// Stripe webhooks can arrive after the redirect; keep the profile in sync for
-// up to two minutes before falling back to the manual refresh action.
-const PAYMENT_POLL_ATTEMPTS = 120;
-const PAYMENT_POLL_DELAY_MS = 1_000;
+// Stripe webhooks can arrive after the redirect. Use backoff to avoid a
+// request storm while keeping the profile responsive during the first seconds.
+const PAYMENT_POLL_ATTEMPTS = 8;
+const PAYMENT_POLL_MAX_DELAY_MS = 15_000;
 const ORDER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function clearPaymentReturnQuery() {
@@ -435,7 +435,8 @@ export default function ProfilePage() {
           canRetry: lastAttempt,
         });
         if (!lastAttempt) {
-          await new Promise((resolve) => window.setTimeout(resolve, PAYMENT_POLL_DELAY_MS));
+          const delay = Math.min(1_000 * (2 ** attempt), PAYMENT_POLL_MAX_DELAY_MS);
+          await new Promise((resolve) => window.setTimeout(resolve, delay));
         }
       }
     } catch (error) {
