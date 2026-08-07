@@ -62,3 +62,22 @@ test("course CRUD routes preserve validation, conflict handling, and revalidatio
   assert.match(item, /update\(\{ is_active: false \}\)/);
   assert.match(item, /revalidateCourseSurfaces\(previous\?\.slug\)/);
 });
+
+test("public course repository uses a request-independent client for build-time params", async () => {
+  const [repository, server] = await Promise.all([
+    read("lib/courses-repository.ts"),
+    read("lib/supabase/server.ts"),
+  ]);
+  assert.match(repository, /createSupabasePublicClient/);
+  assert.match(server, /createSupabasePublicClient/);
+  assert.doesNotMatch(repository, /createSupabaseServerClient/);
+});
+
+test("paid published courses enter Stripe checkout only when the public flag is enabled", async () => {
+  const detail = await read("app/cursos/[slug]/page.tsx");
+  assert.match(detail, /NEXT_PUBLIC_PAYMENTS_ENABLED/);
+  assert.match(detail, /state === "published"/);
+  assert.match(detail, /course\.price > 0/);
+  assert.match(detail, /\/checkout\?curso=\$\{encodeURIComponent\(course\.slug\)\}/);
+  assert.match(detail, /Inscribirme y pagar/);
+});

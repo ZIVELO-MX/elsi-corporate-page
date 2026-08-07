@@ -8,6 +8,8 @@ do $$ begin create type public.enrollment_source as enum ('internal', 'external'
 do $$ begin create type public.enrollment_status as enum ('in_progress', 'completed'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.lead_status as enum ('new', 'contacted', 'closed'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.outbox_status as enum ('pending', 'processing', 'processed', 'failed'); exception when duplicate_object then null; end $$;
+do $$ begin create type public.order_status as enum ('pending', 'paid', 'failed', 'canceled'); exception when duplicate_object then null; end $$;
+do $$ begin create type public.stripe_event_status as enum ('pending', 'processed', 'failed'); exception when duplicate_object then null; end $$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -141,12 +143,45 @@ create table if not exists public.outbox_events (
   unique (aggregate_type, aggregate_id, event_type)
 );
 
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete restrict,
+  course_id uuid not null references public.courses(id) on delete restrict,
+  course_title text not null,
+  amount_cents integer not null check (amount_cents >= 0),
+  currency text not null default 'MXN' check (currency = 'MXN'),
+  status public.order_status not null default 'pending',
+  idempotency_key text not null,
+  stripe_checkout_session_id text unique,
+  stripe_payment_intent_id text unique,
+  livemode boolean not null default false,
+  expires_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, idempotency_key)
+);
+
+create table if not exists public.stripe_events (
+  id uuid primary key default gen_random_uuid(),
+  event_id text not null unique,
+  event_type text not null,
+  status public.stripe_event_status not null default 'pending',
+  payload jsonb not null default '{}'::jsonb,
+  error_message text,
+  created_at timestamptz not null default now(),
+  processed_at timestamptz,
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists courses_public_idx on public.courses (is_active, content_status);
 create index if not exists enrollments_user_idx on public.enrollments (user_id, status);
 create index if not exists enrollments_course_idx on public.enrollments (course_id, status);
 create index if not exists solution_items_solution_idx on public.solution_items (solution_id, sort_order);
 create index if not exists leads_status_idx on public.contact_leads (status, created_at desc);
 create index if not exists outbox_pending_idx on public.outbox_events (status, available_at);
+create index if not exists orders_user_idx on public.orders (user_id, created_at desc);
+create index if not exists orders_status_idx on public.orders (status, created_at desc);
+create index if not exists stripe_events_status_idx on public.stripe_events (status, created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public as $$
@@ -154,7 +189,7 @@ begin new.updated_at = now(); return new; end;
 $$;
 
 do $$ declare table_name text; begin
-  foreach table_name in array array['profiles','courses','enrollments','certificates','page_sections','solutions','solution_items','testimonials','contact_leads','outbox_events'] loop
+  foreach table_name in array array['profiles','courses','enrollments','certificates','page_sections','solutions','solution_items','testimonials','contact_leads','outbox_events','orders','stripe_events'] loop
     execute format('drop trigger if exists set_updated_at on public.%I', table_name);
     execute format('create trigger set_updated_at before update on public.%I for each row execute function public.set_updated_at()', table_name);
   end loop;
@@ -188,6 +223,46 @@ alter table public.solution_items enable row level security;
 alter table public.testimonials enable row level security;
 alter table public.contact_leads enable row level security;
 alter table public.outbox_events enable row level security;
+alter table public.orders enable row level security;
+alter table public.stripe_events enable row level security;
+
+drop policy if exists orders_select_owner_or_admin on public.orders;
+create policy orders_select_owner_or_admin on public.orders for select using (user_id = auth.uid() or public.is_admin());
+drop policy if exists orders_insert_owner on public.orders;
+create policy orders_insert_owner on public.orders for insert with check (user_id = auth.uid());
+drop policy if exists orders_admin_write on public.orders;
+create policy orders_admin_write on public.orders for update using (public.is_admin()) with check (public.is_admin());
+
+-- Webhook workers use the service role; no client policy is intentional.
+
+create or replace function public.fulfill_stripe_order(p_order_id uuid, p_event_id text, p_payload jsonb)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare current_order public.orders;
+declare created_enrollment public.enrollments;
+begin
+  select * into current_order from public.orders where id = p_order_id for update;
+  if not found then raise exception 'order_not_found'; end if;
+  if current_order.status = 'paid' then
+    update public.stripe_events set status = 'processed', processed_at = now(), updated_at = now() where event_id = p_event_id;
+    return jsonb_build_object('status', 'already_paid', 'order_id', p_order_id);
+  end if;
+  update public.orders set status = 'paid', updated_at = now() where id = p_order_id;
+  insert into public.enrollments (user_id, course_id, source, status)
+    values (current_order.user_id, current_order.course_id, 'stripe', 'in_progress')
+    on conflict (user_id, course_id) do nothing;
+  select * into created_enrollment
+    from public.enrollments
+    where user_id = current_order.user_id and course_id = current_order.course_id;
+  insert into public.outbox_events (aggregate_type, aggregate_id, event_type, payload)
+    values ('enrollment', created_enrollment.id, 'enrollment.created', jsonb_build_object('enrollmentId', created_enrollment.id, 'orderId', p_order_id, 'eventId', p_event_id))
+    on conflict (aggregate_type, aggregate_id, event_type) do nothing;
+  update public.stripe_events set status = 'processed', processed_at = now(), updated_at = now() where event_id = p_event_id;
+  return jsonb_build_object('status', 'fulfilled', 'order_id', p_order_id);
+exception when others then
+  update public.stripe_events set status = 'failed', error_message = SQLERRM, updated_at = now() where event_id = p_event_id;
+  raise;
+end;
+$$;
 
 drop policy if exists profiles_select_self_or_admin on public.profiles;
 create policy profiles_select_self_or_admin on public.profiles for select using (id = auth.uid() or public.is_admin());

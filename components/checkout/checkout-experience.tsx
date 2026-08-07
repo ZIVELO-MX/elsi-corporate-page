@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
+import Script from "next/script";
 import {
   useEffect,
   useMemo,
@@ -42,6 +43,70 @@ type CheckoutExperienceProps = {
   course: CheckoutCourse | null;
 };
 
+type StripePaymentElement = {
+  mount: (element: HTMLElement) => void;
+  unmount?: () => void;
+  destroy?: () => void;
+};
+
+type StripeCheckoutError = {
+  message?: string;
+  code?: string;
+  decline_code?: string;
+  type?: string;
+};
+
+function getStripeErrorCopy(error?: StripeCheckoutError) {
+  const code = error?.decline_code ?? error?.code;
+
+  switch (code) {
+    case "insufficient_funds":
+      return "Tu banco rechazó el pago por fondos insuficientes. Usa otra tarjeta o método de pago.";
+    case "expired_card":
+      return "La tarjeta está vencida. Revisa la fecha o usa otra tarjeta.";
+    case "incorrect_cvc":
+      return "El código de seguridad de la tarjeta no es correcto.";
+    case "authentication_required":
+    case "payment_intent_authentication_failure":
+      return "La autenticación 3D Secure no se completó. Inténtalo nuevamente o usa otra tarjeta.";
+    case "processing_error":
+      return "Stripe tuvo un problema al procesar el pago. Inténtalo nuevamente.";
+    case "card_declined":
+      return "El banco rechazó la tarjeta. Usa otra tarjeta o método de pago.";
+    default:
+      return "Stripe rechazó el pago. Revisa los datos o usa otro método de pago.";
+  }
+}
+
+type StripeCheckoutActions = {
+  updateEmail?: (email: string) => Promise<
+    | { type: "success" }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
+  confirm: () => Promise<
+    | { type: "success" }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
+};
+
+type StripeCheckout = {
+  createPaymentElement: () => StripePaymentElement;
+  loadActions: () => Promise<
+    | { type: "success"; actions: StripeCheckoutActions }
+    | { type: "error"; error?: StripeCheckoutError }
+  >;
+};
+
+type StripeClient = {
+  initCheckout: (options: { clientSecret: string }) => StripeCheckout;
+};
+
+declare global {
+  interface Window {
+    Stripe?: (publishableKey: string) => StripeClient;
+  }
+}
+
 type StatusCopy = {
   eyebrow: string;
   title: string;
@@ -68,13 +133,13 @@ const STATUS_COPY: Record<PaymentState, StatusCopy> = {
   },
   "loading-provider": {
     eyebrow: "Paso 2 de 2",
-    title: "Conectando con Conekta",
-    description: "El proveedor está preparando el espacio protegido de pago.",
+    title: "Conectando con Stripe",
+    description: "Stripe está preparando el espacio protegido de pago.",
   },
   ready: {
     eyebrow: "Paso 2 de 2",
     title: "Realiza tu pago",
-    description: "Este prototipo representa el espacio que ocupará Conekta Checkout Component.",
+    description: "El Payment Element de Stripe aparecerá aquí cuando los pagos estén habilitados.",
   },
   processing: {
     eyebrow: "Procesando",
@@ -165,7 +230,7 @@ function OrderSummary({
 
       <div className={styles.securityNote}>
         <LockKeyhole aria-hidden="true" />
-        <p>Conekta procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
+        <p>Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
       </div>
     </aside>
   );
@@ -258,6 +323,11 @@ function ProviderPanel({
   state,
   scenario,
   formattedAmount,
+  clientSecret,
+  buyerEmail,
+  realPayments,
+  scriptReady,
+  onConfirmReady,
   onScenarioChange,
   onEdit,
   onPay,
@@ -265,6 +335,11 @@ function ProviderPanel({
   state: PaymentState;
   scenario: PaymentScenario;
   formattedAmount: string;
+  clientSecret: string | null;
+  buyerEmail: string;
+  realPayments: boolean;
+  scriptReady: boolean;
+  onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
   onScenarioChange: (scenario: PaymentScenario) => void;
   onEdit: () => void;
   onPay: () => void;
@@ -272,31 +347,35 @@ function ProviderPanel({
   const isProcessing = state === "processing";
 
   return (
-    <div className={styles.providerArea} aria-label="Área segura de pago de Conekta">
+    <div className={styles.providerArea} aria-label="Área segura de pago de Stripe">
       <div className={styles.providerHeader}>
         <div>
           <span className={styles.providerName}>
             <LockKeyhole aria-hidden="true" />
-            Conekta Checkout
+            Stripe Payment Element
           </span>
-          <small>Prototipo visual · no realiza cargos</small>
-        </div>
-        <span className={styles.demoBadge}>Demo</span>
-      </div>
-
-      <div className={styles.providerPlaceholder}>
-        <div className={styles.providerMethod}>
-          <CreditCard aria-hidden="true" />
-          <div>
-            <strong>Tarjeta y métodos compatibles</strong>
-            <span>El formulario cifrado se cargará desde Conekta.</span>
+            <small>{realPayments ? "Stripe procesa el pago de forma segura" : "Prototipo visual · no realiza cargos"}</small>
           </div>
-          <Check aria-hidden="true" />
-        </div>
-        <p>No ingreses datos reales en este prototipo.</p>
+        {!realPayments && <span className={styles.demoBadge}>Demo</span>}
       </div>
 
-      <details className={styles.demoControls}>
+      {realPayments && clientSecret ? (
+        <StripePaymentElement clientSecret={clientSecret} buyerEmail={buyerEmail} scriptReady={scriptReady} onConfirmReady={onConfirmReady} />
+      ) : (
+        <div className={styles.providerPlaceholder}>
+          <div className={styles.providerMethod}>
+            <CreditCard aria-hidden="true" />
+            <div>
+              <strong>Tarjeta y métodos compatibles</strong>
+              <span>El formulario cifrado se cargará desde Stripe.</span>
+            </div>
+            <Check aria-hidden="true" />
+          </div>
+          <p>No ingreses datos reales en este prototipo.</p>
+        </div>
+      )}
+
+      {!realPayments && <details className={styles.demoControls}>
         <summary>
           Configurar resultado del prototipo
           <ChevronDown aria-hidden="true" />
@@ -316,7 +395,7 @@ function ProviderPanel({
             <option value="unavailable">Proveedor no disponible</option>
           </select>
         </div>
-      </details>
+      </details>}
 
       <div className={styles.providerActions}>
         <button
@@ -345,14 +424,82 @@ function ProviderPanel({
   );
 }
 
+function StripePaymentElement({
+  clientSecret,
+  buyerEmail,
+  scriptReady,
+  onConfirmReady,
+}: {
+  clientSecret: string;
+  buyerEmail: string;
+  scriptReady: boolean;
+  onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
+}) {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    let paymentElement: StripePaymentElement | undefined;
+    async function mount() {
+      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+      if (!scriptReady) {
+        setError("Cargando el formulario seguro de Stripe…");
+        return;
+      }
+      setError(null);
+      if (!publishableKey || !window.Stripe || !elementRef.current) {
+        setError("Stripe no está configurado para este entorno.");
+        return;
+      }
+      try {
+        const checkout = window.Stripe(publishableKey).initCheckout({ clientSecret });
+        const actionsResult = await checkout.loadActions();
+        if (actionsResult.type !== "success") {
+          throw new Error(actionsResult.error?.message ?? "Stripe no pudo preparar la confirmación.");
+        }
+        if (disposed || !elementRef.current) return;
+        paymentElement = checkout.createPaymentElement();
+        paymentElement.mount(elementRef.current);
+        onConfirmReady(async () => {
+          if (actionsResult.actions.updateEmail) {
+            const emailResult = await actionsResult.actions.updateEmail(buyerEmail);
+            if (emailResult.type === "error") return { error: emailResult.error };
+          }
+          const result = await actionsResult.actions.confirm();
+          return result.type === "error" ? { error: result.error } : {};
+        });
+      } catch {
+        setError("No fue posible cargar el formulario seguro de Stripe.");
+      }
+    }
+    mount();
+    return () => {
+      disposed = true;
+      onConfirmReady(null);
+      paymentElement?.unmount?.();
+      paymentElement?.destroy?.();
+    };
+  }, [clientSecret, onConfirmReady, scriptReady]);
+
+  return (
+    <div className={styles.providerPlaceholder}>
+      <div ref={elementRef} aria-label="Formulario seguro de pago" />
+      {error ? <p role={error.startsWith("Cargando") ? "status" : "alert"}>{error}</p> : <p>El formulario es alojado y cifrado por Stripe.</p>}
+    </div>
+  );
+}
+
 function CheckoutResult({
   state,
   session,
+  errorMessage,
   headingRef,
   onRetry,
 }: {
   state: (typeof TERMINAL_STATES)[number];
   session: CheckoutSession | null;
+  errorMessage?: string | null;
   headingRef: RefObject<HTMLHeadingElement | null>;
   onRetry: () => void;
 }) {
@@ -378,10 +525,11 @@ function CheckoutResult({
         {copy.title}
       </h2>
       <p>{copy.description}</p>
+      {errorMessage ? <p className={styles.resultDetail}>{errorMessage}</p> : null}
 
       {session && (
         <div className={styles.orderReference}>
-          <span>Referencia del prototipo</span>
+          <span>Referencia de pago</span>
           <code>{session.orderId}</code>
         </div>
       )}
@@ -449,6 +597,13 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
   const [errors, setErrors] = useState<BuyerErrors>({});
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [scenario, setScenario] = useState<PaymentScenario>("succeeded");
+  const [stripeReady, setStripeReady] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const stripeConfirmRef = useRef<(() => Promise<{ error?: StripeCheckoutError }>) | null>(null);
+  const realPayments = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1";
+  const setStripeConfirm = useMemo(() => (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => {
+    stripeConfirmRef.current = confirm;
+  }, []);
 
   useEffect(() => {
     if (TERMINAL_STATES.includes(state)) {
@@ -479,16 +634,29 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     }
 
     setState("creating-session");
+    setPaymentError(null);
     try {
-      const checkoutSession = await gateway.createSession({
-        courseId: course.id,
-        buyer: normalizeBuyer(buyer),
-      });
-      setSession(checkoutSession);
-      setState("loading-provider");
-      await gateway.loadProvider(checkoutSession);
+      if (realPayments) {
+        const response = await fetch("/api/payments/checkout", {
+          method: "POST",
+          headers: { "content-type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+          body: JSON.stringify({ courseId: course.id }),
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || typeof payload?.clientSecret !== "string") {
+          throw new Error(payload?.error ?? "No fue posible preparar Stripe");
+        }
+        setSession({ orderId: payload.orderId, checkoutRequestId: payload.orderId, course, buyer: normalizeBuyer(buyer), status: "pending", clientSecret: payload.clientSecret });
+        setState("ready");
+      } else {
+        const checkoutSession = await gateway.createSession({ courseId: course.id, buyer: normalizeBuyer(buyer) });
+        setSession(checkoutSession);
+        setState("loading-provider");
+        await gateway.loadProvider(checkoutSession);
+      }
       setState("ready");
-    } catch {
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : "No fue posible preparar el pago.");
       setState("unavailable");
     }
   }
@@ -500,21 +668,42 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     }
 
     setState("processing");
+    setPaymentError(null);
+    if (realPayments) {
+      try {
+        const result = await stripeConfirmRef.current?.();
+        if (!result) {
+          setPaymentError("No fue posible conectar con Stripe. Inténtalo nuevamente.");
+          setState("unavailable");
+        } else if (result.error) {
+          setPaymentError(getStripeErrorCopy(result.error));
+          setState("declined");
+        } else {
+          setState("pending");
+        }
+      } catch {
+        setPaymentError("No fue posible confirmar el pago con Stripe. Inténtalo nuevamente.");
+        setState("unavailable");
+      }
+      return;
+    }
     const result = await gateway.confirmPayment(session, scenario);
     setState(result.state);
   }
 
   function resetCheckout() {
     setErrors({});
+    setPaymentError(null);
     setSession(null);
     setState("collecting");
   }
 
   return (
     <main className={styles.checkoutPage}>
+      {realPayments ? <Script src="https://js.stripe.com/clover/stripe.js" strategy="afterInteractive" onLoad={() => setStripeReady(true)} onReady={() => setStripeReady(true)} onError={() => setStripeReady(false)} /> : null}
       <section
         className={styles.checkoutShell}
-        data-section-label="Pago / Checkout Conekta"
+        data-section-label="Pago / Checkout Stripe"
         aria-labelledby="checkout-title"
       >
         <Link
@@ -572,6 +761,11 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
                     state={state}
                     scenario={scenario}
                     formattedAmount={formattedAmount}
+                    clientSecret={session?.clientSecret ?? null}
+                    buyerEmail={session?.buyer.email ?? ""}
+                    realPayments={realPayments}
+                    scriptReady={stripeReady}
+                    onConfirmReady={setStripeConfirm}
                     onScenarioChange={setScenario}
                     onEdit={resetCheckout}
                     onPay={() => void handlePayment()}
@@ -584,6 +778,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
               <CheckoutResult
                 state={state}
                 session={session}
+                errorMessage={paymentError}
                 headingRef={resultHeadingRef}
                 onRetry={
                   state === "declined" ? () => setState("ready") : resetCheckout

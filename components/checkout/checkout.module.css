@@ -308,6 +308,16 @@
   line-height: 1.65;
 }
 
+.resultPanel .resultDetail {
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--destructive) 22%, transparent);
+  border-radius: var(--radius-sm);
+  background: #fff7f7;
+  color: var(--text);
+  font-weight: 700;
+}
+
 .buyerForm {
   display: grid;
   gap: 1rem;

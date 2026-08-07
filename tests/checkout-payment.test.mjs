@@ -86,6 +86,10 @@ test("checkout UI keeps sensitive fields outside ELSI and announces states", () 
   assert.match(checkout, /Aún no seleccionas un curso/);
   assert.match(checkout, /fixtures de integración/);
   assert.match(checkout, /No ingreses datos reales/);
+  assert.match(checkout, /decline_code/);
+  assert.match(checkout, /insufficient_funds/);
+  assert.match(checkout, /authentication_required/);
+  assert.match(checkout, /resultDetail/);
   assert.doesNotMatch(checkout, /name="(?:card|pan|cvc|expiry)"/i);
   assert.doesNotMatch(checkout, /ApplePay|apple-pay-button|/);
   assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\)/);
