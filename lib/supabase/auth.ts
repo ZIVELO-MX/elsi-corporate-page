@@ -5,6 +5,7 @@ export type AuthUser = {
   id: string;
   email: string;
   name: string;
+  phone?: string;
   role: "user" | "admin";
   avatarUrl?: string;
 };
@@ -15,7 +16,7 @@ export async function resolveAuthUser(
 ): Promise<AuthUser> {
   const { data: profile } = await client
     .from("profiles")
-    .select("full_name, role, avatar_url")
+    .select("full_name, phone, role, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -27,6 +28,7 @@ export async function resolveAuthUser(
     id: user.id,
     email: user.email ?? "",
     name: profile?.full_name || metadataName || user.email?.split("@")[0] || "Usuario",
+    phone: profile?.phone || (typeof user.user_metadata?.phone === "string" ? user.user_metadata.phone : undefined),
     role: profile?.role === "admin" ? "admin" : "user",
     avatarUrl: profile?.avatar_url ?? undefined,
   };

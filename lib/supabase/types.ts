@@ -54,9 +54,9 @@ export type Database = {
         Relationships: [];
       };
       profiles: {
-        Row: { id: string; full_name: string | null; role: Database["public"]["Enums"]["app_role"]; avatar_url: string | null; created_at: string; updated_at: string };
-        Insert: { id: string; full_name?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
-        Update: { id?: string; full_name?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
+        Row: { id: string; full_name: string | null; phone: string | null; role: Database["public"]["Enums"]["app_role"]; avatar_url: string | null; created_at: string; updated_at: string };
+        Insert: { id: string; full_name?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; full_name?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       solution_items: {
