@@ -94,7 +94,7 @@ export default function AdminUsers() {
       .then(payload => {
         if (!cancelled && payload?.users) setPersistedUsers(payload.users as AdminUser[]);
       })
-      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
 

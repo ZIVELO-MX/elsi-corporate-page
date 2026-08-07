@@ -60,7 +60,7 @@ export default function AdminContacto() {
       .then(payload => {
         if (!cancelled && payload?.leads) setPersistedLeads((payload.leads as PersistedLead[]).map(leadFromRow));
       })
-      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
 

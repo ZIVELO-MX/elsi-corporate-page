@@ -206,7 +206,7 @@ export default function AdminEnrollments() {
           setPersistedEnrollments((enrollmentsPayload.enrollments ?? []).map(row => enrollmentFromRow(row, nextUsers, nextCourses)));
         }
       })
-      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
 

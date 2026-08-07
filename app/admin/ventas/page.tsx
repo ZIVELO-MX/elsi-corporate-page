@@ -1,35 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
-import { Button } from "@/components/ui/button";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useToast } from "@/components/ui/toast";
 
 export default function AdminSales() {
-  const { loading, courses, users, sales, addSale } = useAdminData();
-  const { toast } = useToast();
-  const [selectedUser, setSelectedUser] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [amount, setAmount] = useState(0);
-  const selectableUsers = useMemo(() => users.filter((user) => user.role === "user"), [users]);
-  const activeCourses = useMemo(() => courses.filter((course) => course.status === "active"), [courses]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedUser || !selectedCourse) {
-      toast({ title: "Selecciona un alumno y un curso.", variant: "error" });
-      return;
-    }
-    addSale(selectedUser, selectedCourse, amount);
-    toast({ title: "Venta registrada.", variant: "success" });
-    setSelectedUser("");
-    setSelectedCourse("");
-    setAmount(0);
-  };
+  const { loading, sales } = useAdminData();
 
   const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
 
@@ -42,34 +20,9 @@ export default function AdminSales() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="admin-form-bar">
-        <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label htmlFor="sale-usuario" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Usuario</label>
-          <select id="sale-usuario" value={selectedUser} onChange={e => setSelectedUser(e.target.value)} required
-            className="admin-select" style={{ width: "100%" }}>
-            <option value="">Seleccionar usuario</option>
-            {selectableUsers.map(u => (
-              <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-            ))}
-          </select>
-        </div>
-        <div style={{ flex: 1, minWidth: "10rem" }}>
-          <label htmlFor="sale-curso" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Curso</label>
-          <select id="sale-curso" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required
-            className="admin-select" style={{ width: "100%" }}>
-            <option value="">Seleccionar curso</option>
-            {activeCourses.map(c => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
-        </div>
-        <div style={{ minWidth: "8rem" }}>
-          <label htmlFor="sale-monto" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.375rem" }}>Monto</label>
-          <input id="sale-monto" type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)}
-            style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", background: "var(--paper)" }} />
-        </div>
-        <Button type="submit" variant="primary">Registrar venta</Button>
-      </form>
+      <p style={{ margin: "0 0 1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-muted)", fontSize: "0.8125rem" }}>
+        Las ventas se generan automáticamente cuando Stripe confirma un pago. No se crean registros manuales desde este panel.
+      </p>
 
       {loading ? (
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
