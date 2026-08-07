@@ -751,7 +751,7 @@ function CheckoutFlow({ course, cardPaymentsEnabled }: { course: CheckoutCourse;
 
   const emailAddress = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
   const emailSubject = `Solicitud de inscripción · ${course.title}`;
-  const emailBody = session ? `Hola ELSI,\n\nQuiero solicitar mi inscripción al curso: ${course.title}\nCurso: ${course.id}\nNombre: ${session.buyer.name}\nCorreo: ${session.buyer.email}\nTeléfono: ${session.buyer.phone}\nImporte de referencia: ${formattedAmount}\n\nQuedo atento(a) a los siguientes pasos.` : "";
+  const emailBody = session ? `Hola ELSI,\n\nQuiero solicitar mi inscripción al curso: ${course.title}\nCurso: ${course.id}\nNombre: ${session.buyer.name}\nCorreo: ${session.buyer.email}\nTeléfono: ${session.buyer.phone}\n\nQuedo atento(a) a los siguientes pasos.` : "";
   const emailHref = session
     ? `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
     : "#";
