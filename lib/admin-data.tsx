@@ -61,6 +61,10 @@ export type Sale = {
   soldAt: string;
 };
 
+export type PendingPayment = Sale & {
+  status: "pending";
+};
+
 export type PageSection = {
   id: string;
   label: string;
@@ -99,6 +103,7 @@ type AdminData = {
   users: AdminUser[];
   enrollments: Enrollment[];
   sales: Sale[];
+  pendingPayments: PendingPayment[];
   sections: PageSection[];
   leads: Lead[];
   testimonials: Testimonial[];
@@ -118,6 +123,7 @@ type AdminData = {
   deleteTestimonial: (id: string) => void;
   getUserName: (id: string) => string;
   getCourseName: (id: string) => string;
+  approvePendingPayment: (id: string) => Promise<void>;
 };
 
 const AdminDataContext = createContext<AdminData | null>(null);
@@ -127,6 +133,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
   const [sections, setSections] = useState<PageSection[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -200,6 +207,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
           return { id: String(section.id), key: String(section.section_key), label: String(section.title), content: typeof body.text === "string" ? body.text : "", active: Boolean(section.is_active) } satisfies PageSection;
         }) : [];
         const persistedSales = Array.isArray(salesPayload.sales) ? salesPayload.sales as Sale[] : [];
+        const persistedPendingPayments = Array.isArray(salesPayload.pendingPayments) ? salesPayload.pendingPayments as PendingPayment[] : [];
 
         setUsers(persistedUsers);
         setCourses(persistedCourses);
@@ -207,6 +215,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         setLeads(persistedLeads);
         setSections(persistedSections);
         setSales(persistedSales);
+        setPendingPayments(persistedPendingPayments);
         setError(null);
       } catch (loadError) {
         if (!cancelled) setError(loadError instanceof Error ? loadError.message : "No fue posible cargar los datos del panel.");
@@ -238,6 +247,44 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     const courseName = courses.find(c => c.id === courseId)?.title ?? "Desconocido";
     setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0], source, status: "en-curso" }]);
   }, [courses, users]);
+
+  const approvePendingPayment = useCallback(async (id: string) => {
+    const response = await fetch("/api/admin/orders", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ orderId: id }),
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(typeof payload.error === "string" ? payload.error : "No fue posible aprobar la inscripción.");
+    }
+    const result = await response.json().catch(() => ({})) as { result?: { enrollment_id?: string } };
+    const approved = pendingPayments.find((payment) => payment.id === id);
+    setPendingPayments((previous) => previous.filter((payment) => payment.id !== id));
+    if (approved) {
+      setEnrollments((previous) => previous.some((enrollment) => enrollment.userId === approved.userId && enrollment.courseId === approved.courseId)
+        ? previous
+        : [{
+          id: String(result.result?.enrollment_id ?? `pending-${approved.id}`),
+          userId: approved.userId,
+          userName: approved.userName,
+          courseId: approved.courseId,
+          courseName: approved.courseName,
+          enrolledAt: new Date().toISOString().slice(0, 10),
+          source: "interna",
+          status: "en-curso",
+        }, ...previous]);
+      setSales((previous) => [{
+        id: approved.id,
+        userId: approved.userId,
+        userName: approved.userName,
+        courseId: approved.courseId,
+        courseName: approved.courseName,
+        amount: approved.amount,
+        soldAt: approved.soldAt,
+      }, ...previous]);
+    }
+  }, [pendingPayments]);
 
   // "constancia" = admin cargo una constancia -> finalizacion automatica, pendiente de publicacion.
   // "manual" = boton de respaldo para casos excepcionales, sin constancia asociada.
@@ -298,8 +345,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, [courses]);
 
   const value = useMemo(
-    () => ({ loading, error, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName }),
-    [loading, error, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName],
+    () => ({ loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment }),
+    [loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment],
   );
 
   return (

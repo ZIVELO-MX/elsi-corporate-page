@@ -15,14 +15,16 @@ test("admin provider loads persisted collections instead of shipping fixtures", 
   assert.doesNotMatch(provider, /INITIAL_(COURSES|USERS|ENROLLMENTS|SALES|SECTIONS|LEADS|TESTIMONIALS)/);
 });
 
-test("admin sales are read-only projections of paid orders", async () => {
+test("admin sales and pending payments are projections of persisted orders", async () => {
   const [route, screen] = await Promise.all([
     read("app/api/admin/orders/route.ts"),
     read("app/admin/ventas/page.tsx"),
   ]);
   assert.match(route, /role.*admin/);
-  assert.match(route, /eq\("status", "paid"\)/);
+  assert.match(route, /in\("status", \["paid", "pending"\]\)/);
   assert.match(route, /amount_cents/);
   assert.match(screen, /Stripe confirma un pago/);
+  assert.match(screen, /Pagos pendientes/);
+  assert.match(screen, /Aprobar inscripción/);
   assert.doesNotMatch(screen, /addSale|Registrar venta/);
 });
