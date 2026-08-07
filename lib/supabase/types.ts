@@ -102,6 +102,10 @@ export type Database = {
         Args: { p_order_id: string; p_event_id: string; p_payload: Json };
         Returns: Json;
       };
+      approve_pending_order: {
+        Args: { p_order_id: string; p_admin_id: string };
+        Returns: Json;
+      };
     };
     Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed"; order_status: "pending" | "paid" | "failed" | "canceled"; stripe_event_status: "pending" | "processed" | "failed" };
     CompositeTypes: Record<string, never>;
