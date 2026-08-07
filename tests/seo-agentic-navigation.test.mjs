@@ -88,8 +88,6 @@ test("private routes own explicit noindex metadata", () => {
     "app/profile/layout.tsx",
     "app/login/layout.tsx",
     "app/register/layout.tsx",
-    "app/cursos/wireframes/layout.tsx",
-    "app/profile/wireframes/layout.tsx",
     "app/checkout/page.tsx",
   ]) {
     assert.match(read(path), /buildPrivateMetadata/);

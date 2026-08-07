@@ -20,7 +20,7 @@ test("solution details preserve semantic, provisional, and contextual content", 
   const page = read("app/soluciones/[slug]/page.tsx");
 
   assert.match(page, /<Breadcrumbs/);
-  assert.match(page, /<PrototypeDataNote>/);
+  assert.doesNotMatch(page, /<PrototypeDataNote>/);
   assert.match(page, /<dl className="solution-detail-facts">/);
   assert.match(page, /<ol>/);
   assert.match(page, /solution\.audience/);

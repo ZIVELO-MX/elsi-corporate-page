@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAuth, type User } from "@/components/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import type { ProfilePayload, ProfileUpcoming, ProfileCertificate, ProfilePendingPayment } from "@/app/api/profile/route";
 import styles from "./profile.module.css";
 
@@ -524,12 +525,9 @@ export default function ProfilePage() {
       <main className="mx-auto max-w-md px-4 py-24 text-center">
         <h1 className="font-heading text-xl font-bold text-[var(--text)]">Inicia sesión para ver tu perfil</h1>
         <p className="mt-2 text-[13px] leading-6 text-[var(--text-muted)]">Tu perfil, cursos y constancias aparecen después de identificarte.</p>
-        <Link
-          href="/login"
-          className="mt-5 inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-4 text-[12px] font-extrabold text-white transition-colors pointer-fine:hover:bg-[color-mix(in_oklab,var(--primary-hover),#000_14%)] pointer-fine:hover:text-white"
-        >
-          Ir a iniciar sesión
-        </Link>
+        <Button asChild variant="default" size="default" className="mt-5">
+          <Link href="/login">Ir a iniciar sesión</Link>
+        </Button>
       </main>
     );
   }
@@ -655,7 +653,9 @@ export default function ProfilePage() {
             <Mail className="text-[var(--primary)]" size={22} aria-hidden="true" />
             <h2 id="help-title" className="mt-3 font-heading text-[15px] font-bold text-[var(--text)]">¿Necesitas ayuda?</h2>
             <p className="mt-2 text-[12px] leading-5 text-[var(--text-muted)]">Para dudas sobre inscripciones, acceso o constancias, escribe al canal de soporte.</p>
-            <a href={`mailto:${SUPPORT_EMAIL}`} className={`${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white`}>Enviar correo</a>
+            <Button asChild variant="default" size="default" className="mt-3">
+              <a href={`mailto:${SUPPORT_EMAIL}`}>Enviar correo</a>
+            </Button>
           </section>
         </aside>
       </div>

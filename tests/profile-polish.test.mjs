@@ -8,7 +8,6 @@ const read = (path) => readFileSync(resolve(process.cwd(), path), "utf8");
 test("student portal exposes useful loading, empty, error and download states", () => {
   const page = read("app/profile/page.tsx");
   const profileApi = read("app/api/profile/route.ts");
-  const wireframes = read("app/profile/wireframes/page.tsx");
 
   assert.match(page, /function ProfileSkeleton/);
   assert.match(page, /role="status"/);
@@ -19,7 +18,6 @@ test("student portal exposes useful loading, empty, error and download states", 
   assert.match(page, /pointer-fine:hover/);
   assert.doesNotMatch(profileApi, /09:00[–—]13:00/);
   assert.doesNotMatch(profileApi, /17:00[–—]19:00/);
-  assert.doesNotMatch(wireframes, /09:00[–—]13:00/);
 });
 
 test("student portal motion is specific, subtle and reduced-motion safe", () => {

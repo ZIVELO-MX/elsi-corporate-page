@@ -33,8 +33,8 @@ export const SOCIAL_IMAGE = {
 } as const;
 
 // Public routes served to visitors. Internal routes (admin, profile, auth,
-// checkout, wireframes) are deliberately absent — they must never reach the
-// sitemap or the index.
+// checkout) are deliberately absent — they must never reach the sitemap or
+// the index.
 export const PUBLIC_ROUTES = [
   "/",
   "/cursos",
@@ -51,8 +51,6 @@ export const INTERNAL_ROUTES = [
   "/login",
   "/register",
   "/checkout",
-  "/cursos/wireframes",
-  "/profile/wireframes",
 ] as const;
 
 // Per-page metadata for public pages. Robots are inherited from the root layout

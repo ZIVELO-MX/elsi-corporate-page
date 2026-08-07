@@ -17,7 +17,7 @@ test("Nosotros uses typed provisional content with a production-safe fallback", 
   );
   assert.match(page, /getPublicAboutContent\(\)/);
   assert.match(page, /La información institucional está en preparación/);
-  assert.match(page, /<PrototypeDataNote>/);
+  assert.doesNotMatch(page, /<PrototypeDataNote>/);
   assert.match(page, /allowIndexing: indexable && isAboutContentVerified\(\)/);
 });
 

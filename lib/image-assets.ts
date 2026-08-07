@@ -15,6 +15,14 @@ export type PendingImageAsset = {
 export type ImageAsset = AvailableImageAsset | PendingImageAsset;
 
 export const courseImages: Record<string, AvailableImageAsset> = {
+  "manejo-integral-de-residuos": {
+    status: "available",
+    source: "fixture",
+    src: "/images/course-7.webp",
+    alt: "Taller de manejo de residuos: clasificacion, economia circular y plan de manejo",
+    width: 900,
+    height: 600,
+  },
   "fundamentos-de-educacion-ambiental": {
     status: "available",
     source: "fixture",

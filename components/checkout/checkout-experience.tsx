@@ -156,7 +156,7 @@ const STATUS_COPY: Record<PaymentState, StatusCopy> = {
   succeeded: {
     eyebrow: "Pago confirmado",
     title: "Tu lugar está reservado",
-    description: "En producción, recibirás por correo la confirmación y los siguientes pasos.",
+    description: "Recibirás por correo la confirmación y los siguientes pasos.",
   },
   declined: {
     eyebrow: "Pago no autorizado",

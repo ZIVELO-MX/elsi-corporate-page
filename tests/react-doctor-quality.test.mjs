@@ -95,14 +95,12 @@ test("admin metadata remains at least twelve pixels", () => {
   assert.doesNotMatch(adminSources, /0\.6875rem/);
 });
 
-test("wireframes use Next links and module-scoped status styles", () => {
-  const wireframes = read("app/profile/wireframes/page.tsx");
+test("wireframe routes are removed from robots and the repo", () => {
+  const seo = read("lib/seo.ts");
+  const glob = read("next.config.ts");
 
-  assert.match(wireframes, /const STATUS_COLORS/);
-  assert.doesNotMatch(wireframes, /const colors =/);
-  assert.doesNotMatch(wireframes, /<a href="\/(profile|register)"/);
-  assert.match(wireframes, /<Link href="\/profile"/);
-  assert.match(wireframes, /<Link href="\/register"/);
+  assert.doesNotMatch(seo, /wireframes/);
+  assert.doesNotMatch(glob, /wireframes/);
 });
 
 test("PostCSS exports a named configuration", () => {

@@ -24,9 +24,13 @@ test("course media distinguishes available fixtures from client-pending imagery"
       "manejo-integral-de-residuos",
       "Manejo Integral de Residuos",
     ),
+    courseImages["manejo-integral-de-residuos"],
+  );
+  assert.deepEqual(
+    getCourseImage("curso-sin-imagen", "Curso sin imagen"),
     {
       status: "pending",
-      alt: "Imagen pendiente para el curso Manejo Integral de Residuos",
+      alt: "Imagen pendiente para el curso Curso sin imagen",
     },
   );
 });

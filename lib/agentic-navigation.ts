@@ -5,7 +5,32 @@ export const CATALOG_CATEGORIES = [
   { key: "hab", label: "Habilidades" },
 ] as const;
 
-export type CatalogCategory = (typeof CATALOG_CATEGORIES)[number]["key"];
+export type CatalogCategoryOption = { key: string; label: string };
+
+export function buildCatalogCategories(
+  courses: { cat?: string; category?: string; catLabel?: string }[],
+): CatalogCategoryOption[] {
+  const byKey = new Map<string, { label: string; sort: number }>();
+  let nextSort = CATALOG_CATEGORIES.length;
+  for (const course of courses) {
+    const key = course.cat || course.category || course.catLabel;
+    if (!key || byKey.has(key)) continue;
+    const canonical = CATALOG_CATEGORIES.find(
+      (item) => item.key !== "todos" && item.key === key,
+    );
+    byKey.set(key, {
+      label: course.category || course.catLabel || key,
+      sort: canonical ? CATALOG_CATEGORIES.indexOf(canonical) : nextSort++,
+    });
+  }
+  return [
+    { key: "todos", label: "Todos" },
+    ...[...byKey.entries()]
+      .map(([key, { label, sort }]) => ({ key, label, sort }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ key, label }) => ({ key, label })),
+  ];
+}
 
 export const intentRoutes = [
   {
@@ -32,10 +57,9 @@ export const intentRoutes = [
 
 export function normalizeCatalogCategory(
   value: string | undefined,
-): CatalogCategory {
-  return CATALOG_CATEGORIES.some((category) => category.key === value)
-    ? (value as CatalogCategory)
-    : "todos";
+  knownKeys: readonly string[] = CATALOG_CATEGORIES.map((item) => item.key),
+): string {
+  return value && knownKeys.includes(value) ? value : "todos";
 }
 
 export function normalizeCatalogQuery(value: string | undefined) {
@@ -46,7 +70,7 @@ export function buildCatalogPath({
   category = "todos",
   query = "",
 }: {
-  category?: CatalogCategory;
+  category?: string;
   query?: string;
 }) {
   const params = new URLSearchParams();
