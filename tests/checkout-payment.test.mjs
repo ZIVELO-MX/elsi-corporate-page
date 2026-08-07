@@ -82,9 +82,9 @@ test("checkout UI keeps sensitive fields outside ELSI and announces states", () 
 
   assert.match(checkout, /aria-live="polite"/);
   assert.match(checkout, /aria-invalid=/);
-  assert.match(checkout, /Prototipo visual · no realiza cargos/);
+  assert.match(checkout, /Modo de prueba · no realiza cargos/);
   assert.match(checkout, /Aún no seleccionas un curso/);
-  assert.match(checkout, /fixtures de integración/);
+  assert.match(checkout, /Pagos con tarjeta desactivados/);
   assert.match(checkout, /No ingreses datos reales/);
   assert.match(checkout, /decline_code/);
   assert.match(checkout, /insufficient_funds/);
