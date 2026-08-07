@@ -24,12 +24,14 @@ export type ProfileCertificate = {
   status: "disponible" | "pendiente";
   fileLabel?: string; // p.ej. "PDF · Publicada el 05 jun 2026"
 };
+export type ProfilePendingPayment = { id: string; title: string; createdAt: string };
 
 export type ProfilePayload = {
   summary: { upcoming: number; completed: number; certificates: number };
   upcoming: ProfileUpcoming[];
   history: ProfileHistory[];
   certificates: ProfileCertificate[];
+  pendingPayments: ProfilePendingPayment[];
 };
 
 const DATA: ProfilePayload = {
@@ -47,6 +49,7 @@ const DATA: ProfilePayload = {
     { id: "c1", course: "Economía circular", status: "disponible", fileLabel: "PDF · Publicada el 05 jun 2026" },
     { id: "c2", course: "Gestión ambiental aplicada", status: "pendiente" },
   ],
+  pendingPayments: [],
 };
 
 export async function GET() {
@@ -57,6 +60,8 @@ export async function GET() {
     if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     const { data: enrollments, error } = await supabase.from("enrollments").select("id,course_id,status,enrolled_at").eq("user_id", auth.user.id).order("enrolled_at", { ascending: false });
     if (error) return NextResponse.json({ error: "No fue posible cargar tu perfil" }, { status: 500 });
+    const { data: pendingOrders, error: pendingOrdersError } = await supabase.from("orders").select("id,course_title,created_at").eq("user_id", auth.user.id).eq("status", "pending").order("created_at", { ascending: false });
+    if (pendingOrdersError) return NextResponse.json({ error: "No fue posible cargar tus pagos pendientes" }, { status: 500 });
     const courseIds = [...new Set((enrollments ?? []).map((e) => e.course_id))];
     const { data: courses } = courseIds.length ? await supabase.from("courses").select("id,title,modality,location,starts_at").in("id", courseIds) : { data: [] };
     const courseMap = new Map((courses ?? []).map((c) => [c.id, c]));
@@ -69,7 +74,8 @@ export async function GET() {
     });
     const history = (enrollments ?? []).filter((e) => e.status === "completed").map((e) => ({ id: e.id, title: courseMap.get(e.course_id)?.title ?? "Curso", year: new Date(e.enrolled_at).getFullYear() }));
     const profileCertificates = (enrollments ?? []).filter((e) => e.status === "completed").map((e) => { const certificate = certMap.get(e.id); return { id: certificate?.id ?? e.id, course: courseMap.get(e.course_id)?.title ?? "Curso", status: certificate?.status === "available" ? "disponible" : "pendiente", fileLabel: certificate?.issued_at ? `PDF · Publicada el ${new Date(certificate.issued_at).toLocaleDateString("es-MX")}` : undefined } satisfies ProfileCertificate; });
-    return NextResponse.json({ summary: { upcoming: upcoming.length, completed: history.length, certificates: profileCertificates.filter((c) => c.status === "disponible").length }, upcoming, history, certificates: profileCertificates });
+    const pendingPayments = (pendingOrders ?? []).map((order) => ({ id: order.id, title: order.course_title, createdAt: order.created_at } satisfies ProfilePendingPayment));
+    return NextResponse.json({ summary: { upcoming: upcoming.length, completed: history.length, certificates: profileCertificates.filter((c) => c.status === "disponible").length }, upcoming, history, certificates: profileCertificates, pendingPayments });
   }
   return NextResponse.json(DATA);
 }
