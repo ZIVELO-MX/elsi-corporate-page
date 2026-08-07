@@ -223,15 +223,15 @@ function OrderSummary({
 
       <div className={styles.totalBlock}>
         <div>
-          <span>{course.priceLabel}</span>
-          <small>Pago único · {course.currency}</small>
+          <span>{course.amount > 0 ? course.priceLabel : "Sin costo"}</span>
+          <small>{course.amount > 0 ? `Pago único · ${course.currency}` : "Inscripción por correo"}</small>
         </div>
-        <strong>{formattedAmount}</strong>
+        <strong>{course.amount > 0 ? formattedAmount : "Gratis"}</strong>
       </div>
 
       <div className={styles.securityNote}>
         <LockKeyhole aria-hidden="true" />
-        <p>Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
+        <p>{course.amount > 0 ? "Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta." : "ELSI confirmará tu inscripción por correo."}</p>
       </div>
     </aside>
   );

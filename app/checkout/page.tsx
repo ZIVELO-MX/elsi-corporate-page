@@ -21,7 +21,7 @@ export default async function CheckoutPage({
   const course = persisted
     ? mapPublicCourseToCheckoutCourse(persisted)
     : getCheckoutCourseBySlug(curso);
-  const cardPaymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1" && await getCardPaymentsEnabled();
+  const cardPaymentsEnabled = Boolean(course && course.amount > 0) && process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1" && await getCardPaymentsEnabled();
 
   return <CheckoutExperience course={course} cardPaymentsEnabled={cardPaymentsEnabled} />;
 }

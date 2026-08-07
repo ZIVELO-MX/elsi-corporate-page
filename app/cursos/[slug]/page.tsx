@@ -88,7 +88,6 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const cardPaymentsEnabled = await getCardPaymentsEnabled();
   const online = course.modality !== "presencial";
   const checkoutAvailable = state === "published"
-    && course.price > 0
     && !alreadyEnrolled;
   const actionHref = alreadyEnrolled
     ? "/profile"
@@ -143,7 +142,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             {alreadyEnrolled ? <span className="course-enrollment-badge">Ya inscrito</span> : null}
             {course.certificateType ? <p className="course-detail-certificate">Incluye constancia {certType(course)}</p> : null}
             <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
-              {alreadyEnrolled ? "Ver mi perfil" : checkoutAvailable ? "Inscribirme y pagar" : inquiryLabels[state]}
+              {alreadyEnrolled ? "Ver mi perfil" : checkoutAvailable ? (course.price > 0 && cardPaymentsEnabled ? "Inscribirme y pagar" : "Solicitar inscripción") : inquiryLabels[state]}
               <ArrowRight aria-hidden="true" size={16} />
             </Link>
             <p className="course-detail-action-note">

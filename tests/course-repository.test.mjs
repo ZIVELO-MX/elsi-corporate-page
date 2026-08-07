@@ -77,7 +77,7 @@ test("paid published courses enter Stripe checkout only when the public flag is 
   const detail = await read("app/cursos/[slug]/page.tsx");
   assert.match(detail, /getCardPaymentsEnabled/);
   assert.match(detail, /state === "published"/);
-  assert.match(detail, /course\.price > 0/);
+  assert.match(detail, /!alreadyEnrolled/);
   assert.match(detail, /\/checkout\?curso=\$\{encodeURIComponent\(course\.slug\)\}/);
   assert.match(detail, /Inscribirme y pagar/);
 });
