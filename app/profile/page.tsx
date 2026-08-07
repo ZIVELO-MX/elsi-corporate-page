@@ -430,7 +430,7 @@ export default function ProfilePage() {
   }, [load]);
 
   useEffect(() => {
-    if (user) load();
+    if (user) void Promise.resolve().then(() => load());
   }, [user, load]);
 
   useEffect(() => {
@@ -448,7 +448,7 @@ export default function ProfilePage() {
       return;
     }
 
-    void pollPaymentReturn(orderId);
+    void Promise.resolve().then(() => pollPaymentReturn(orderId));
     return () => activePaymentRequest.current?.abort();
   }, [user, pollPaymentReturn]);
 
