@@ -142,7 +142,7 @@ export default function AdminCourses() {
       .then(payload => {
         if (!cancelled && payload?.courses) setPersistedCourses((payload.courses as PersistedCourse[]).map(courseFromRow));
       })
-      .catch(() => { /* Fixtures remain available while Supabase is not configured. */ });
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
 

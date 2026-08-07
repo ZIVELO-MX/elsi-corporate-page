@@ -92,90 +92,9 @@ export type Testimonial = {
   active: boolean;
 };
 
-const INITIAL_COURSES: AdminCourse[] = [
-  { id: "c1", title: "Fundamentos de Educación Ambiental", category: "Sostenibilidad", slug: "fundamentos-de-educacion-ambiental", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 184, createdAt: "2025-01-15",
-    synopsis: "Introducción a los principios de la educación ambiental aplicada a contextos comunitarios y escolares.",
-    duration: "8 horas", targetAudience: "Docentes, promotores comunitarios y público general",
-    curriculum: "Fundamentos de sostenibilidad\n- Recursos naturales y su gestión\n- Huella ecológica\nEstrategias de educación ambiental\n- Diseño de talleres\n- Evaluación de impacto",
-    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
-  { id: "c2", title: "Cumplimiento Ambiental para Empresas", category: "Normatividad", slug: "cumplimiento-ambiental-para-empresas", price: 0, status: "active", externalUrl: "https://elsyacademy.me", students: 92, createdAt: "2025-02-20",
-    synopsis: "Marco normativo ambiental vigente y su aplicación práctica en procesos industriales.",
-    duration: "12 horas", targetAudience: "Responsables de cumplimiento y gerencia de operaciones",
-    curriculum: "Marco legal ambiental\n- Normas federales y estatales\n- Permisos y licencias\nAuditoría y reporte\n- Indicadores de cumplimiento\n- Documentación requerida",
-    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
-  { id: "c3", title: "Liderazgo Ambiental Universitario", category: "Formación", slug: "liderazgo-ambiental-universitario", price: 0, status: "active", externalUrl: "", students: 56, createdAt: "2025-03-10",
-    synopsis: "Formación de liderazgo estudiantil orientado a iniciativas de sostenibilidad en campus universitarios.",
-    duration: "6 horas", targetAudience: "Estudiantes universitarios y grupos ambientales estudiantiles",
-    curriculum: "Liderazgo y trabajo en equipo\n- Gestión de proyectos estudiantiles\nIniciativas sostenibles en campus\n- Casos de éxito\n- Planeación de campañas",
-    modality: "presencial", presencialLocation: "Campus Central ELSI, Auditorio B", presencialDate: "2025-08-14", presencialTime: "09:00 - 13:00",
-    presencialInfo: "Cupo limitado a 40 personas. Se recomienda llegar 15 minutos antes del inicio." },
-  { id: "c4", title: "Gestión de Residuos Industriales", category: "Operaciones", slug: "gestion-de-residuos-industriales", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-04-05",
-    synopsis: "Manejo integral de residuos peligrosos y no peligrosos en entornos industriales.",
-    duration: "10 horas", targetAudience: "Personal operativo y de seguridad industrial",
-    curriculum: "Clasificación de residuos\n- Peligrosos y no peligrosos\nManejo y disposición\n- Almacenamiento temporal\n- Proveedores autorizados",
-    modality: "presencial", presencialLocation: "Planta industrial ELSI, Zona Norte", presencialDate: "Por confirmar", presencialTime: "Por confirmar",
-    presencialInfo: "Requiere equipo de protección personal, proporcionado por la empresa anfitriona." },
-  { id: "c5", title: "Impacto Ambiental y Permisos", category: "Normatividad", slug: "impacto-ambiental-y-permisos", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-05-12",
-    synopsis: "Evaluación de impacto ambiental y proceso de obtención de permisos para nuevos proyectos.",
-    duration: "8 horas", targetAudience: "Equipos de proyectos y consultoría ambiental",
-    curriculum: "Manifiesto de impacto ambiental\n- Estructura y contenido\nProceso de permisos\n- Autoridades competentes\n- Tiempos y requisitos",
-    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
-  { id: "c6", title: "Comunicación de Sostenibilidad", category: "Sostenibilidad", slug: "comunicacion-de-sostenibilidad", price: 0, status: "inactive", externalUrl: "", students: 0, createdAt: "2025-06-01",
-    synopsis: "Estrategias de comunicación para divulgar resultados y compromisos de sostenibilidad.",
-    duration: "5 horas", targetAudience: "Equipos de comunicación y relaciones institucionales",
-    curriculum: "Narrativa de sostenibilidad\n- Mensajes clave por audiencia\nCanales y formatos\n- Reportes públicos\n- Redes y medios",
-    modality: "online", presencialLocation: "", presencialDate: "", presencialTime: "", presencialInfo: "" },
-];
-
-const INITIAL_USERS: AdminUser[] = [
-  { id: "u1", name: "Admin ELSI", email: "admin@elsi.com", role: "admin", enrolledCourses: 0, createdAt: "2025-01-01" },
-  { id: "u2", name: "María García", email: "maria@example.com", role: "user", enrolledCourses: 2, createdAt: "2025-03-15" },
-  { id: "u3", name: "Juan López", email: "juan@example.com", role: "user", enrolledCourses: 1, createdAt: "2025-04-20" },
-  { id: "u4", name: "Ana Martínez", email: "ana@example.com", role: "user", enrolledCourses: 3, createdAt: "2025-05-10" },
-  { id: "u5", name: "Carlos Sánchez", email: "carlos@example.com", role: "user", enrolledCourses: 0, createdAt: "2025-06-05" },
-];
-
-const INITIAL_ENROLLMENTS: Enrollment[] = [
-  { id: "e1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-04-01", source: "interna", status: "realizado", certificateStatus: "disponible" },
-  { id: "e2", userId: "u2", userName: "María García", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-04-15", source: "externa", status: "en-curso" },
-  { id: "e3", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-01", source: "interna", status: "realizado", certificateStatus: "pendiente" },
-  { id: "e4", userId: "u4", userName: "Ana Martínez", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", enrolledAt: "2025-05-20", source: "interna", status: "en-curso" },
-  { id: "e5", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", enrolledAt: "2025-06-01", source: "externa", status: "en-curso" },
-  { id: "e6", userId: "u4", userName: "Ana Martínez", courseId: "c3", courseName: "Liderazgo Ambiental Universitario", enrolledAt: "2025-06-10", source: "interna", status: "en-curso" },
-];
-
-const INITIAL_SALES: Sale[] = [
-  { id: "s1", userId: "u2", userName: "María García", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", amount: 0, soldAt: "2025-04-01" },
-  { id: "s2", userId: "u3", userName: "Juan López", courseId: "c1", courseName: "Fundamentos de Educación Ambiental", amount: 0, soldAt: "2025-05-01" },
-  { id: "s3", userId: "u4", userName: "Ana Martínez", courseId: "c2", courseName: "Cumplimiento Ambiental para Empresas", amount: 0, soldAt: "2025-06-01" },
-];
-
-const INITIAL_SECTIONS: PageSection[] = [
-  { id: "sec-1", label: "Hero", key: "hero", content: "Formamos líderes ambientales con educación práctica y accesible.", active: true },
-  { id: "sec-2", label: "Propuesta de valor", key: "value-prop", content: "Educación ambiental de calidad para profesionales y empresas.", active: true },
-  { id: "sec-3", label: "Beneficios", key: "benefits", content: "Aprende a tu ritmo, certificados avalados, mentoría personalizada.", active: true },
-  { id: "sec-4", label: "Cursos destacados", key: "featured-courses", content: "Explora nuestra oferta educativa diseñada para el cambio.", active: true },
-  { id: "sec-5", label: "Testimonios", key: "testimonials", content: "Lo que dicen nuestros alumnos sobre su experiencia.", active: false },
-  { id: "sec-6", label: "FAQ", key: "faq", content: "Respuestas a las preguntas más frecuentes.", active: true },
-  { id: "sec-7", label: "CTA final", key: "cta", content: "Únete a la comunidad de líderes ambientales.", active: true },
-];
-
-// Example fixtures (validation prototype) — not real submissions.
-const INITIAL_LEADS: Lead[] = [
-  { id: "l1", name: "Laura Méndez", email: "laura.mendez@example.com", phone: "477-123-4567", message: "Me interesa el curso DC-3 para mi equipo de planta. ¿Tienen fechas en agosto?", courseSlug: "manejo-integral-de-residuos", createdAt: "2026-07-22", status: "nuevo" },
-  { id: "l2", name: "Diego Ramírez", email: "diego.ramirez@example.com", phone: "477-987-6543", message: "Quisiera información sobre cupos y modalidad de los cursos en línea.", createdAt: "2026-07-20", status: "nuevo" },
-  { id: "l3", name: "Sofía Herrera", email: "sofia.herrera@example.com", phone: "461-222-3344", message: "¿El curso de comunicación de sostenibilidad entrega constancia?", courseSlug: "comunicacion-de-sostenibilidad", createdAt: "2026-07-18", status: "atendido" },
-];
-
-// Example fixtures (validation prototype) — placeholder, NOT real reviews (ELS-0024).
-const INITIAL_TESTIMONIALS: Testimonial[] = [
-  { id: "t1", authorName: "Ejemplo · Docente", authorRole: "Docente de secundaria", quote: "Testimonio de ejemplo: el taller me dio herramientas concretas para llevar la educación ambiental al aula.", courseId: "c1", active: true },
-  { id: "t2", authorName: "Ejemplo · Responsable ambiental", authorRole: "Responsable de cumplimiento", quote: "Testimonio de ejemplo: entendimos qué normas aplican a la empresa y cómo documentarlas.", courseId: "c2", active: true },
-  { id: "t3", authorName: "Ejemplo · Estudiante", authorRole: "Estudiante universitario", quote: "Testimonio de ejemplo: pasé de la idea a un proyecto ambiental real en el campus.", active: false },
-];
-
 type AdminData = {
   loading: boolean;
+  error: string | null;
   courses: AdminCourse[];
   users: AdminUser[];
   enrollments: Enrollment[];
@@ -204,20 +123,100 @@ type AdminData = {
 const AdminDataContext = createContext<AdminData | null>(null);
 
 export function AdminDataProvider({ children }: { children: ReactNode }) {
-  const [courses, setCourses] = useState<AdminCourse[]>(INITIAL_COURSES);
-  const [users] = useState<AdminUser[]>(INITIAL_USERS);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
-  const [sales, setSales] = useState<Sale[]>(INITIAL_SALES);
-  const [sections, setSections] = useState<PageSection[]>(INITIAL_SECTIONS);
-  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
-  // Simulated initial fetch: the provider mounts once for the whole panel, so the
-  // skeleton shows on first entry and navigation stays instant afterward. When the
-  // Supabase data layer lands, this flag becomes the real query loading state.
+  const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [sections, setSections] = useState<PageSection[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 650);
-    return () => clearTimeout(t);
+    let cancelled = false;
+
+    const loadAdminData = async () => {
+      try {
+        const responses = await Promise.all([
+          fetch("/api/admin/courses", { cache: "no-store" }),
+          fetch("/api/admin/users", { cache: "no-store" }),
+          fetch("/api/admin/enrollments", { cache: "no-store" }),
+          fetch("/api/admin/leads", { cache: "no-store" }),
+          fetch("/api/admin/content", { cache: "no-store" }),
+          fetch("/api/admin/orders", { cache: "no-store" }),
+        ]);
+        if (responses.some((response) => !response.ok)) throw new Error("No fue posible cargar los datos del panel.");
+
+        const [coursesPayload, usersPayload, enrollmentsPayload, leadsPayload, contentPayload, salesPayload] = await Promise.all(
+          responses.map((response) => response.json() as Promise<Record<string, unknown>>),
+        );
+        if (cancelled) return;
+
+        const persistedUsers = Array.isArray(usersPayload.users) ? usersPayload.users as AdminUser[] : [];
+        const persistedCourses = Array.isArray(coursesPayload.courses) ? coursesPayload.courses.map((row) => {
+          const course = row as Record<string, unknown>;
+          const syllabus = Array.isArray(course.syllabus) ? course.syllabus.map(String).join("\n") : typeof course.syllabus === "string" ? course.syllabus : "";
+          return {
+            id: String(course.id), title: String(course.title), category: "General", slug: String(course.slug),
+            price: Number(course.price_cents ?? 0) / 100, status: course.is_active ? "active" : "inactive",
+            externalUrl: String(course.enrollment_link ?? ""), students: 0,
+            createdAt: String(course.created_at ?? "").slice(0, 10),
+            synopsis: String(course.short_description ?? ""), duration: course.duration_hours ? `${course.duration_hours} horas` : "",
+            targetAudience: String(course.audience ?? ""), curriculum: syllabus,
+            modality: course.modality === "in_person" ? "presencial" : "online",
+            presencialLocation: String(course.location ?? ""), presencialDate: "", presencialTime: "", presencialInfo: "",
+          } satisfies AdminCourse;
+        }) : [];
+        const userById = new Map(persistedUsers.map((user) => [user.id, user]));
+        const courseById = new Map(persistedCourses.map((course) => [course.id, course]));
+        const persistedEnrollments = Array.isArray(enrollmentsPayload.enrollments) ? enrollmentsPayload.enrollments.map((row) => {
+          const enrollment = row as Record<string, unknown>;
+          const userId = String(enrollment.user_id);
+          const courseId = String(enrollment.course_id);
+          const certificates = Array.isArray(enrollment.certificates) ? enrollment.certificates[0] as Record<string, unknown> | undefined : enrollment.certificates as Record<string, unknown> | undefined;
+          return {
+            id: String(enrollment.id), userId, userName: userById.get(userId)?.name ?? `Alumno ${userId.slice(0, 8)}`,
+            courseId, courseName: courseById.get(courseId)?.title ?? `Curso ${courseId.slice(0, 8)}`,
+            enrolledAt: String(enrollment.enrolled_at ?? "").slice(0, 10),
+            source: enrollment.source === "external" ? "externa" : "interna",
+            status: enrollment.status === "completed" ? "realizado" : "en-curso",
+            certificateId: certificates?.id as string | undefined,
+            certificateStatus: certificates ? certificates.status === "available" ? "disponible" : "pendiente" : undefined,
+          } satisfies Enrollment;
+        }) : [];
+        const persistedLeads = Array.isArray(leadsPayload.leads) ? leadsPayload.leads.map((row) => {
+          const lead = row as Record<string, unknown>;
+          const source = typeof lead.source === "string" ? lead.source : "";
+          return {
+            id: String(lead.id), name: String(lead.full_name ?? ""), email: String(lead.email ?? ""), phone: String(lead.phone ?? ""),
+            message: String(lead.message ?? ""), courseSlug: source.startsWith("course:") ? source.slice(7) : undefined,
+            createdAt: String(lead.created_at ?? "").slice(0, 10), status: lead.status === "new" ? "nuevo" : "atendido",
+          } satisfies Lead;
+        }) : [];
+        const persistedSections = Array.isArray(contentPayload.sections) ? contentPayload.sections.map((row) => {
+          const section = row as Record<string, unknown>;
+          const body = section.body && typeof section.body === "object" ? section.body as Record<string, unknown> : {};
+          return { id: String(section.id), key: String(section.section_key), label: String(section.title), content: typeof body.text === "string" ? body.text : "", active: Boolean(section.is_active) } satisfies PageSection;
+        }) : [];
+        const persistedSales = Array.isArray(salesPayload.sales) ? salesPayload.sales as Sale[] : [];
+
+        setUsers(persistedUsers);
+        setCourses(persistedCourses);
+        setEnrollments(persistedEnrollments);
+        setLeads(persistedLeads);
+        setSections(persistedSections);
+        setSales(persistedSales);
+        setError(null);
+      } catch (loadError) {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : "No fue posible cargar los datos del panel.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void loadAdminData();
+    return () => { cancelled = true; };
   }, []);
 
   const addCourse = useCallback((c: Omit<AdminCourse, "id" | "students" | "createdAt">) => {
@@ -235,10 +234,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
 
   const addEnrollment = useCallback((userId: string, courseId: string, source: EnrollmentSource = "interna") => {
     const id = "e" + Date.now();
-    const userName = INITIAL_USERS.find(u => u.id === userId)?.name ?? "Desconocido";
-    const courseName = INITIAL_COURSES.find(c => c.id === courseId)?.title ?? "Desconocido";
+    const userName = users.find(u => u.id === userId)?.name ?? "Desconocido";
+    const courseName = courses.find(c => c.id === courseId)?.title ?? "Desconocido";
     setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0], source, status: "en-curso" }]);
-  }, []);
+  }, [courses, users]);
 
   // "constancia" = admin cargo una constancia -> finalizacion automatica, pendiente de publicacion.
   // "manual" = boton de respaldo para casos excepcionales, sin constancia asociada.
@@ -261,10 +260,10 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
 
   const addSale = useCallback((userId: string, courseId: string, amount: number) => {
     const id = "s" + Date.now();
-    const userName = INITIAL_USERS.find(u => u.id === userId)?.name ?? "Desconocido";
-    const courseName = INITIAL_COURSES.find(c => c.id === courseId)?.title ?? "Desconocido";
+    const userName = users.find(u => u.id === userId)?.name ?? "Desconocido";
+    const courseName = courses.find(c => c.id === courseId)?.title ?? "Desconocido";
     setSales(prev => [...prev, { id, userId, userName, courseId, courseName, amount, soldAt: new Date().toISOString().split("T")[0] }]);
-  }, []);
+  }, [courses, users]);
 
   const updateSection = useCallback((id: string, data: Partial<PageSection>) => {
     setSections(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
@@ -291,16 +290,16 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getUserName = useCallback((id: string) => {
-    return INITIAL_USERS.find(u => u.id === id)?.name ?? "Desconocido";
-  }, []);
+    return users.find(u => u.id === id)?.name ?? "Desconocido";
+  }, [users]);
 
   const getCourseName = useCallback((id: string) => {
-    return INITIAL_COURSES.find(c => c.id === id)?.title ?? "Desconocido";
-  }, []);
+    return courses.find(c => c.id === id)?.title ?? "Desconocido";
+  }, [courses]);
 
   const value = useMemo(
-    () => ({ loading, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName }),
-    [loading, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName],
+    () => ({ loading, error, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName }),
+    [loading, error, courses, users, enrollments, sales, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName],
   );
 
   return (

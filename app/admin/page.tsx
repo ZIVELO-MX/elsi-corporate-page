@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
 
 export default function AdminDashboard() {
-  const { loading, courses, users, enrollments, sales, leads } = useAdminData();
+  const { loading, error, courses, users, enrollments, sales, leads } = useAdminData();
 
   const activeCourses = courses.filter((c) => c.status === "active");
   const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
@@ -41,6 +41,12 @@ export default function AdminDashboard() {
         <h1 className="admin-page-title" style={{ marginBottom: "0.5rem" }}>Dashboard</h1>
         <p className="admin-page-sub">Resumen general de la plataforma. Toca una tarjeta para ir a su sección.</p>
       </div>
+
+      {error && (
+        <div role="alert" style={{ marginBottom: "1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--danger)", borderRadius: "var(--radius-sm)", color: "var(--danger)", background: "var(--card)" }}>
+          {error} Actualiza la página o revisa la sesión de administrador.
+        </div>
+      )}
 
       {loading && (
         <div role="status" aria-label="Cargando resumen">

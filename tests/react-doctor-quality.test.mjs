@@ -79,8 +79,8 @@ test("admin derived collections avoid handler-only state and chained iterations"
   assert.match(enrollments, /const selectableUsers = useMemo/);
   assert.match(enrollments, /const activeCourses = useMemo/);
   assert.match(enrollments, /filtered\.flatMap/);
-  assert.match(sales, /const selectableUsers = useMemo/);
-  assert.match(sales, /const activeCourses = useMemo/);
+  assert.match(sales, /Stripe confirma un pago/);
+  assert.doesNotMatch(sales, /Registrar venta/);
 });
 
 test("admin metadata remains at least twelve pixels", () => {
