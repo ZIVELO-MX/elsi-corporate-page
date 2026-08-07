@@ -21,7 +21,7 @@ test("Stripe returns to the authenticated profile with an owner-scoped order ref
 test("profile polls a bounded owner-safe order lookup and refreshes enrollment data after payment", async () => {
   const profile = await read("app/profile/page.tsx");
 
-  assert.match(profile, /PAYMENT_POLL_ATTEMPTS = 15/);
+  assert.match(profile, /PAYMENT_POLL_ATTEMPTS = 8/);
   assert.match(profile, /fetch\(`\/api\/orders\/\$\{encodeURIComponent\(orderId\)\}`/);
   assert.match(profile, /method: "GET"/);
   assert.match(profile, /order\.status === "paid"/);
