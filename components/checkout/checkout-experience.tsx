@@ -529,7 +529,7 @@ function CheckoutResult({
 
       {session && (
         <div className={styles.orderReference}>
-          <span>Referencia del prototipo</span>
+          <span>Referencia de pago</span>
           <code>{session.orderId}</code>
         </div>
       )}
