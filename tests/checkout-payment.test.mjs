@@ -85,6 +85,8 @@ test("checkout UI keeps sensitive fields outside ELSI and announces states", () 
   assert.match(checkout, /Modo de prueba · no realiza cargos/);
   assert.match(checkout, /Aún no seleccionas un curso/);
   assert.match(checkout, /Solicita tu inscripción/);
+  assert.match(checkout, /defaultPhone/);
+  assert.match(checkout, /defaultValue=\{defaultPhone\}/);
   assert.match(checkout, /No ingreses datos reales/);
   assert.match(checkout, /decline_code/);
   assert.match(checkout, /insufficient_funds/);
