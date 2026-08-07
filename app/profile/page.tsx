@@ -32,7 +32,9 @@ type OrderResponse = {
   };
 };
 
-const PAYMENT_POLL_ATTEMPTS = 15;
+// Stripe webhooks can arrive after the redirect; keep the profile in sync for
+// up to two minutes before falling back to the manual refresh action.
+const PAYMENT_POLL_ATTEMPTS = 120;
 const PAYMENT_POLL_DELAY_MS = 1_000;
 const ORDER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
