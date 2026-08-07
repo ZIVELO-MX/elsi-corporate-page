@@ -17,7 +17,7 @@ test("catalog and course detail expose an enrolled state", async () => {
   assert.match(catalog, /enrolledCourseIds/);
   assert.match(detail, /currentUserHasEnrollment/);
   assert.match(detail, /href=\{actionHref\}/);
-  assert.match(detail, /alreadyEnrolled \? "Ver mi perfil"/);
+  assert.match(detail, /alreadyEnrolled \|\| paymentPending \? "Ver mi perfil"/);
   assert.match(detail, /course-enrollment-badge/);
 });
 
