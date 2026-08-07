@@ -25,7 +25,13 @@ export async function GET() {
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const { data, error } = await client.from("courses").select("*").order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: "No fue posible consultar cursos" }, { status: 500 });
-  return NextResponse.json({ courses: data ?? [] });
+  const { data: enrollments, error: enrollmentError } = await client.from("enrollments").select("course_id");
+  if (enrollmentError) return NextResponse.json({ error: "No fue posible consultar estudiantes" }, { status: 500 });
+  const studentCounts = new Map<string, number>();
+  for (const enrollment of enrollments ?? []) {
+    studentCounts.set(enrollment.course_id, (studentCounts.get(enrollment.course_id) ?? 0) + 1);
+  }
+  return NextResponse.json({ courses: (data ?? []).map((course) => ({ ...course, students: studentCounts.get(course.id) ?? 0 })) });
 }
 
 export async function POST(request: Request) {

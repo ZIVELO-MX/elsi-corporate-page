@@ -20,3 +20,12 @@ export async function currentUserHasEnrollment(courseId: string): Promise<boolea
   const courseIds = await getCurrentUserEnrollmentCourseIds();
   return courseIds.has(courseId);
 }
+
+export async function currentUserHasPendingOrder(courseId: string): Promise<boolean> {
+  const client = await createSupabaseServerClient();
+  if (!client) return false;
+  const { data: auth } = await client.auth.getUser();
+  if (!auth.user) return false;
+  const { data, error } = await client.from("orders").select("id").eq("user_id", auth.user.id).eq("course_id", courseId).eq("status", "pending").limit(1).maybeSingle();
+  return !error && Boolean(data);
+}

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStripe, paymentsEnabled } from "@/lib/stripe";
+import { getCardPaymentsEnabled } from "@/lib/payment-settings";
 
 export async function POST(request: Request) {
-  if (!paymentsEnabled()) return NextResponse.json({ error: "Pagos no disponibles" }, { status: 503 });
+  if (!paymentsEnabled() || !(await getCardPaymentsEnabled())) return NextResponse.json({ error: "Pagos con tarjeta desactivados" }, { status: 503 });
   const stripe = getStripe();
   if (!stripe) return NextResponse.json({ error: "Stripe no está configurado" }, { status: 503 });
   const livemode = process.env.STRIPE_SECRET_KEY?.trim().startsWith("sk_live_") === true;
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
   const { data: enrollment, error: enrollmentError } = await client.from("enrollments").select("id,status").eq("user_id", auth.user.id).eq("course_id", course.id).maybeSingle();
   if (enrollmentError) return NextResponse.json({ error: "No fue posible validar tu inscripción" }, { status: 500 });
   if (enrollment) return NextResponse.json({ error: "Ya estás inscrito en este curso", enrollmentStatus: enrollment.status }, { status: 409 });
+  const { data: pendingOrder } = await client.from("orders").select("id,status").eq("user_id", auth.user.id).eq("course_id", course.id).eq("status", "pending").limit(1).maybeSingle();
+  if (pendingOrder) return NextResponse.json({ error: "Ya tienes un pago pendiente para este curso", orderId: pendingOrder.id, orderStatus: pendingOrder.status }, { status: 409 });
   const { data: order, error: orderError } = await client.from("orders").insert({ user_id: auth.user.id, course_id: course.id, course_title: course.title, amount_cents: course.price_cents, currency: course.currency, idempotency_key: idempotencyKey, livemode }).select("id,amount_cents,currency,status").single();
   if (orderError || !order) {
     if (orderError?.code === "23505") return NextResponse.json({ error: "La solicitud ya está en proceso; reintenta con el mismo Idempotency-Key" }, { status: 409 });

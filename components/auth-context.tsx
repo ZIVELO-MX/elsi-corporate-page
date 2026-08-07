@@ -73,8 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // The local session must still be cleared if the network is unavailable.
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   const value = useMemo(

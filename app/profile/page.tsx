@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
-  AlertCircle, BookOpen, CalendarDays, CheckCircle2, Download, FileClock,
+  AlertCircle, BookOpen, CalendarDays, CheckCircle2, Clock3, Download, FileClock,
   GraduationCap, Mail, MapPin, TicketCheck,
 } from "lucide-react";
 import { useAuth, type User } from "@/components/auth-context";
-import type { ProfilePayload, ProfileUpcoming, ProfileCertificate } from "@/app/api/profile/route";
+import type { ProfilePayload, ProfileUpcoming, ProfileCertificate, ProfilePendingPayment } from "@/app/api/profile/route";
 import styles from "./profile.module.css";
 
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
@@ -32,8 +32,10 @@ type OrderResponse = {
   };
 };
 
-const PAYMENT_POLL_ATTEMPTS = 15;
-const PAYMENT_POLL_DELAY_MS = 1_000;
+// Stripe webhooks can arrive after the redirect. Use backoff to avoid a
+// request storm while keeping the profile responsive during the first seconds.
+const PAYMENT_POLL_ATTEMPTS = 8;
+const PAYMENT_POLL_MAX_DELAY_MS = 15_000;
 const ORDER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function clearPaymentReturnQuery() {
@@ -170,6 +172,19 @@ function CertificateCard({ c }: { c: ProfileCertificate }) {
         <Download size={16} aria-hidden="true" />
         <span>Descargar</span>
       </button>
+    </article>
+  );
+}
+
+function PendingPaymentCard({ payment }: { payment: ProfilePendingPayment }) {
+  return (
+    <article className="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--paper)] p-4">
+      <Clock3 className="mt-0.5 shrink-0 text-[var(--earth)]" size={19} aria-hidden="true" />
+      <div className="min-w-0">
+        <Status tone="purple">Pago pendiente</Status>
+        <h3 className="mt-2 break-words text-[13px] font-bold text-[var(--text)]">{payment.title}</h3>
+        <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">La confirmación está en proceso. La inscripción aparecerá aquí cuando Stripe confirme el pago.</p>
+      </div>
     </article>
   );
 }
@@ -420,7 +435,8 @@ export default function ProfilePage() {
           canRetry: lastAttempt,
         });
         if (!lastAttempt) {
-          await new Promise((resolve) => window.setTimeout(resolve, PAYMENT_POLL_DELAY_MS));
+          const delay = Math.min(1_000 * (2 ** attempt), PAYMENT_POLL_MAX_DELAY_MS);
+          await new Promise((resolve) => window.setTimeout(resolve, delay));
         }
       }
     } catch (error) {
@@ -468,7 +484,7 @@ export default function ProfilePage() {
   }
 
   const firstName = user.name.split(" ")[0];
-  const isEmpty = data && data.upcoming.length === 0 && data.history.length === 0 && data.certificates.length === 0;
+  const isEmpty = data && data.upcoming.length === 0 && data.history.length === 0 && data.certificates.length === 0 && data.pendingPayments.length === 0;
 
   return (
     <main className={`${styles.portalContent} mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12`}>
@@ -528,6 +544,15 @@ export default function ProfilePage() {
 
           {state === "ready" && data && !isEmpty && (
             <>
+              {data.pendingPayments.length > 0 && (
+                <section aria-labelledby="pending-payments-title" className={styles.revealItem} data-reveal-index="1">
+                  <SectionTitle id="pending-payments-title" title="Pagos pendientes" />
+                  <div className="flex flex-col gap-3">
+                    {data.pendingPayments.map((payment) => <PendingPaymentCard key={payment.id} payment={payment} />)}
+                  </div>
+                </section>
+              )}
+
               {data.upcoming.length > 0 && (
                 <section aria-labelledby="next-title" className={styles.revealItem} data-reveal-index="1">
                   <SectionTitle id="next-title" title="Lo siguiente" />

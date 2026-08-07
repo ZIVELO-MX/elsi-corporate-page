@@ -71,6 +71,12 @@ export type Database = {
         Update: { id?: string; slug?: string; title?: string; summary?: string; body?: Json; content_status?: Database["public"]["Enums"]["content_status"]; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
         Relationships: [];
       };
+      site_settings: {
+        Row: { key: string; value: Json; created_at: string; updated_at: string };
+        Insert: { key: string; value?: Json; created_at?: string; updated_at?: string };
+        Update: { key?: string; value?: Json; created_at?: string; updated_at?: string };
+        Relationships: [];
+      };
       testimonials: {
         Row: { id: string; quote: string; author_name: string; author_role: string | null; image_path: string | null; consent_reference: string | null; is_active: boolean; sort_order: number; created_at: string; updated_at: string };
         Insert: { id?: string; quote: string; author_name: string; author_role?: string | null; image_path?: string | null; consent_reference?: string | null; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };

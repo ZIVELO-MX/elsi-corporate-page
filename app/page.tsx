@@ -17,6 +17,7 @@ import {
 } from "@/lib/seo";
 import { intentRoutes } from "@/lib/agentic-navigation";
 import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
+import { listPublicCourses } from "@/lib/courses-repository";
 
 export const metadata = buildMetadata({
   description: "ELSI, Environmental Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
@@ -40,7 +41,8 @@ const homeFaqs = [
 
 export default async function Home() {
   const persistedContent = await listPublicContent();
-  const featuredCourses = getPublicCourses().slice(0, 3);
+  const persistedCourses = await listPublicCourses();
+  const featuredCourses = (persistedCourses ?? getPublicCourses()).slice(0, 3);
   const [primaryCourse, ...secondaryCourses] = featuredCourses;
   const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
   const availableIntentRoutes = intentRoutes.filter((intent) => {

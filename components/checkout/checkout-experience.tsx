@@ -9,6 +9,7 @@ import {
   Clock3,
   CreditCard,
   LockKeyhole,
+  Mail,
   PackageOpen,
   RotateCcw,
   ShieldCheck,
@@ -23,8 +24,8 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import { useFormStatus } from "react-dom";
 import { useAuth } from "@/components/auth-context";
-import { PrototypeDataNote } from "@/components/prototype-data-note";
 import {
   createMockPaymentGateway,
   formatPaymentAmount,
@@ -41,6 +42,7 @@ import styles from "./checkout.module.css";
 
 type CheckoutExperienceProps = {
   course: CheckoutCourse | null;
+  cardPaymentsEnabled: boolean;
 };
 
 type StripePaymentElement = {
@@ -139,7 +141,7 @@ const STATUS_COPY: Record<PaymentState, StatusCopy> = {
   ready: {
     eyebrow: "Paso 2 de 2",
     title: "Realiza tu pago",
-    description: "El Payment Element de Stripe aparecerá aquí cuando los pagos estén habilitados.",
+    description: "Revisa el importe y confirma tus datos para continuar.",
   },
   processing: {
     eyebrow: "Procesando",
@@ -203,7 +205,7 @@ function OrderSummary({
   return (
     <aside className={styles.summaryCard} aria-labelledby="order-summary-title">
       <div className={styles.summaryTopline}>
-        <span>Resumen · Datos de ejemplo</span>
+        <span>Resumen de inscripción</span>
         <ShieldCheck aria-hidden="true" />
       </div>
       <h2 id="order-summary-title">{course.title}</h2>
@@ -222,15 +224,15 @@ function OrderSummary({
 
       <div className={styles.totalBlock}>
         <div>
-          <span>{course.priceLabel}</span>
-          <small>Pago único · {course.currency}</small>
+          <span>{course.amount > 0 ? course.priceLabel : "Sin costo"}</span>
+          <small>{course.amount > 0 ? `Pago único · ${course.currency}` : "Inscripción por correo"}</small>
         </div>
-        <strong>{formattedAmount}</strong>
+        <strong>{course.amount > 0 ? formattedAmount : "Gratis"}</strong>
       </div>
 
       <div className={styles.securityNote}>
         <LockKeyhole aria-hidden="true" />
-        <p>Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta.</p>
+        <p>{course.amount > 0 ? "Stripe procesará el pago. ELSI no almacenará datos de tu tarjeta." : "ELSI confirmará tu inscripción por correo."}</p>
       </div>
     </aside>
   );
@@ -311,11 +313,18 @@ function BuyerForm({
         )}
       </div>
 
-      <button className={styles.primaryAction} type="submit">
-        Continuar al pago
-        <CreditCard aria-hidden="true" />
-      </button>
+      <BuyerSubmitButton />
     </form>
+  );
+}
+
+function BuyerSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button className={styles.primaryAction} type="submit" disabled={pending} aria-busy={pending}>
+      {pending ? "Preparando…" : "Continuar al pago"}
+      {pending ? <Clock3 aria-hidden="true" /> : <CreditCard aria-hidden="true" />}
+    </button>
   );
 }
 
@@ -326,6 +335,11 @@ function ProviderPanel({
   clientSecret,
   buyerEmail,
   realPayments,
+  emailOnly,
+  emailHref,
+  emailAddress,
+  emailSubject,
+  emailBody,
   scriptReady,
   onConfirmReady,
   onScenarioChange,
@@ -338,6 +352,11 @@ function ProviderPanel({
   clientSecret: string | null;
   buyerEmail: string;
   realPayments: boolean;
+  emailOnly: boolean;
+  emailHref: string;
+  emailAddress: string;
+  emailSubject: string;
+  emailBody: string;
   scriptReady: boolean;
   onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
   onScenarioChange: (scenario: PaymentScenario) => void;
@@ -345,21 +364,58 @@ function ProviderPanel({
   onPay: () => void;
 }) {
   const isProcessing = state === "processing";
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function copyField(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      window.setTimeout(() => setCopied((current) => current === label ? null : current), 1800);
+    } catch {
+      setCopied(null);
+    }
+  }
 
   return (
-    <div className={styles.providerArea} aria-label="Área segura de pago de Stripe">
+    <div className={styles.providerArea} aria-label={emailOnly ? "Solicitud de inscripción por correo" : "Área segura de pago de Stripe"}>
       <div className={styles.providerHeader}>
         <div>
           <span className={styles.providerName}>
-            <LockKeyhole aria-hidden="true" />
-            Stripe Payment Element
+            {emailOnly ? <Mail aria-hidden="true" /> : <LockKeyhole aria-hidden="true" />}
+            {emailOnly ? "Solicitud por correo" : "Stripe Payment Element"}
           </span>
-            <small>{realPayments ? "Stripe procesa el pago de forma segura" : "Prototipo visual · no realiza cargos"}</small>
+          <small>{emailOnly ? "ELSI confirmará disponibilidad y siguientes pasos." : realPayments ? "Stripe procesa el pago de forma segura" : "Modo de prueba · no realiza cargos"}</small>
           </div>
-        {!realPayments && <span className={styles.demoBadge}>Demo</span>}
+        {!realPayments && !emailOnly && <span className={styles.demoBadge}>Prueba</span>}
       </div>
 
-      {realPayments && clientSecret ? (
+      {emailOnly ? (
+        <div className={styles.providerPlaceholder}>
+          <div className={styles.providerMethod}>
+            <Mail aria-hidden="true" />
+            <div>
+              <strong>Solicita tu inscripción</strong>
+              <span>Envía tus datos y el curso seleccionado a ELSI para continuar.</span>
+            </div>
+          </div>
+          <p>Se abrirá tu aplicación de correo con un mensaje preparado para revisión.</p>
+          <div className={styles.emailCopyGrid} aria-label="Datos para enviar la solicitud manualmente">
+            {[
+              ["Correo", emailAddress],
+              ["Asunto", emailSubject],
+              ["Mensaje", emailBody],
+            ].map(([label, value]) => (
+              <div className={styles.emailCopyField} key={label}>
+                <label htmlFor={`checkout-copy-${label.toLowerCase()}`}>{label}</label>
+                <textarea id={`checkout-copy-${label.toLowerCase()}`} value={value} readOnly rows={label === "Mensaje" ? 4 : 2} />
+                <button type="button" className={styles.secondaryAction} onClick={() => void copyField(label, value)}>
+                  {copied === label ? "Copiado" : `Copiar ${label.toLowerCase()}`}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : realPayments && clientSecret ? (
         <StripePaymentElement clientSecret={clientSecret} buyerEmail={buyerEmail} scriptReady={scriptReady} onConfirmReady={onConfirmReady} />
       ) : (
         <div className={styles.providerPlaceholder}>
@@ -375,7 +431,7 @@ function ProviderPanel({
         </div>
       )}
 
-      {!realPayments && <details className={styles.demoControls}>
+      {!realPayments && !emailOnly && <details className={styles.demoControls}>
         <summary>
           Configurar resultado del prototipo
           <ChevronDown aria-hidden="true" />
@@ -406,7 +462,10 @@ function ProviderPanel({
         >
           Editar datos
         </button>
-        <button
+        {emailOnly ? <a className={styles.primaryAction} href={emailHref}>
+          Enviar solicitud por correo
+          <Mail aria-hidden="true" />
+        </a> : <button
           className={styles.primaryAction}
           type="button"
           onClick={onPay}
@@ -418,7 +477,7 @@ function ProviderPanel({
           ) : (
             <LockKeyhole aria-hidden="true" />
           )}
-        </button>
+        </button>}
       </div>
     </div>
   );
@@ -576,9 +635,7 @@ function CheckoutEmptyState() {
           <p className={styles.emptyCheckoutLabel}>Inscripción</p>
           <h1 id="checkout-empty-title">Aún no seleccionas un curso</h1>
           <p>
-            Explora la oferta de demostración y abre el detalle del curso antes
-            de continuar. La selección real se conectará cuando ELSI entregue
-            su catálogo aprobado.
+            Explora el catálogo y abre el detalle de un curso antes de continuar.
           </p>
           <Link className={styles.primaryAction} href="/cursos">
             Explorar cursos
@@ -589,7 +646,7 @@ function CheckoutEmptyState() {
   );
 }
 
-function CheckoutFlow({ course }: { course: CheckoutCourse }) {
+function CheckoutFlow({ course, cardPaymentsEnabled }: { course: CheckoutCourse; cardPaymentsEnabled: boolean }) {
   const { user } = useAuth();
   const gateway = useMemo(() => createMockPaymentGateway(), []);
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -600,7 +657,7 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
   const [stripeReady, setStripeReady] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const stripeConfirmRef = useRef<(() => Promise<{ error?: StripeCheckoutError }>) | null>(null);
-  const realPayments = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1";
+  const realPayments = cardPaymentsEnabled;
   const setStripeConfirm = useMemo(() => (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => {
     stripeConfirmRef.current = confirm;
   }, []);
@@ -648,11 +705,13 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
         }
         setSession({ orderId: payload.orderId, checkoutRequestId: payload.orderId, course, buyer: normalizeBuyer(buyer), status: "pending", clientSecret: payload.clientSecret });
         setState("ready");
-      } else {
+      } else if (cardPaymentsEnabled) {
         const checkoutSession = await gateway.createSession({ courseId: course.id, buyer: normalizeBuyer(buyer) });
         setSession(checkoutSession);
         setState("loading-provider");
         await gateway.loadProvider(checkoutSession);
+      } else {
+        setSession({ orderId: "email-request", checkoutRequestId: "email-request", course, buyer: normalizeBuyer(buyer), status: "pending" });
       }
       setState("ready");
     } catch (error) {
@@ -698,6 +757,13 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
     setState("collecting");
   }
 
+  const emailAddress = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
+  const emailSubject = `Solicitud de inscripción · ${course.title}`;
+  const emailBody = session ? `Hola ELSI,\n\nQuiero solicitar mi inscripción al curso: ${course.title}\nCurso: ${course.id}\nNombre: ${session.buyer.name}\nCorreo: ${session.buyer.email}\nTeléfono: ${session.buyer.phone}\n\nQuedo atento(a) a los siguientes pasos.` : "";
+  const emailHref = session
+    ? `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
+    : "#";
+
   return (
     <main className={styles.checkoutPage}>
       {realPayments ? <Script src="https://js.stripe.com/clover/stripe.js" strategy="afterInteractive" onLoad={() => setStripeReady(true)} onReady={() => setStripeReady(true)} onError={() => setStripeReady(false)} /> : null}
@@ -718,10 +784,6 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
           <span className="section-kicker">Inscripción segura</span>
           <h1 id="checkout-title">Finaliza tu inscripción</h1>
           <p>Revisa el curso, confirma tus datos y continúa al pago.</p>
-          <PrototypeDataNote>
-            Curso, importe y confirmaciones son fixtures de integración; no se
-            realizan cargos ni inscripciones reales.
-          </PrototypeDataNote>
         </header>
 
         <div className={styles.checkoutGrid}>
@@ -764,6 +826,11 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
                     clientSecret={session?.clientSecret ?? null}
                     buyerEmail={session?.buyer.email ?? ""}
                     realPayments={realPayments}
+                    emailOnly={!cardPaymentsEnabled}
+                    emailHref={emailHref}
+                    emailAddress={emailAddress}
+                    emailSubject={emailSubject}
+                    emailBody={emailBody}
                     scriptReady={stripeReady}
                     onConfirmReady={setStripeConfirm}
                     onScenarioChange={setScenario}
@@ -792,6 +859,6 @@ function CheckoutFlow({ course }: { course: CheckoutCourse }) {
   );
 }
 
-export function CheckoutExperience({ course }: CheckoutExperienceProps) {
-  return course ? <CheckoutFlow course={course} /> : <CheckoutEmptyState />;
+export function CheckoutExperience({ course, cardPaymentsEnabled }: CheckoutExperienceProps) {
+  return course ? <CheckoutFlow course={course} cardPaymentsEnabled={cardPaymentsEnabled} /> : <CheckoutEmptyState />;
 }

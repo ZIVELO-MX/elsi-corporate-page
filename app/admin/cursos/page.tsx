@@ -47,6 +47,7 @@ type PersistedCourse = {
   price_cents: number;
   is_active: boolean;
   created_at: string;
+  students?: number;
 };
 
 function courseFromRow(row: PersistedCourse): AdminCourse {
@@ -66,7 +67,7 @@ function courseFromRow(row: PersistedCourse): AdminCourse {
     price: row.price_cents / 100,
     status: row.is_active ? "active" : "inactive",
     externalUrl: row.enrollment_link ?? "",
-    students: 0,
+    students: row.students ?? 0,
     createdAt: row.created_at.slice(0, 10),
     synopsis: row.short_description,
     duration: row.duration_hours ? `${row.duration_hours} horas` : "",
