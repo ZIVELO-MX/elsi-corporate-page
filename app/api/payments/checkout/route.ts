@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStripe, paymentsEnabled } from "@/lib/stripe";
+import { getCardPaymentsEnabled } from "@/lib/payment-settings";
 
 export async function POST(request: Request) {
-  if (!paymentsEnabled()) return NextResponse.json({ error: "Pagos no disponibles" }, { status: 503 });
+  if (!paymentsEnabled() || !(await getCardPaymentsEnabled())) return NextResponse.json({ error: "Pagos con tarjeta desactivados" }, { status: 503 });
   const stripe = getStripe();
   if (!stripe) return NextResponse.json({ error: "Stripe no está configurado" }, { status: 503 });
   const livemode = process.env.STRIPE_SECRET_KEY?.trim().startsWith("sk_live_") === true;

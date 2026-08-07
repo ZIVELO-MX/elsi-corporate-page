@@ -7,7 +7,7 @@ import { AdminDataProvider } from "@/lib/admin-data";
 import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Inbox, Quote, Menu, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Inbox, Quote, Settings, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: "/admin/contenido", label: "Contenido", Icon: FileText },
   { href: "/admin/contacto", label: "Contacto", Icon: Inbox },
   { href: "/admin/testimonios", label: "Testimonios", Icon: Quote },
+  { href: "/admin/configuracion", label: "Configuración", Icon: Settings },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

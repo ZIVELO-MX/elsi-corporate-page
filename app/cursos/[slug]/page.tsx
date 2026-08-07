@@ -25,6 +25,7 @@ import {
 import { buildContactPath } from "@/lib/agentic-navigation";
 import { getPublicCourse, listPublicCourses } from "@/lib/courses-repository";
 import { currentUserHasEnrollment } from "@/lib/enrollments-repository";
+import { getCardPaymentsEnabled } from "@/lib/payment-settings";
 
 export async function generateStaticParams() {
   const persisted = await listPublicCourses();
@@ -84,9 +85,9 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const state = publishState(course);
   const availability = stateMeta(course).label;
   const alreadyEnrolled = await currentUserHasEnrollment(course.id);
+  const cardPaymentsEnabled = await getCardPaymentsEnabled();
   const online = course.modality !== "presencial";
-  const checkoutAvailable = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1"
-    && state === "published"
+  const checkoutAvailable = state === "published"
     && course.price > 0
     && !alreadyEnrolled;
   const actionHref = alreadyEnrolled
@@ -109,9 +110,9 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               <p className="course-detail-kicker">Curso {modalityLabel(course).toLowerCase()}</p>
               <h1>{course.title}</h1>
               <p className="course-detail-description">{course.description}</p>
-              <PrototypeDataNote>
-                Temario, fechas, precio, instructor e imagen permanecen como ejemplo hasta recibir la ficha aprobada por ELSI.
-              </PrototypeDataNote>
+              {persisted === null || course.contentStatus === "fixture" ? <PrototypeDataNote>
+                Mostrando la ficha de referencia mientras se configura el catálogo validado de ELSI.
+              </PrototypeDataNote> : null}
             </header>
             <figure className="course-detail-media">
               <CourseMedia
@@ -146,7 +147,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
               <ArrowRight aria-hidden="true" size={16} />
             </Link>
             <p className="course-detail-action-note">
-              {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : checkoutAvailable ? "Completa tus datos para continuar al pago seguro con Stripe." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
+              {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : checkoutAvailable && cardPaymentsEnabled ? "Completa tus datos para continuar al pago seguro con Stripe." : checkoutAvailable ? "Completa tus datos para enviar una solicitud a ELSI." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
             </p>
           </aside>
         </div>

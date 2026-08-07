@@ -61,9 +61,9 @@ test("prototype course data stays visibly provisional until client handoff", () 
 
   assert.match(note, /siteConfig\.previewMode/);
   assert.match(note, /Contenido de demostración/);
-  assert.match(catalog, /información\s+validada por ELSI/);
-  assert.match(detail, /ficha aprobada por ELSI/);
-  assert.match(checkout, /no se\s+realizan cargos ni inscripciones reales/);
+  assert.match(catalog, /catálogo validado de ELSI/);
+  assert.match(detail, /catálogo validado de ELSI/);
+  assert.match(checkout, /Pagos con tarjeta desactivados/);
 });
 
 test("mission checkout capture selects a fixture course explicitly", () => {

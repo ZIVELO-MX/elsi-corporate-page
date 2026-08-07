@@ -225,6 +225,7 @@ export default async function CursosPage({
   const verifiedCourses = (persisted ?? getVerifiedCourses()).filter(
     (course) => publishState(course) !== "draft",
   );
+  const showingReferenceData = persisted === null || allCourses.some((course) => course.contentStatus === "fixture");
 
   return (
     <main>
@@ -238,10 +239,9 @@ export default async function CursosPage({
           Encuentra el curso por tema, modalidad o disponibilidad. El acceso a
           los cursos en línea se envía por correo tras la inscripción.
         </p>
-        <PrototypeDataNote>
-          Cursos, fechas, precios e imágenes se sustituirán con la información
-          validada por ELSI.
-        </PrototypeDataNote>
+        {showingReferenceData ? <PrototypeDataNote>
+          Mostrando el catálogo de referencia mientras se configura el catálogo validado de ELSI.
+        </PrototypeDataNote> : null}
       </div>
 
       <section
