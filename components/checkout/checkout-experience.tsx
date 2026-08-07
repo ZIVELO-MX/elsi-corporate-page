@@ -329,6 +329,9 @@ function ProviderPanel({
   realPayments,
   emailOnly,
   emailHref,
+  emailAddress,
+  emailSubject,
+  emailBody,
   scriptReady,
   onConfirmReady,
   onScenarioChange,
@@ -343,6 +346,9 @@ function ProviderPanel({
   realPayments: boolean;
   emailOnly: boolean;
   emailHref: string;
+  emailAddress: string;
+  emailSubject: string;
+  emailBody: string;
   scriptReady: boolean;
   onConfirmReady: (confirm: (() => Promise<{ error?: StripeCheckoutError }>) | null) => void;
   onScenarioChange: (scenario: PaymentScenario) => void;
@@ -350,6 +356,17 @@ function ProviderPanel({
   onPay: () => void;
 }) {
   const isProcessing = state === "processing";
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function copyField(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      window.setTimeout(() => setCopied((current) => current === label ? null : current), 1800);
+    } catch {
+      setCopied(null);
+    }
+  }
 
   return (
     <div className={styles.providerArea} aria-label={emailOnly ? "Solicitud de inscripción por correo" : "Área segura de pago de Stripe"}>
@@ -374,6 +391,21 @@ function ProviderPanel({
             </div>
           </div>
           <p>Se abrirá tu aplicación de correo con un mensaje preparado para revisión.</p>
+          <div className={styles.emailCopyGrid} aria-label="Datos para enviar la solicitud manualmente">
+            {[
+              ["Correo", emailAddress],
+              ["Asunto", emailSubject],
+              ["Mensaje", emailBody],
+            ].map(([label, value]) => (
+              <div className={styles.emailCopyField} key={label}>
+                <label htmlFor={`checkout-copy-${label.toLowerCase()}`}>{label}</label>
+                <textarea id={`checkout-copy-${label.toLowerCase()}`} value={value} readOnly rows={label === "Mensaje" ? 4 : 2} />
+                <button type="button" className={styles.secondaryAction} onClick={() => void copyField(label, value)}>
+                  {copied === label ? "Copiado" : `Copiar ${label.toLowerCase()}`}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       ) : realPayments && clientSecret ? (
         <StripePaymentElement clientSecret={clientSecret} buyerEmail={buyerEmail} scriptReady={scriptReady} onConfirmReady={onConfirmReady} />
@@ -717,8 +749,11 @@ function CheckoutFlow({ course, cardPaymentsEnabled }: { course: CheckoutCourse;
     setState("collecting");
   }
 
+  const emailAddress = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
+  const emailSubject = `Solicitud de inscripción · ${course.title}`;
+  const emailBody = session ? `Hola ELSI,\n\nQuiero solicitar mi inscripción al curso: ${course.title}\nCurso: ${course.id}\nNombre: ${session.buyer.name}\nCorreo: ${session.buyer.email}\nTeléfono: ${session.buyer.phone}\nImporte de referencia: ${formattedAmount}\n\nQuedo atento(a) a los siguientes pasos.` : "";
   const emailHref = session
-    ? `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com"}?subject=${encodeURIComponent(`Solicitud de inscripción · ${course.title}`)}&body=${encodeURIComponent(`Hola ELSI,\n\nQuiero solicitar mi inscripción al curso: ${course.title}\nCurso: ${course.id}\nNombre: ${session.buyer.name}\nCorreo: ${session.buyer.email}\nTeléfono: ${session.buyer.phone}\nImporte de referencia: ${formattedAmount}\n\nQuedo atento(a) a los siguientes pasos.`)}`
+    ? `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
     : "#";
 
   return (
@@ -785,6 +820,9 @@ function CheckoutFlow({ course, cardPaymentsEnabled }: { course: CheckoutCourse;
                     realPayments={realPayments}
                     emailOnly={!cardPaymentsEnabled}
                     emailHref={emailHref}
+                    emailAddress={emailAddress}
+                    emailSubject={emailSubject}
+                    emailBody={emailBody}
                     scriptReady={stripeReady}
                     onConfirmReady={setStripeConfirm}
                     onScenarioChange={setScenario}
