@@ -63,7 +63,7 @@ test("prototype course data stays visibly provisional until client handoff", () 
   assert.match(note, /Contenido de demostración/);
   assert.match(catalog, /catálogo validado de ELSI/);
   assert.match(detail, /catálogo validado de ELSI/);
-  assert.match(checkout, /Pagos con tarjeta desactivados/);
+  assert.match(checkout, /Solicita tu inscripción/);
 });
 
 test("mission checkout capture selects a fixture course explicitly", () => {
