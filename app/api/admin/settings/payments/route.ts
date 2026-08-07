@@ -26,6 +26,14 @@ export async function PATCH(request: Request) {
   const body = await request.json().catch(() => ({}));
   if (typeof body.enabled !== "boolean") return NextResponse.json({ error: "enabled debe ser booleano" }, { status: 400 });
   const { error } = await client.from("site_settings").upsert({ key: "payments", value: { card_enabled: body.enabled } });
-  if (error) return NextResponse.json({ error: "No fue posible guardar la configuración" }, { status: 500 });
+  if (error) {
+    console.error("[admin/settings/payments] update failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    return NextResponse.json({ error: "No fue posible guardar la configuración" }, { status: 500 });
+  }
   return NextResponse.json({ cardEnabled: body.enabled });
 }
