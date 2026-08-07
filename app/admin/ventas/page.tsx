@@ -1,13 +1,85 @@
 "use client";
 
 import { Receipt } from "lucide-react";
-import { useAdminData } from "@/lib/admin-data";
+import { useState } from "react";
+import { useAdminData, type PendingPayment } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onApprove: (payment: PendingPayment) => Promise<void> }) {
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null);
+  const { toast } = useToast();
+
+  const approve = async () => {
+    if (!selectedPayment) return;
+    const payment = selectedPayment;
+    setApprovingId(payment.id);
+    try {
+      await onApprove(payment);
+      toast({ title: "Inscripción aprobada. El alumno ya puede ver el curso en su perfil.", variant: "success" });
+      setSelectedPayment(null);
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : "No fue posible aprobar la inscripción.", variant: "error" });
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  return (
+    <>
+      <AdminTable
+        rows={rows}
+        rowKey={(payment) => payment.id}
+        minWidth="42rem"
+        columns={[
+          { key: "user", header: "Usuario", primary: true, cell: (payment) => <span style={{ fontWeight: 500 }}>{payment.userName}</span> },
+          { key: "course", header: "Curso", cell: (payment) => <span className="admin-cell-truncate admin-cell-muted" title={payment.courseName}>{payment.courseName}</span> },
+          { key: "amount", header: "Monto", align: "right", cell: (payment) => <span style={{ fontWeight: 600 }}>{`$${payment.amount.toFixed(2)}`}</span> },
+          { key: "status", header: "Estado", cell: () => <Badge variant="outline">Pendiente</Badge> },
+          { key: "date", header: "Fecha", cell: (payment) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{payment.soldAt}</span> },
+        ]}
+        actions={(payment) => (
+          <Button type="button" size="sm" variant="outline" disabled={approvingId !== null} onClick={() => setSelectedPayment(payment)}>
+            Aprobar inscripción
+          </Button>
+        )}
+        empty={<EmptyState icon={<Receipt size={20} aria-hidden="true" />} title="Sin pagos pendientes" hint="Los pagos aparecerán aquí mientras Stripe confirma su estado." />}
+      />
+      <Dialog open={selectedPayment !== null} onOpenChange={(open) => { if (!open && approvingId === null) setSelectedPayment(null); }}>
+        <DialogContent aria-describedby="approve-payment-description">
+          <DialogHeader>
+            <DialogTitle>¿Aprobar inscripción?</DialogTitle>
+            <DialogDescription id="approve-payment-description">
+              Esta acción habilita el curso para el alumno y marca la orden como aprobada desde el panel administrativo.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPayment && (
+            <dl className="grid gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--paper-warm)] p-4 text-sm">
+              <div><dt className="font-bold text-[var(--text-muted)]">Alumno</dt><dd className="font-semibold text-[var(--text)]">{selectedPayment.userName}</dd></div>
+              <div><dt className="font-bold text-[var(--text-muted)]">Curso</dt><dd className="font-semibold text-[var(--text)]">{selectedPayment.courseName}</dd></div>
+              <div><dt className="font-bold text-[var(--text-muted)]">Monto</dt><dd className="font-semibold text-[var(--text)]">${selectedPayment.amount.toFixed(2)}</dd></div>
+            </dl>
+          )}
+          <div className="mt-5 flex justify-end gap-2">
+            <Button type="button" variant="outline" disabled={approvingId !== null} onClick={() => setSelectedPayment(null)}>Cancelar</Button>
+            <Button type="button" disabled={approvingId !== null} onClick={() => void approve()}>
+              {approvingId === selectedPayment?.id ? "Aprobando…" : "Confirmar aprobación"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export default function AdminSales() {
-  const { loading, sales } = useAdminData();
+  const { loading, sales, pendingPayments, approvePendingPayment } = useAdminData();
 
   const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
 
@@ -23,6 +95,17 @@ export default function AdminSales() {
       <p style={{ margin: "0 0 1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-muted)", fontSize: "0.8125rem" }}>
         Las ventas se generan automáticamente cuando Stripe confirma un pago. No se crean registros manuales desde este panel.
       </p>
+
+      <section aria-labelledby="pending-payments-title" style={{ marginBottom: "2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+          <h2 id="pending-payments-title" className="admin-section-title">Pagos pendientes</h2>
+          <Badge variant="outline">{pendingPayments.length}</Badge>
+        </div>
+        <p className="admin-page-sub" style={{ marginBottom: "1rem" }}>
+          Revisa casos en los que Stripe aún no confirmó el pago. Aprobar manualmente crea la inscripción y deja registro de la acción.
+        </p>
+        {loading ? <TableSkeleton rows={2} widths={["9rem", "12rem", "5rem", "8rem"]} /> : <PendingPaymentTable rows={pendingPayments} onApprove={(payment) => approvePendingPayment(payment.id)} />}
+      </section>
 
       {loading ? (
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
