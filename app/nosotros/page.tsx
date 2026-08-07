@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SafeImage } from "@/components/safe-image";
-import { PrototypeDataNote } from "@/components/prototype-data-note";
 import { Button } from "@/components/ui/button";
 import {
   getPublicAboutContent,
@@ -70,10 +69,6 @@ export default async function NosotrosPage() {
             <p className="home-kicker">Quiénes somos</p>
             <h1 id="about-title">{content.title}</h1>
             <p className="about-hero-lede">{content.introduction}</p>
-            <PrototypeDataNote>
-              La historia y las declaraciones institucionales permanecen como
-              contenido provisional hasta recibir la validación final de ELSI.
-            </PrototypeDataNote>
           </div>
 
           <figure className="about-hero-media">

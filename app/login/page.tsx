@@ -158,14 +158,16 @@ export default function LoginPage() {
           <span className="h-px flex-1 bg-[var(--border)]" />
         </div>
 
-        <button
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-sm)] border border-[var(--input)] bg-white px-4 text-[12px] font-extrabold text-[var(--text)] transition-colors pointer-fine:hover:bg-[var(--paper-warm)] disabled:cursor-wait disabled:opacity-60"
+        <Button
+          className="w-full"
           type="button"
+          variant="secondary"
+          size="default"
           onClick={handleGoogleLogin}
           disabled={loading}
         >
           Continuar con Google
-        </button>
+        </Button>
 
       </form>
 

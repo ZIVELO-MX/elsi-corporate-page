@@ -8,7 +8,6 @@ import {
 } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
-import { PrototypeDataNote } from "@/components/prototype-data-note";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import {
@@ -75,10 +74,6 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
               <p className="home-kicker">{solution.eyebrow}</p>
               <h1 id="solution-detail-title">{solution.title}</h1>
               <p className="solution-detail-intro">{solution.intro}</p>
-              <PrototypeDataNote>
-                El alcance, la modalidad y los entregables permanecen como
-                propuesta hasta recibir la validación final de ELSI.
-              </PrototypeDataNote>
             </header>
 
             {image ? (
