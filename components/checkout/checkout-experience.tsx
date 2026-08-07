@@ -386,7 +386,7 @@ function ProviderPanel({
           <div className={styles.providerMethod}>
             <Mail aria-hidden="true" />
             <div>
-              <strong>Pagos con tarjeta desactivados</strong>
+              <strong>Solicita tu inscripción</strong>
               <span>Envía tus datos y el curso seleccionado a ELSI para continuar.</span>
             </div>
           </div>
