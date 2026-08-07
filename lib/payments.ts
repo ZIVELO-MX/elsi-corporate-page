@@ -31,7 +31,7 @@ export type CheckoutCourse = {
   amount: number;
   currency: "MXN";
   priceLabel: string;
-  contentStatus: "fixture";
+  contentStatus: "fixture" | "verified";
 };
 
 export type PaymentBuyer = {
@@ -49,6 +49,7 @@ export type CheckoutSession = {
   course: CheckoutCourse;
   buyer: PaymentBuyer;
   status: "pending";
+  clientSecret?: string | null;
 };
 
 export type PaymentResult = {
@@ -105,6 +106,33 @@ export function getCheckoutCourseBySlug(
   slug: string | undefined,
 ): CheckoutCourse | null {
   return slug === CHECKOUT_COURSE.slug ? CHECKOUT_COURSE : null;
+}
+
+export function mapPublicCourseToCheckoutCourse(course: {
+  id: string;
+  slug: string;
+  title: string;
+  category?: string;
+  duration?: string;
+  certificateType?: string;
+  price: number;
+  currency?: string;
+  priceLabel?: string;
+  contentStatus?: "fixture" | "verified";
+}): CheckoutCourse | null {
+  if (course.currency && course.currency !== "MXN") return null;
+  return {
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    category: course.category || "Curso ELSI",
+    duration: course.duration || "Por confirmar",
+    certificateType: course.certificateType || "Constancia de participación",
+    amount: Math.round(course.price * 100),
+    currency: "MXN",
+    priceLabel: course.priceLabel || "Pago único",
+    contentStatus: course.contentStatus ?? "verified",
+  };
 }
 
 export function formatPaymentAmount(

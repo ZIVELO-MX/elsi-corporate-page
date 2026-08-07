@@ -16,20 +16,11 @@ import {
   websiteJsonLd,
 } from "@/lib/seo";
 import { intentRoutes } from "@/lib/agentic-navigation";
+import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
 
 export const metadata = buildMetadata({
   description: "ELSI, Environmental Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
   path: "/",
-});
-
-const featuredCourses = getPublicCourses().slice(0, 3);
-const [primaryCourse, ...secondaryCourses] = featuredCourses;
-const publicSolutions = getPublicSolutions();
-const availableIntentRoutes = intentRoutes.filter((intent) => {
-  if (intent.href === "/cursos") return featuredCourses.length > 0;
-  return publicSolutions.some(
-    (solution) => intent.href === `/soluciones/${solution.slug}`,
-  );
 });
 
 const homeFaqs = [
@@ -47,7 +38,19 @@ const homeFaqs = [
   },
 ] as const;
 
-export default function Home() {
+export default async function Home() {
+  const persistedContent = await listPublicContent();
+  const featuredCourses = getPublicCourses().slice(0, 3);
+  const [primaryCourse, ...secondaryCourses] = featuredCourses;
+  const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
+  const availableIntentRoutes = intentRoutes.filter((intent) => {
+    if (intent.href === "/cursos") return featuredCourses.length > 0;
+    return publicSolutions.some((solution) => intent.href === `/soluciones/${solution.slug}`);
+  });
+  const heroText = sectionText(persistedContent, "hero", "ELSI crea rutas de formación y acompañamiento para organizaciones, comunidades e instituciones educativas.");
+  const storyText = sectionText(persistedContent, "value-prop", "Bee Blue reunió educación ambiental, participación universitaria y trabajo de campo. ELSI continúa esa trayectoria mediante experiencias que conectan conocimiento y contexto.");
+  const faqText = sectionText(persistedContent, "faq", "Estas respuestas describen el proceso general. El alcance específico se confirma en cada propuesta.");
+  const ctaText = sectionText(persistedContent, "cta", "Comparte tus datos y el contexto general. ELSI podrá orientar la solución, curso o programa adecuado.");
   return (
     <main>
       {indexable ? (
@@ -73,7 +76,7 @@ export default function Home() {
             <p className="home-kicker">Instituto de educación y soluciones ambientales</p>
             <h1>Conocimiento ambiental para aprender, decidir y actuar.</h1>
             <p className="home-hero-lede">
-              ELSI crea rutas de formación y acompañamiento para organizaciones, comunidades e instituciones educativas.
+              {heroText}
             </p>
             <div className="home-hero-actions">
               <Button asChild variant="inverse" size="lg">
@@ -186,7 +189,7 @@ export default function Home() {
             <p className="home-kicker">Una historia que nace en comunidad</p>
             <h2>De una iniciativa estudiantil a una práctica ambiental compartida.</h2>
             <p>
-              Bee Blue reunió educación ambiental, participación universitaria y trabajo de campo. ELSI continúa esa trayectoria mediante experiencias que conectan conocimiento y contexto.
+              {storyText}
             </p>
             <Button asChild variant="link" className="home-inline-action">
               <Link href="/nosotros">Conocer la historia <ArrowRight data-icon="inline-end" /></Link>
@@ -256,7 +259,7 @@ export default function Home() {
           <header className="home-section-intro">
             <p className="home-kicker">Antes de comenzar</p>
             <h2>Una ruta clara desde la primera conversación.</h2>
-            <p>Estas respuestas describen el proceso general. El alcance específico se confirma en cada propuesta.</p>
+            <p>{faqText}</p>
           </header>
           <div className="home-faq-list">
             {homeFaqs.map((item) => (
@@ -274,7 +277,7 @@ export default function Home() {
           <div className="cta-copy">
             <p className="home-kicker home-kicker-inverse">El siguiente paso</p>
             <h2>Conversemos sobre el reto que quieres atender.</h2>
-            <p>Comparte tus datos y el contexto general. ELSI podrá orientar la solución, curso o programa adecuado.</p>
+            <p>{ctaText}</p>
           </div>
           <PublicContactForm
             className="cta-form"

@@ -21,7 +21,7 @@ test("checkout validates the buyer and completes the approved mock flow", async 
   await page.getByRole("button", { name: "Continuar al pago" }).click();
 
   await expect(page.getByRole("heading", { name: "Realiza tu pago" })).toBeVisible();
-  await expect(page.getByLabel("Área segura de pago de Conekta")).toBeVisible();
+  await expect(page.getByLabel("Área segura de pago de Stripe")).toBeVisible();
   await expect(page.getByText("Prototipo visual · no realiza cargos")).toBeVisible();
 
   await page.getByRole("button", { name: "Pagar $550" }).click();

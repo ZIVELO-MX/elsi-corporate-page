@@ -25,6 +25,7 @@ test("Supabase foundation keeps schema, RLS, and secrets separated", async () =>
     "testimonials",
     "contact_leads",
     "outbox_events",
+    "orders",
   ]) {
     assert.match(migration, new RegExp(`create table if not exists public\\.${table}`));
     assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`));
@@ -35,7 +36,8 @@ test("Supabase foundation keeps schema, RLS, and secrets separated", async () =>
   assert.match(migration, /create policy courses_select_published/);
   assert.match(migration, /create policy enrollments_select_owner_or_admin/);
   assert.match(migration, /create policy contact_leads_admin_only/);
-  assert.doesNotMatch(migration, /create table if not exists public\.orders|stripe_|payment_intent/i);
+  assert.match(migration, /create table if not exists public\.orders/);
+  assert.match(migration, /orders_select_owner_or_admin/);
   assert.match(seed, /fixture/);
   assert.doesNotMatch(seed, /@|service_role/i);
 

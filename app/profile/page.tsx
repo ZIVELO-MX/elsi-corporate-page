@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   AlertCircle, BookOpen, CalendarDays, CheckCircle2, Download, FileClock,
   GraduationCap, Mail, MapPin, TicketCheck,
@@ -13,6 +14,31 @@ import styles from "./profile.module.css";
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "instituteelsi@gmail.com";
 
 type LoadState = "loading" | "error" | "ready";
+type OrderStatus = "pending" | "paid" | "failed" | "canceled";
+type PaymentReturnStatus = "idle" | "checking" | "pending" | "paid" | "failed" | "canceled" | "error";
+
+type PaymentReturnFeedback = {
+  status: PaymentReturnStatus;
+  orderId?: string;
+  courseTitle?: string;
+  canRetry?: boolean;
+};
+
+type OrderResponse = {
+  order: {
+    id: string;
+    course_title: string;
+    status: OrderStatus;
+  };
+};
+
+const PAYMENT_POLL_ATTEMPTS = 15;
+const PAYMENT_POLL_DELAY_MS = 1_000;
+const ORDER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function clearPaymentReturnQuery() {
+  window.history.replaceState(null, "", "/profile");
+}
 
 /* --- Presentational pieces (ported from the approved ELS-0020 wireframe) --- */
 
@@ -159,6 +185,109 @@ function Discover({ empty = false }: { empty?: boolean }) {
   );
 }
 
+function PaymentReturnNotice({
+  feedback,
+  onRetry,
+}: {
+  feedback: PaymentReturnFeedback;
+  onRetry: () => void;
+}) {
+  if (feedback.status === "idle") return null;
+
+  if (feedback.status === "paid") {
+    return (
+      <section
+        role="status"
+        aria-live="polite"
+        className="mb-6 rounded-[var(--radius-md)] border border-[var(--leaf)] bg-[#edf7ed] p-4 text-[var(--text)]"
+      >
+        <div className="flex gap-3">
+          <CheckCircle2 className="mt-0.5 shrink-0 text-[var(--leaf)]" size={20} aria-hidden="true" />
+          <div>
+            <p className="text-[13px] font-extrabold">Pago confirmado</p>
+            <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">
+              {feedback.courseTitle
+                ? `Tu inscripción a ${feedback.courseTitle} ya aparece en el portal.`
+                : "Tu inscripción ya aparece en el portal."}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (feedback.status === "checking" || feedback.status === "pending") {
+    return (
+      <section
+        role="status"
+        aria-live="polite"
+        className="mb-6 rounded-[var(--radius-md)] border border-[var(--earth)] bg-[var(--paper)] p-4 text-[var(--text)]"
+      >
+        <div className="flex gap-3">
+          <FileClock className="mt-0.5 shrink-0 text-[var(--earth)]" size={20} aria-hidden="true" />
+          <div>
+            <p className="text-[13px] font-extrabold">
+              {feedback.status === "checking" ? "Confirmando tu pago" : "Pago pendiente"}
+            </p>
+            <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">
+              Estamos esperando la confirmación final de Stripe. Tu inscripción aparecerá automáticamente cuando termine.
+            </p>
+            {feedback.canRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className={`${styles.control} mt-3 rounded-[var(--radius-sm)] border border-[var(--earth)] px-3 text-[11px] font-extrabold text-[var(--earth)] pointer-fine:hover:bg-[var(--paper-warm)]`}
+              >
+                Actualizar estado
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const canceled = feedback.status === "canceled";
+  const failed = feedback.status === "failed";
+
+  return (
+    <section
+      role="alert"
+      className="mb-6 rounded-[var(--radius-md)] border border-[var(--destructive)] bg-[#fdf2f2] p-4 text-[var(--text)]"
+    >
+      <div className="flex gap-3">
+        <AlertCircle className="mt-0.5 shrink-0 text-[var(--destructive)]" size={20} aria-hidden="true" />
+        <div>
+          <p className="text-[13px] font-extrabold text-[var(--destructive)]">
+            {canceled ? "Pago cancelado" : failed ? "No se completó el pago" : "No pudimos confirmar el pago"}
+          </p>
+          <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">
+            {canceled || failed
+              ? "No se creó ninguna inscripción. Puedes volver al catálogo e intentarlo de nuevo."
+              : "Comprueba tu conexión y vuelve a consultar el estado de la orden."}
+          </p>
+          {feedback.status === "error" ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className={`${styles.control} mt-3 rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] pointer-fine:hover:bg-[#f9e8e8]`}
+            >
+              Reintentar
+            </button>
+          ) : (
+            <Link
+              href="/cursos"
+              className={`${styles.control} mt-3 inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--destructive)] px-3 text-[11px] font-extrabold text-[var(--destructive)] pointer-fine:hover:bg-[#f9e8e8]`}
+            >
+              Volver a cursos
+            </Link>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AccountSection({ user }: { user: User }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user.name);
@@ -221,20 +350,107 @@ export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [data, setData] = useState<ProfilePayload | null>(null);
   const [state, setState] = useState<LoadState>("loading");
+  const [paymentReturn, setPaymentReturn] = useState<PaymentReturnFeedback>({ status: "idle" });
+  const activePaymentRequest = useRef<AbortController | null>(null);
+  const confirmedOrder = useRef<string | null>(null);
 
   // Setting state lives inside the async then/catch (not synchronously in the
   // effect), so the initial fetch doesn't trigger a cascading render. Initial
   // state is already "loading"; the retry handler resets it before calling load.
-  const load = useCallback(() => {
-    fetch("/api/profile")
-      .then((r) => { if (!r.ok) throw new Error("bad status"); return r.json(); })
-      .then((d: ProfilePayload) => { setData(d); setState("ready"); })
-      .catch(() => setState("error"));
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch("/api/profile", { cache: "no-store" });
+      if (!response.ok) throw new Error("bad status");
+      const profile = await response.json() as ProfilePayload;
+      setData(profile);
+      setState("ready");
+    } catch {
+      setState("error");
+    }
   }, []);
 
+  const pollPaymentReturn = useCallback(async (orderId: string) => {
+    activePaymentRequest.current?.abort();
+    const controller = new AbortController();
+    activePaymentRequest.current = controller;
+
+    await Promise.resolve();
+    if (controller.signal.aborted) return;
+    setPaymentReturn({ status: "checking", orderId });
+
+    try {
+      for (let attempt = 0; attempt < PAYMENT_POLL_ATTEMPTS; attempt += 1) {
+        const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("order lookup failed");
+
+        const { order } = await response.json() as OrderResponse;
+        if (order.id !== orderId) throw new Error("order mismatch");
+
+        if (order.status === "paid") {
+          await load();
+          if (controller.signal.aborted) return;
+
+          setPaymentReturn({ status: "paid", orderId, courseTitle: order.course_title });
+          if (confirmedOrder.current !== orderId) {
+            confirmedOrder.current = orderId;
+            toast.success("Pago confirmado", {
+              id: `payment-confirmed-${orderId}`,
+              description: `${order.course_title} ya aparece en tu perfil.`,
+            });
+          }
+          clearPaymentReturnQuery();
+          return;
+        }
+
+        if (order.status === "failed" || order.status === "canceled") {
+          setPaymentReturn({ status: order.status, orderId, courseTitle: order.course_title });
+          clearPaymentReturnQuery();
+          return;
+        }
+
+        const lastAttempt = attempt === PAYMENT_POLL_ATTEMPTS - 1;
+        setPaymentReturn({
+          status: "pending",
+          orderId,
+          courseTitle: order.course_title,
+          canRetry: lastAttempt,
+        });
+        if (!lastAttempt) {
+          await new Promise((resolve) => window.setTimeout(resolve, PAYMENT_POLL_DELAY_MS));
+        }
+      }
+    } catch (error) {
+      if (controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) return;
+      setPaymentReturn({ status: "error", orderId, canRetry: true });
+    }
+  }, [load]);
+
   useEffect(() => {
-    if (user) load();
+    if (user) void Promise.resolve().then(() => load());
   }, [user, load]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "success") return;
+
+    const orderId = params.get("order_id") ?? "";
+    if (!ORDER_ID_PATTERN.test(orderId)) {
+      clearPaymentReturnQuery();
+      void Promise.resolve().then(() => {
+        setPaymentReturn({ status: "error" });
+      });
+      return;
+    }
+
+    void Promise.resolve().then(() => pollPaymentReturn(orderId));
+    return () => activePaymentRequest.current?.abort();
+  }, [user, pollPaymentReturn]);
 
   if (!user) {
     return (
@@ -268,6 +484,13 @@ export default function ProfilePage() {
           <button type="button" onClick={logout} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cerrar sesión</button>
         </div>
       </header>
+
+      <PaymentReturnNotice
+        feedback={paymentReturn}
+        onRetry={() => {
+          if (paymentReturn.orderId) void pollPaymentReturn(paymentReturn.orderId);
+        }}
+      />
 
       {/* At-a-glance summary spans the full width; the detailed content and the
           account rail split into two columns on desktop. */}

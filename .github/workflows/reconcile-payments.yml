@@ -1,0 +1,33 @@
+name: Reconcile pending payments
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check reconciliation secrets
+        env:
+          ELSI_APP_URL: ${{ secrets.ELSI_APP_URL }}
+          PAYMENTS_RECONCILE_SECRET: ${{ secrets.PAYMENTS_RECONCILE_SECRET }}
+        run: |
+          test -n "$ELSI_APP_URL" || { echo "ELSI_APP_URL is not configured"; exit 1; }
+          test -n "$PAYMENTS_RECONCILE_SECRET" || { echo "PAYMENTS_RECONCILE_SECRET is not configured"; exit 1; }
+
+      - name: Reconcile expired pending orders
+        env:
+          ELSI_APP_URL: ${{ secrets.ELSI_APP_URL }}
+          PAYMENTS_RECONCILE_SECRET: ${{ secrets.PAYMENTS_RECONCILE_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${PAYMENTS_RECONCILE_SECRET}" \
+            --header "Accept: application/json" \
+            --url "${ELSI_APP_URL%/}/api/internal/payments/reconcile"

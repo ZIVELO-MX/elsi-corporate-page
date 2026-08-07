@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/server";
 import type { Course, CourseModality, PublishState } from "@/lib/courses";
 import type { Database } from "@/lib/supabase/types";
 
@@ -47,7 +47,7 @@ function mapCourse(row: CourseRow): Course {
 }
 
 export async function listPublicCourses() {
-  const client = await createSupabaseServerClient();
+  const client = createSupabasePublicClient();
   if (!client) return null;
   const { data, error } = await client.from("courses").select("*").eq("is_active", true).eq("content_status", "verified").order("created_at", { ascending: false });
   if (error) throw new Error("No fue posible consultar el catálogo");
@@ -55,7 +55,7 @@ export async function listPublicCourses() {
 }
 
 export async function getPublicCourse(slug: string) {
-  const client = await createSupabaseServerClient();
+  const client = createSupabasePublicClient();
   if (!client) return null;
   const { data, error } = await client.from("courses").select("*").eq("slug", slug).eq("is_active", true).eq("content_status", "verified").maybeSingle();
   if (error) throw new Error("No fue posible consultar el curso");
