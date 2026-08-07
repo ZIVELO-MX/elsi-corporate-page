@@ -25,8 +25,8 @@ import {
   indexable,
 } from "@/lib/seo";
 import {
+  buildCatalogCategories,
   buildCatalogPath,
-  CATALOG_CATEGORIES,
   normalizeCatalogCategory,
   normalizeCatalogQuery,
 } from "@/lib/agentic-navigation";
@@ -91,7 +91,12 @@ function StateBadge({ course, enrolled = false }: { course: Course; enrolled?: b
 
 function FeaturedCard({ course, enrolled }: { course: Course; enrolled: boolean }) {
   return (
-    <article className="course-feature-card grid w-full min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)] md:grid-cols-[1.05fr_1fr]">
+    <article className="course-feature-card relative grid w-full min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)] transition-[border-color,box-shadow] pointer-fine:hover:border-[var(--primary)] pointer-fine:hover:shadow-[var(--shadow-card-hover)] md:grid-cols-[1.05fr_1fr]">
+      <Link
+        href={`/cursos/${course.slug}`}
+        aria-label={`Ver curso: ${course.title}`}
+        className="absolute inset-0 z-[1] rounded-[var(--radius-md)]"
+      />
       <div className="course-feature-media relative min-w-0 aspect-[16/10] md:aspect-auto">
         <CourseMedia
           course={course}
@@ -153,7 +158,7 @@ function FeaturedCard({ course, enrolled }: { course: Course; enrolled: boolean 
           </div>
           <Link
             href={`/cursos/${course.slug}`}
-            className="on-primary-link inline-flex min-h-10 items-center rounded-[8px] bg-[var(--primary-hover)] px-4 text-[13px] font-extrabold transition-transform active:scale-[.97]"
+            className="on-primary-link relative z-[2] inline-flex min-h-10 items-center rounded-[8px] bg-[var(--primary-hover)] px-4 text-[13px] font-extrabold transition-transform active:scale-[.97]"
           >
             Ver curso
           </Link>
@@ -201,12 +206,18 @@ export default async function CursosPage({
   searchParams: CatalogSearchParams;
 }) {
   const params = await searchParams;
-  const category = normalizeCatalogCategory(first(params.categoria));
   const query = normalizeCatalogQuery(first(params.q));
   const normalizedQuery = query.toLocaleLowerCase("es-MX");
   const persisted = await listPublicCourses();
   const enrolledCourseIds = await getCurrentUserEnrollmentCourseIds();
   const allCourses = persisted === null ? getPublicCourses() : persisted;
+  const categoryOptions = buildCatalogCategories(
+    allCourses.filter((course) => publishState(course) !== "draft"),
+  );
+  const category = normalizeCatalogCategory(
+    first(params.categoria),
+    categoryOptions.map((item) => item.key),
+  );
   const visible = allCourses.filter(
     (course) =>
       publishState(course) !== "draft" &&
@@ -284,7 +295,7 @@ export default async function CursosPage({
               className="flex flex-wrap gap-2"
               aria-label="Filtrar cursos por categoría"
             >
-              {CATALOG_CATEGORIES.map((item) => (
+              {categoryOptions.map((item) => (
                 <Link
                   key={item.key}
                   href={buildCatalogPath({
