@@ -21,12 +21,14 @@ export default async function CheckoutPage({
   const course = persisted
     ? mapPublicCourseToCheckoutCourse(persisted)
     : getCheckoutCourseBySlug(curso);
-  const publicPaymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "1";
+  const publicPaymentsValue = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED?.trim() ?? "";
+  const publicPaymentsEnabled = publicPaymentsValue === "1";
   const configuredCardPayments = await getCardPaymentsEnabled();
   const cardPaymentsEnabled = Boolean(course && course.amount > 0) && publicPaymentsEnabled && configuredCardPayments;
   console.info("[checkout/payment-mode]", {
     courseSelected: Boolean(course),
     paidCourse: Boolean(course && course.amount > 0),
+    publicPaymentsValue,
     publicPaymentsEnabled,
     configuredCardPayments,
     cardPaymentsEnabled,
