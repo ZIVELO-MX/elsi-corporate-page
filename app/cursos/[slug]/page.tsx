@@ -147,7 +147,7 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             <CourseAction className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
               {alreadyEnrolled || paymentPending ? "Ver mi perfil" : checkoutAvailable ? (course.price > 0 && cardPaymentsEnabled ? "Inscribirme y pagar" : "Solicitar inscripción") : inquiryLabels[state]}
               <ArrowRight aria-hidden="true" size={16} />
-            </Link>
+            </CourseAction>
             <p className="course-detail-action-note">
               {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : paymentPending ? "Tu pago está en proceso de confirmación." : checkoutAvailable && cardPaymentsEnabled ? "Completa tus datos para continuar al pago seguro con Stripe." : checkoutAvailable ? "Completa tus datos para enviar una solicitud a ELSI." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
             </p>
