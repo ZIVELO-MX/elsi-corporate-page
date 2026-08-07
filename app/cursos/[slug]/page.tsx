@@ -24,7 +24,8 @@ import {
 } from "@/lib/seo";
 import { buildContactPath } from "@/lib/agentic-navigation";
 import { getPublicCourse, listPublicCourses } from "@/lib/courses-repository";
-import { currentUserHasEnrollment } from "@/lib/enrollments-repository";
+import { currentUserHasEnrollment, currentUserHasPendingOrder } from "@/lib/enrollments-repository";
+import { CourseAction } from "@/components/course-action";
 import { getCardPaymentsEnabled } from "@/lib/payment-settings";
 
 export async function generateStaticParams() {
@@ -85,11 +86,13 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
   const state = publishState(course);
   const availability = stateMeta(course).label;
   const alreadyEnrolled = await currentUserHasEnrollment(course.id);
+  const paymentPending = !alreadyEnrolled && await currentUserHasPendingOrder(course.id);
   const cardPaymentsEnabled = await getCardPaymentsEnabled();
   const online = course.modality !== "presencial";
   const checkoutAvailable = state === "published"
+    && !paymentPending
     && !alreadyEnrolled;
-  const actionHref = alreadyEnrolled
+  const actionHref = alreadyEnrolled || paymentPending
     ? "/profile"
     : checkoutAvailable
     ? `/checkout?curso=${encodeURIComponent(course.slug)}`
@@ -139,14 +142,14 @@ export default async function CursoPage({ params }: { params: Promise<{ slug: st
             <p className="course-detail-price">{money(course.price)}</p>
             {course.priceLabel && course.price > 0 ? <p className="course-detail-price-note">{course.priceLabel}</p> : null}
             <p id="course-decision-title" className="course-detail-availability">Disponibilidad: {availability}</p>
-            {alreadyEnrolled ? <span className="course-enrollment-badge">Ya inscrito</span> : null}
+            {alreadyEnrolled ? <span className="course-enrollment-badge">Ya inscrito</span> : paymentPending ? <span className="course-enrollment-badge">Pago pendiente</span> : null}
             {course.certificateType ? <p className="course-detail-certificate">Incluye constancia {certType(course)}</p> : null}
-            <Link className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
-              {alreadyEnrolled ? "Ver mi perfil" : checkoutAvailable ? (course.price > 0 && cardPaymentsEnabled ? "Inscribirme y pagar" : "Solicitar inscripción") : inquiryLabels[state]}
+            <CourseAction className={`course-detail-action${state === "closed" ? " is-secondary" : ""}`} href={actionHref}>
+              {alreadyEnrolled || paymentPending ? "Ver mi perfil" : checkoutAvailable ? (course.price > 0 && cardPaymentsEnabled ? "Inscribirme y pagar" : "Solicitar inscripción") : inquiryLabels[state]}
               <ArrowRight aria-hidden="true" size={16} />
             </Link>
             <p className="course-detail-action-note">
-              {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : checkoutAvailable && cardPaymentsEnabled ? "Completa tus datos para continuar al pago seguro con Stripe." : checkoutAvailable ? "Completa tus datos para enviar una solicitud a ELSI." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
+              {alreadyEnrolled ? "Ya tienes una inscripción activa para este curso." : paymentPending ? "Tu pago está en proceso de confirmación." : checkoutAvailable && cardPaymentsEnabled ? "Completa tus datos para continuar al pago seguro con Stripe." : checkoutAvailable ? "Completa tus datos para enviar una solicitud a ELSI." : "ELSI confirmará disponibilidad y los siguientes pasos por correo."}
             </p>
           </aside>
         </div>
