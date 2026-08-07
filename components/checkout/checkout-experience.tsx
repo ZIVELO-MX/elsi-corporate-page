@@ -24,6 +24,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import { useFormStatus } from "react-dom";
 import { useAuth } from "@/components/auth-context";
 import {
   createMockPaymentGateway,
@@ -312,11 +313,18 @@ function BuyerForm({
         )}
       </div>
 
-      <button className={styles.primaryAction} type="submit">
-        Continuar al pago
-        <CreditCard aria-hidden="true" />
-      </button>
+      <BuyerSubmitButton />
     </form>
+  );
+}
+
+function BuyerSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button className={styles.primaryAction} type="submit" disabled={pending} aria-busy={pending}>
+      {pending ? "Preparando…" : "Continuar al pago"}
+      {pending ? <Clock3 aria-hidden="true" /> : <CreditCard aria-hidden="true" />}
+    </button>
   );
 }
 
