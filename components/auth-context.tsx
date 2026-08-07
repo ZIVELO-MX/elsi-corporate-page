@@ -6,6 +6,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  phone?: string;
   role: "user" | "admin";
   avatarUrl?: string;
 };
@@ -16,6 +17,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<Pick<User, "name" | "phone">>) => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -82,9 +84,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const updateUser = useCallback((updates: Partial<Pick<User, "name" | "phone">>) => {
+    setUser((current) => current ? { ...current, ...updates } : current);
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, register, logout, updateUser }),
+    [user, loading, login, register, logout, updateUser],
   );
 
   return (

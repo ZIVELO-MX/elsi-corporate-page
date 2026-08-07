@@ -8,6 +8,7 @@ import {
   GraduationCap, Mail, MapPin, TicketCheck,
 } from "lucide-react";
 import { useAuth, type User } from "@/components/auth-context";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ProfilePayload, ProfileUpcoming, ProfileCertificate, ProfilePendingPayment } from "@/app/api/profile/route";
 import styles from "./profile.module.css";
 
@@ -304,16 +305,50 @@ function PaymentReturnNotice({
 }
 
 function AccountSection({ user }: { user: User }) {
+  const { updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user.name);
+  const [phone, setPhone] = useState(user.phone ?? "");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, phone }),
+      });
+      const payload = await response.json().catch(() => ({})) as { error?: string; user?: User };
+      if (!response.ok || !payload.user) throw new Error(payload.error ?? "No fue posible guardar los datos de la cuenta.");
+      updateUser({ name: payload.user.name, phone: payload.user.phone });
+      setName(payload.user.name);
+      setPhone(payload.user.phone ?? "");
+      setEditing(false);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "No fue posible guardar los datos de la cuenta.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <section aria-labelledby="account-title" className={`${styles.revealItem} rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-4`} data-reveal-index="0">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="account-title" className="font-heading text-[15px] font-bold text-[var(--text)]">Datos de la cuenta</h2>
+        <div className="flex items-center gap-3">
+          <Avatar className="size-12" size="lg">
+            <AvatarImage src={user.avatarUrl} alt={user.avatarUrl ? `Foto de perfil de ${user.name}` : ""} />
+            <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <h2 id="account-title" className="font-heading text-[15px] font-bold text-[var(--text)]">Datos de la cuenta</h2>
+        </div>
         {!editing && (
-          <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Editar</button>
+          <button type="button" onClick={() => { setEditing(true); setSaved(false); setError(null); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Editar</button>
         )}
       </div>
 
@@ -321,11 +356,13 @@ function AccountSection({ user }: { user: User }) {
         <dl className="mt-3 grid gap-2 text-[13px]">
           <div className="flex justify-between gap-3"><dt className="shrink-0 text-[var(--text-muted)]">Nombre</dt><dd className="min-w-0 break-words text-right font-bold text-[var(--text)]">{name}</dd></div>
           <div className="flex justify-between gap-3"><dt className="shrink-0 text-[var(--text-muted)]">Correo</dt><dd className="min-w-0 break-all text-right font-bold text-[var(--text)]">{user.email}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="shrink-0 text-[var(--text-muted)]">Teléfono</dt><dd className="min-w-0 break-words text-right font-bold text-[var(--text)]">{phone || "No registrado"}</dd></div>
         </dl>
       ) : (
         <form
           className="mt-3 flex flex-col gap-3"
-          onSubmit={(e) => { e.preventDefault(); setEditing(false); setSaved(true); }}
+          onSubmit={save}
+          aria-busy={saving}
         >
           <label className="text-[12px] font-bold text-[var(--text)]">
             Nombre
@@ -333,9 +370,23 @@ function AccountSection({ user }: { user: User }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
+              autoComplete="name"
               required
               className="mt-1 block h-9 w-full rounded-[var(--radius-sm)] border border-[var(--input)] bg-[var(--paper)] px-3 text-[13px] text-[var(--text)]"
             />
+          </label>
+          <label className="text-[12px] font-bold text-[var(--text)]">
+            Teléfono <span className="font-normal text-[var(--text-muted)]">(opcional)</span>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              aria-describedby="account-phone-hint"
+              className="mt-1 block h-9 w-full rounded-[var(--radius-sm)] border border-[var(--input)] bg-[var(--paper)] px-3 text-[13px] text-[var(--text)]"
+            />
+            <span id="account-phone-hint" className="mt-1 block text-[11px] font-normal text-[var(--text-muted)]">Puedes dejarlo vacío.</span>
           </label>
           <label className="text-[12px] font-bold text-[var(--text-muted)]">
             Correo
@@ -347,10 +398,10 @@ function AccountSection({ user }: { user: User }) {
             />
           </label>
           <div className="flex gap-2">
-            <button type="submit" className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white`}>Guardar</button>
-            <button type="button" onClick={() => { setEditing(false); setName(user.name); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cancelar</button>
+            <button type="submit" disabled={saving} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--primary-hover)] px-3 text-[12px] font-extrabold text-white disabled:opacity-60`}>{saving ? "Guardando…" : "Guardar"}</button>
+            <button type="button" disabled={saving} onClick={() => { setEditing(false); setName(user.name); setPhone(user.phone ?? ""); setError(null); }} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)] disabled:opacity-60`}>Cancelar</button>
           </div>
-          <p className="text-[11px] text-[var(--text-muted)]">Prototipo: por ahora los cambios no se guardan.</p>
+          {error && <p role="alert" className="text-[11px] font-bold text-[var(--destructive)]">{error}</p>}
         </form>
       )}
 

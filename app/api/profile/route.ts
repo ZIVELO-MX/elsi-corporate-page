@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, requireSupabaseServerClient } from "@/lib/supabase/server";
 import { hasSupabasePublicConfig } from "@/lib/supabase/env";
+import { resolveAuthUser } from "@/lib/supabase/auth";
 
 // Mock del portal del alumno (ELS-0006). Datos simulados: no hay backend,
 // descargas ni correo reales. La liga de acceso NUNCA se expone aquí: para
@@ -78,4 +79,32 @@ export async function GET() {
     return NextResponse.json({ summary: { upcoming: upcoming.length, completed: history.length, certificates: profileCertificates.filter((c) => c.status === "disponible").length }, upcoming, history, certificates: profileCertificates, pendingPayments });
   }
   return NextResponse.json(DATA);
+}
+
+export async function PATCH(request: Request) {
+  if (!hasSupabasePublicConfig()) return NextResponse.json({ error: "Perfil persistente no configurado" }, { status: 503 });
+
+  const supabase = await requireSupabaseServerClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+  const body = await request.json().catch(() => ({}));
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const rawPhone = typeof body.phone === "string" ? body.phone.trim() : "";
+  const phone = rawPhone ? rawPhone.replace(/[\s().-]/g, "") : null;
+
+  if (name.length < 2 || name.length > 160) {
+    return NextResponse.json({ error: "El nombre debe tener entre 2 y 160 caracteres." }, { status: 400 });
+  }
+  if (phone && (!/^\+?\d+$/.test(phone) || phone.replace(/\D/g, "").length < 10 || phone.replace(/\D/g, "").length > 15)) {
+    return NextResponse.json({ error: "El teléfono debe tener entre 10 y 15 dígitos." }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: name, phone })
+    .eq("id", auth.user.id);
+  if (error) return NextResponse.json({ error: "No fue posible guardar los datos de la cuenta." }, { status: 500 });
+
+  return NextResponse.json({ user: await resolveAuthUser(supabase, auth.user) });
 }

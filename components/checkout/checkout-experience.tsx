@@ -242,11 +242,13 @@ function BuyerForm({
   errors,
   defaultName,
   defaultEmail,
+  defaultPhone,
   action,
 }: {
   errors: BuyerErrors;
   defaultName: string;
   defaultEmail: string;
+  defaultPhone: string;
   action: (formData: FormData) => void | Promise<void>;
 }) {
   return (
@@ -302,6 +304,7 @@ function BuyerForm({
           type="tel"
           inputMode="tel"
           autoComplete="tel"
+          defaultValue={defaultPhone}
           placeholder="477 123 4567"
           aria-invalid={Boolean(errors.phone)}
           aria-describedby={errors.phone ? "checkout-phone-error" : undefined}
@@ -800,6 +803,7 @@ function CheckoutFlow({ course, cardPaymentsEnabled }: { course: CheckoutCourse;
                     errors={errors}
                     defaultName={user?.name ?? ""}
                     defaultEmail={user?.email ?? ""}
+                    defaultPhone={user?.phone ?? ""}
                     action={handleBuyerSubmit}
                   />
                 ) : (
