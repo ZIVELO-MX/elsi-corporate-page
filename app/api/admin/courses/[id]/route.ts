@@ -27,8 +27,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const input = validateCourseInput(await request.json());
     const { id } = await params;
-    const { data: previous } = await client.from("courses").select("slug").eq("id", id).maybeSingle();
-    const { data, error } = await client.from("courses").update(mapCourseInput(input)).eq("id", id).select().single();
+    const { data: previous } = await client.from("courses").select("slug, syllabus, content_status, is_active").eq("id", id).maybeSingle();
+    if (!previous) return NextResponse.json({ error: "Curso no encontrado" }, { status: 404 });
+    // Preserve metadata the admin form does not send, so editing a course never
+    // silently reverts its publish/verification state or wipes the structured
+    // syllabus (category, publishState, certificateType, moduleList).
+    const mapped = mapCourseInput(input);
+    if (input.contentStatus === undefined) mapped.content_status = previous.content_status;
+    if (input.isActive === undefined) mapped.is_active = previous.is_active;
+    const previousSyllabus = previous.syllabus && typeof previous.syllabus === "object" && !Array.isArray(previous.syllabus)
+      ? previous.syllabus as Record<string, unknown>
+      : {};
+    if (input.syllabus === undefined) {
+      mapped.syllabus = previous.syllabus;
+    } else if (input.syllabus && typeof input.syllabus === "object" && !Array.isArray(input.syllabus)) {
+      mapped.syllabus = { ...previousSyllabus, ...(input.syllabus as Record<string, unknown>) };
+    }
+    const { data, error } = await client.from("courses").update(mapped).eq("id", id).select().single();
     if (error) return NextResponse.json({ error: error.code === "23505" ? "El slug ya existe" : "No fue posible actualizar el curso" }, { status: error.code === "23505" ? 409 : 400 });
     revalidateCourseSurfaces(data.slug, previous?.slug);
     return NextResponse.json({ course: data });
