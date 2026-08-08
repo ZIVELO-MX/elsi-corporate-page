@@ -126,6 +126,28 @@ type AdminData = {
   approvePendingPayment: (id: string) => Promise<void>;
 };
 
+// Maps the admin course shape to the API's CourseInput payload, including only
+// the fields present so partial edits never clobber untouched columns.
+function coursePayload(data: Partial<AdminCourse>): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.slug !== undefined) payload.slug = data.slug;
+  if (data.synopsis !== undefined) payload.shortDescription = data.synopsis;
+  if (data.price !== undefined) payload.priceCents = Math.round(data.price * 100);
+  if (data.status !== undefined) payload.isActive = data.status === "active";
+  if (data.externalUrl !== undefined) payload.enrollmentLink = data.externalUrl;
+  if (data.duration !== undefined) { const hours = parseInt(data.duration, 10); payload.durationHours = Number.isFinite(hours) ? hours : null; }
+  if (data.targetAudience !== undefined) payload.audience = data.targetAudience;
+  if (data.modality !== undefined) payload.modality = data.modality;
+  if (data.presencialLocation !== undefined) payload.location = data.presencialLocation;
+  return payload;
+}
+
+async function extractError(response: Response, fallback: string): Promise<string> {
+  const body = await response.json().catch(() => ({})) as { error?: unknown };
+  return typeof body.error === "string" ? body.error : fallback;
+}
+
 const AdminDataContext = createContext<AdminData | null>(null);
 
 export function AdminDataProvider({ children }: { children: ReactNode }) {
@@ -229,16 +251,47 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addCourse = useCallback((c: Omit<AdminCourse, "id" | "students" | "createdAt">) => {
-    const id = "c" + Date.now();
-    setCourses(prev => [...prev, { ...c, id, students: 0, createdAt: new Date().toISOString().split("T")[0] }]);
+    const tempId = "tmp-" + Date.now();
+    const optimistic: AdminCourse = { ...c, id: tempId, students: 0, createdAt: new Date().toISOString().split("T")[0] };
+    setCourses(prev => [...prev, optimistic]);
+    void fetch("/api/admin/courses", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(coursePayload(c)) })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({})) as { course?: { id?: unknown } };
+        if (!response.ok) throw new Error(await extractError(response, "No fue posible crear el curso."));
+        if (body.course?.id) setCourses(prev => prev.map(x => x.id === tempId ? { ...optimistic, id: String(body.course!.id) } : x));
+        setError(null);
+      })
+      .catch((cause: unknown) => {
+        setCourses(prev => prev.filter(x => x.id !== tempId));
+        setError(cause instanceof Error ? cause.message : "No fue posible crear el curso.");
+      });
   }, []);
 
   const updateCourse = useCallback((id: string, data: Partial<AdminCourse>) => {
-    setCourses(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+    let previous: AdminCourse | undefined;
+    setCourses(prev => { previous = prev.find(c => c.id === id); return prev.map(c => c.id === id ? { ...c, ...data } : c); });
+    const payload = coursePayload(data);
+    if (Object.keys(payload).length === 0) return;
+    const snapshot = previous;
+    void fetch(`/api/admin/courses/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+      .then(async (response) => { if (!response.ok) throw new Error(await extractError(response, "No fue posible guardar el curso.")); setError(null); })
+      .catch((cause: unknown) => {
+        if (snapshot) setCourses(prev => prev.map(c => c.id === id ? snapshot : c));
+        setError(cause instanceof Error ? cause.message : "No fue posible guardar el curso.");
+      });
   }, []);
 
   const toggleCourse = useCallback((id: string) => {
-    setCourses(prev => prev.map(c => c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c));
+    let previous: AdminCourse | undefined;
+    let nextStatus: AdminCourse["status"] = "active";
+    setCourses(prev => { previous = prev.find(c => c.id === id); nextStatus = previous?.status === "active" ? "inactive" : "active"; return prev.map(c => c.id === id ? { ...c, status: nextStatus } : c); });
+    const snapshot = previous;
+    void fetch(`/api/admin/courses/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ isActive: nextStatus === "active" }) })
+      .then(async (response) => { if (!response.ok) throw new Error(await extractError(response, "No fue posible actualizar el curso.")); setError(null); })
+      .catch((cause: unknown) => {
+        if (snapshot) setCourses(prev => prev.map(c => c.id === id ? snapshot : c));
+        setError(cause instanceof Error ? cause.message : "No fue posible actualizar el curso.");
+      });
   }, []);
 
   const addEnrollment = useCallback((userId: string, courseId: string, source: EnrollmentSource = "interna") => {
