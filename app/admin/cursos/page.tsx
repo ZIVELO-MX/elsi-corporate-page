@@ -99,7 +99,9 @@ function coursePayload(course: Omit<AdminCourse, "id" | "students" | "createdAt"
     startsAt,
     enrollmentLink: course.externalUrl || null,
     priceCents: Math.round(course.price * 100),
-    contentStatus: "fixture" as const,
+    // Do not send contentStatus: create defaults to "fixture" server-side and
+    // an edit must preserve the stored publish/verification state instead of
+    // silently reverting a verified course back to fixture.
     isActive: course.status === "active",
   };
 }
