@@ -1,9 +1,19 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabasePublicClient,
+  createSupabaseServerClient,
+} from "@/lib/supabase/server";
 import type { Database, Json } from "@/lib/supabase/types";
 import { revalidatePath } from "next/cache";
-import type { Solution } from "@/lib/solutions";
+import { cache } from "react";
+import {
+  getPublicSolutionBySlug,
+  getPublicSolutions,
+  solutions,
+  type Solution,
+} from "@/lib/solutions";
 
 export type PublicContent = NonNullable<Awaited<ReturnType<typeof listPublicContent>>>;
+type SolutionRow = Database["public"]["Tables"]["solutions"]["Row"];
 
 export function cleanText(value: unknown, max: number) {
   if (typeof value !== "string") throw new Error("Texto inválido");
@@ -59,7 +69,7 @@ export async function requireAdminContentClient() {
   return profile?.role === "admin" ? client : null;
 }
 
-export async function listPublicContent() {
+export const listPublicContent = cache(async function listPublicContent() {
   const client = await createSupabaseServerClient();
   if (!client) return null;
   const [sections, solutions, testimonials] = await Promise.all([
@@ -69,10 +79,32 @@ export async function listPublicContent() {
   ]);
   if (sections.error || solutions.error || testimonials.error) throw new Error("No fue posible consultar contenido");
   return { sections: sections.data ?? [], solutions: solutions.data ?? [], testimonials: testimonials.data ?? [] };
-}
+});
 
 function bodyRecord(body: Json) {
   return body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, Json> : {};
+}
+
+function mapPublicSolutionRow(row: SolutionRow) {
+  const original = solutions.find((solution) => solution.slug === row.slug);
+  if (!original) return null;
+  const body = bodyRecord(row.body);
+  const text = (key: string, value: string) => typeof body[key] === "string" && body[key] ? body[key] as string : value;
+  const items = Array.isArray(body.items) ? body.items.filter((item): item is string => typeof item === "string") : original.items;
+  return {
+    ...original,
+    title: row.title,
+    description: text("description", row.summary),
+    eyebrow: text("eyebrow", original.eyebrow),
+    audience: text("audience", original.audience),
+    imageCaption: text("imageCaption", original.imageCaption),
+    intro: text("intro", original.intro),
+    approach: text("approach", original.approach),
+    delivery: text("delivery", original.delivery),
+    items,
+    contentStatus: "verified" as const,
+    updatedAt: row.updated_at,
+  } satisfies Solution;
 }
 
 export function sectionText(content: PublicContent | null, sectionKey: string, fallback: string) {
@@ -85,28 +117,43 @@ export function sectionText(content: PublicContent | null, sectionKey: string, f
 
 export function mapPublicSolutions(content: PublicContent | null, fallback: readonly Solution[]) {
   if (!content) return fallback;
-  return content.solutions.flatMap((row) => {
-    const original = fallback.find((solution) => solution.slug === row.slug);
-    if (!original) return [];
-    const body = bodyRecord(row.body);
-    const text = (key: string, value: string) => typeof body[key] === "string" && body[key] ? body[key] as string : value;
-    const items = Array.isArray(body.items) ? body.items.filter((item): item is string => typeof item === "string") : original.items;
-    return [{
-      ...original,
-      title: row.title,
-      description: text("description", row.summary),
-      eyebrow: text("eyebrow", original.eyebrow),
-      audience: text("audience", original.audience),
-      imageCaption: text("imageCaption", original.imageCaption),
-      intro: text("intro", original.intro),
-      approach: text("approach", original.approach),
-      delivery: text("delivery", original.delivery),
-      items,
-      contentStatus: "verified" as const,
-      updatedAt: row.updated_at,
-    } satisfies Solution];
+  const mapped = content.solutions.flatMap((row) => {
+    const solution = mapPublicSolutionRow(row);
+    return solution ? [solution] : [];
   });
+  return mapped.length > 0 ? mapped : fallback;
 }
+
+export const listPublicSolutions = cache(async function listPublicSolutions() {
+  const client = createSupabasePublicClient();
+  if (!client) return getPublicSolutions();
+  const { data, error } = await client
+    .from("solutions")
+    .select("*")
+    .eq("is_active", true)
+    .eq("content_status", "verified")
+    .order("sort_order");
+  if (error) throw new Error("No fue posible consultar las soluciones");
+  const mapped = (data ?? []).flatMap((row) => {
+    const solution = mapPublicSolutionRow(row);
+    return solution ? [solution] : [];
+  });
+  return mapped.length > 0 ? mapped : getPublicSolutions();
+});
+
+export const getPublicSolution = cache(async function getPublicSolution(slug: string) {
+  const client = createSupabasePublicClient();
+  if (!client) return getPublicSolutionBySlug(slug);
+  const { data, error } = await client
+    .from("solutions")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .eq("content_status", "verified")
+    .maybeSingle();
+  if (error) throw new Error("No fue posible consultar la solución");
+  return data ? mapPublicSolutionRow(data) : getPublicSolutionBySlug(slug);
+});
 
 export function revalidatePublicContent(slug?: string) {
   revalidatePath("/");

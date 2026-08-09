@@ -10,12 +10,15 @@ import { PublicContactForm } from "@/components/public-contact-form";
 import { CourseMedia } from "@/components/course-media";
 import { StructuredData } from "@/components/structured-data";
 import {
+  buildFaqJsonLd,
   buildMetadata,
+  buildSiteNavigationJsonLd,
   indexable,
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
 import { intentRoutes } from "@/lib/agentic-navigation";
+import { primaryNavigation } from "@/lib/navigation";
 import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
 import { listPublicCourses } from "@/lib/courses-repository";
 
@@ -40,8 +43,10 @@ const homeFaqs = [
 ] as const;
 
 export default async function Home() {
-  const persistedContent = await listPublicContent();
-  const persistedCourses = await listPublicCourses();
+  const [persistedContent, persistedCourses] = await Promise.all([
+    listPublicContent(),
+    listPublicCourses(),
+  ]);
   const featuredCourses = (persistedCourses ?? getPublicCourses()).slice(0, 3);
   const [primaryCourse, ...secondaryCourses] = featuredCourses;
   const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
@@ -59,6 +64,8 @@ export default async function Home() {
         <>
           <StructuredData value={organizationJsonLd} />
           <StructuredData value={websiteJsonLd} />
+          <StructuredData value={buildSiteNavigationJsonLd(primaryNavigation)} />
+          <StructuredData value={buildFaqJsonLd(homeFaqs)} />
         </>
       ) : null}
       <section className="home-hero" data-section-label="Home / Hero editorial">

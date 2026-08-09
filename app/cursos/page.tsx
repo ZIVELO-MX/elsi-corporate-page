@@ -50,9 +50,11 @@ export async function generateMetadata({
 }: {
   searchParams: CatalogSearchParams;
 }) {
-  const params = await searchParams;
+  const [params, persisted] = await Promise.all([
+    searchParams,
+    listPublicCourses(),
+  ]);
   const hasFilters = Boolean(first(params.categoria) || first(params.q));
-  const persisted = await listPublicCourses();
   const hasVerifiedCatalog = (persisted ?? getVerifiedCourses()).some(
     (course) => publishState(course) !== "draft",
   );
@@ -205,11 +207,13 @@ export default async function CursosPage({
 }: {
   searchParams: CatalogSearchParams;
 }) {
-  const params = await searchParams;
+  const [params, persisted, enrolledCourseIds] = await Promise.all([
+    searchParams,
+    listPublicCourses(),
+    getCurrentUserEnrollmentCourseIds(),
+  ]);
   const query = normalizeCatalogQuery(first(params.q));
   const normalizedQuery = query.toLocaleLowerCase("es-MX");
-  const persisted = await listPublicCourses();
-  const enrolledCourseIds = await getCurrentUserEnrollmentCourseIds();
   const allCourses = persisted === null ? getPublicCourses() : persisted;
   const categoryOptions = buildCatalogCategories(
     allCourses.filter((course) => publishState(course) !== "draft"),

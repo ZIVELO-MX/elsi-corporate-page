@@ -27,6 +27,14 @@ Este documento concentra decisiones y datos de negocio que no bloquean la implem
 - [ ] Definir responsables nominales, SLA y protocolo de reasignación para mensajes de Contacto. El panel ya permite responsable, notas y estados Nuevo, En seguimiento y Cerrado.
 - [ ] Definir el protocolo comercial para pagos fallidos o cancelados (contacto, reintento, devolución o cierre). El panel los muestra como incidencias sin ejecutar acciones financieras automáticas.
 
+## SEO y descubrimiento agéntico
+
+- [ ] Confirmar el dominio canónico definitivo y autorizar el go-live coordinado de `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PROTOTYPE_MODE=0` y `NEXT_PUBLIC_CONTENT_STATUS=verified`. La indexación permanece cerrada si falta cualquiera de estas señales.
+- [ ] Validar nombre legal, domicilio, teléfono, correo institucional, perfiles sociales y Google Business Profile antes de ampliar `sameAs` o datos locales en JSON-LD.
+- [ ] Entregar acceso o verificaciones de Google Search Console y Bing Webmaster Tools para registrar el sitemap y medir cobertura, consultas y Core Web Vitals.
+- [ ] Priorizar temas, regiones, competidores y consultas objetivo. La implementación técnica evita canibalización, pero no inventa una estrategia de palabras clave sin evidencia del negocio.
+- [ ] Definir si los crawlers de entrenamiento de IA deben permitirse o bloquearse por separado. La configuración vigente permite rastreo público al pasar el gate, pero nunca expone rutas privadas ni autoriza compras o envíos automáticos.
+
 ## Política de datos durante validaciones
 
 - Los smokes y recorridos Playwright solo pueden crear registros con prefijos temporales identificables de la misión.

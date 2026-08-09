@@ -2,21 +2,27 @@ import Link from "next/link";
 import { ArrowDown, ArrowRight, Building2, GraduationCap, Sprout, type LucideIcon } from "lucide-react";
 import {
   getPublicSolutions,
-  getVerifiedSolutions,
   type Solution,
 } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
-import { buildMetadata, indexable } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
+import { buildMetadata, buildServiceListJsonLd, indexable } from "@/lib/seo";
 import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
 
-export const metadata = buildMetadata({
-  title: "Soluciones",
-  description: "Capacitación, soluciones ambientales y educación universitaria: acompañamos a equipos, organizaciones y comunidades.",
-  path: "/soluciones",
-  allowIndexing: indexable && getVerifiedSolutions().length > 0,
-});
+const solutionsDescription = "Capacitación, soluciones ambientales y educación universitaria: acompañamos a equipos, organizaciones y comunidades.";
+
+export async function generateMetadata() {
+  const persistedContent = await listPublicContent();
+  const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
+  return buildMetadata({
+    title: "Soluciones",
+    description: solutionsDescription,
+    path: "/soluciones",
+    allowIndexing: indexable && publicSolutions.length > 0,
+  });
+}
 
 const solutionIcons: Record<Solution["slug"], LucideIcon> = {
   capacitacion: GraduationCap,
@@ -30,6 +36,9 @@ export default async function SolucionesPage() {
   const introduction = sectionText(persistedContent, "solutions-intro", "Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias.");
   return (
     <main>
+      {indexable && publicSolutions.length > 0 ? (
+        <StructuredData value={buildServiceListJsonLd(publicSolutions)} />
+      ) : null}
       <section className="solutions-editorial-hero" data-section-label="Soluciones / Introducción">
         <div className="shell solutions-editorial-hero-grid">
           <div>

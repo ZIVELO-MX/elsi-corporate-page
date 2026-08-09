@@ -2,20 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import {
-  getPublicSolutionBySlug,
-  getPublicSolutions,
   isSolutionVerified,
 } from "@/lib/solutions";
 import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { StructuredData } from "@/components/structured-data";
 import {
   buildMetadata,
   buildPrivateMetadata,
+  buildServiceJsonLd,
   indexable,
 } from "@/lib/seo";
 import { buildContactPath } from "@/lib/agentic-navigation";
+import { getPublicSolution, listPublicSolutions } from "@/lib/content-repository";
 
 type SolutionDetailPageProps = {
   params: Promise<{
@@ -23,15 +24,16 @@ type SolutionDetailPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return getPublicSolutions().map((solution) => ({
+export async function generateStaticParams() {
+  const publicSolutions = await listPublicSolutions();
+  return publicSolutions.map((solution) => ({
     slug: solution.slug,
   }));
 }
 
 export async function generateMetadata({ params }: SolutionDetailPageProps) {
   const { slug } = await params;
-  const solution = getPublicSolutionBySlug(slug);
+  const solution = await getPublicSolution(slug);
 
   if (!solution) {
     return buildPrivateMetadata({
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: SolutionDetailPageProps) {
 
 export default async function SolutionDetailPage({ params }: SolutionDetailPageProps) {
   const { slug } = await params;
-  const solution = getPublicSolutionBySlug(slug);
+  const solution = await getPublicSolution(slug);
 
   if (!solution) {
     notFound();
@@ -60,6 +62,9 @@ export default async function SolutionDetailPage({ params }: SolutionDetailPageP
 
   return (
     <main>
+      {indexable && isSolutionVerified(solution) ? (
+        <StructuredData value={buildServiceJsonLd(solution)} />
+      ) : null}
       <section
         className="solution-detail-hero"
         data-layout={solution.layout}

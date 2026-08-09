@@ -13,7 +13,7 @@ export const SITE = {
   fullName: "ELSI | Environmental Learning & Solutions Institute",
   url: siteConfig.siteUrl,
   description:
-    "Environmental Learning & Solutions Institute. Educación, capacitación y consultoría ambiental.",
+    "ELSI ofrece educación ambiental, capacitación y consultoría para personas, empresas y universidades en Guanajuato. Conoce cursos y soluciones.",
   locale: "es_MX",
   language: "es-MX",
   contact: {
@@ -23,6 +23,11 @@ export const SITE = {
     region: "Guanajuato",
     country: "MX",
   },
+} as const;
+
+export const DISCOVERY_ALTERNATES = {
+  "text/plain": "/llms.txt",
+  "application/json": "/api/navigation",
 } as const;
 
 export const SOCIAL_IMAGE = {
@@ -70,9 +75,19 @@ export function buildMetadata({
   return {
     ...(title ? { title } : {}),
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, types: DISCOVERY_ALTERNATES },
     robots: allowIndexing
-      ? { index: true, follow: true }
+      ? {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        }
       : { index: false, follow: true },
     openGraph: {
       type: "website",
@@ -108,6 +123,7 @@ export function buildPrivateMetadata({
       path,
       allowIndexing: false,
     }),
+    alternates: { canonical: path },
     robots: { index: false, follow: false },
   };
 }
@@ -141,12 +157,14 @@ export function buildBreadcrumbJsonLd(
 export const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
+  "@id": `${SITE.url}/#organization`,
   name: SITE.fullName,
   alternateName: "ELSI",
   url: SITE.url,
   description: SITE.description,
   email: SITE.contact.email,
   telephone: SITE.contact.phone,
+  logo: absoluteUrl("/logos/elsi-full-logo.png"),
   address: {
     "@type": "PostalAddress",
     addressLocality: SITE.contact.locality,
@@ -158,19 +176,27 @@ export const organizationJsonLd = {
 export const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${SITE.url}/#website`,
   name: SITE.name,
   alternateName: SITE.fullName,
   url: SITE.url,
   inLanguage: SITE.language,
   description: SITE.description,
   publisher: {
-    "@type": "EducationalOrganization",
-    name: SITE.name,
-    url: SITE.url,
+    "@id": `${SITE.url}/#organization`,
+  },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: absoluteUrl("/cursos?q={search_term_string}"),
+    },
+    "query-input": "required name=search_term_string",
   },
 } as const;
 
 export function buildCourseJsonLd(course: {
+  slug?: string;
   title: string;
   description: string;
 }) {
@@ -179,11 +205,92 @@ export function buildCourseJsonLd(course: {
     "@type": "Course",
     name: course.title,
     description: course.description,
+    inLanguage: SITE.language,
+    ...(course.slug ? { url: absoluteUrl(`/cursos/${course.slug}`) } : {}),
     provider: {
       "@type": "EducationalOrganization",
       name: SITE.name,
       url: SITE.url,
     },
+  };
+}
+
+export function buildFaqJsonLd(
+  faqs: ReadonlyArray<{ question: string; answer: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+export function buildSiteNavigationJsonLd(
+  items: ReadonlyArray<{ label: string; href: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": items.map((item) => ({
+      "@type": "SiteNavigationElement",
+      name: item.label,
+      url: absoluteUrl(item.href),
+    })),
+  };
+}
+
+export function buildServiceJsonLd(solution: {
+  slug: string;
+  title: string;
+  description: string;
+  audience: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: solution.title,
+    description: solution.description,
+    url: absoluteUrl(`/soluciones/${solution.slug}`),
+    serviceType: solution.title,
+    areaServed: {
+      "@type": "Country",
+      name: "México",
+    },
+    audience: {
+      "@type": "Audience",
+      audienceType: solution.audience,
+    },
+    provider: {
+      "@type": "EducationalOrganization",
+      name: SITE.name,
+      url: SITE.url,
+    },
+  };
+}
+
+export function buildServiceListJsonLd(
+  solutions: ReadonlyArray<{
+    slug: string;
+    title: string;
+    description: string;
+    audience: string;
+  }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: solutions.map((solution, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: absoluteUrl(`/soluciones/${solution.slug}`),
+      item: buildServiceJsonLd(solution),
+    })),
   };
 }
 
