@@ -41,23 +41,23 @@ export const GET = createAdminCsvExport<EnrollmentExport>({
 
     const userIds = [...new Set(rows.map((row) => row.user_id))];
     const courseIds = [...new Set(rows.map((row) => row.course_id))];
-    const profilePages = await Promise.all(chunks(userIds).map(async (ids) => {
-      let result = await client.from("profiles").select("id,full_name,email").in("id", ids);
-      if (result.error?.code === "42703") result = await client.from("profiles").select("id,full_name").in("id", ids) as typeof result;
-      if (result.error) throw result.error;
-      return result.data ?? [];
-    }));
-    const coursePages = await Promise.all(chunks(courseIds).map(async (ids) => {
-      const result = await client.from("courses").select("id,title").in("id", ids);
-      if (result.error) throw result.error;
-      return result.data ?? [];
-    }));
-    const certificatePages = await Promise.all(chunks(rows.map((row) => row.id)).map(async (ids) => {
-      let result = await client.from("certificates").select("enrollment_id,status,original_filename").in("enrollment_id", ids);
-      if (result.error?.code === "42703") result = await client.from("certificates").select("enrollment_id,status").in("enrollment_id", ids) as typeof result;
-      if (result.error) throw result.error;
-      return result.data ?? [];
-    }));
+    const [profilePages, coursePages, certificatePages] = await Promise.all([
+      Promise.all(chunks(userIds).map(async (ids) => {
+        const result = await client.from("profiles").select("*").in("id", ids);
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      })),
+      Promise.all(chunks(courseIds).map(async (ids) => {
+        const result = await client.from("courses").select("id,title").in("id", ids);
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      })),
+      Promise.all(chunks(rows.map((row) => row.id)).map(async (ids) => {
+        const result = await client.from("certificates").select("*").in("enrollment_id", ids);
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      })),
+    ]);
     const profiles = profilePages.flat();
     const courses = coursePages.flat();
     const certificates = certificatePages.flat();
