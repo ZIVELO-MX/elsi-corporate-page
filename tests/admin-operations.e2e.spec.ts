@@ -18,12 +18,18 @@ test("ELS-0076 admin works on desktop, mobile, and keyboard", async ({ page }) =
     ["Testimonios", "/admin/testimonios"], ["Configuración", "/admin/configuracion"],
   ] as const;
   for (const [heading, path] of sections) {
-    await page.goto(path);
+    await Promise.all([
+      page.waitForURL(`**${path}`),
+      page.getByRole("link", { name: heading, exact: true }).click(),
+    ]);
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
   }
 
+  await Promise.all([
+    page.waitForURL("**/admin"),
+    page.getByRole("link", { name: "Dashboard", exact: true }).click(),
+  ]);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/admin");
   const toggle = page.getByRole("button", { name: "Abrir menú de administración" });
   await toggle.focus();
   await toggle.press("Enter");
