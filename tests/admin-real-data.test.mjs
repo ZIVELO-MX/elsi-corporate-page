@@ -46,13 +46,13 @@ test("admin money, dates, and recent records use explicit locale-aware formattin
   ]);
 });
 
-test("admin sales and pending payments are projections of persisted orders", async () => {
+test("admin sales and every payment state are projections of persisted orders", async () => {
   const [route, screen] = await Promise.all([
     read("app/api/admin/orders/route.ts"),
     read("app/admin/ventas/page.tsx"),
   ]);
   assert.match(route, /requireAdminClient/);
-  assert.match(route, /in\("status", \["paid", "pending"\]\)/);
+  assert.match(route, /in\("status", \["paid", "pending", "failed", "canceled"\]\)/);
   assert.match(route, /amount_cents/);
   assert.match(screen, /Stripe confirma un pago/);
   assert.match(screen, /Pagos pendientes/);

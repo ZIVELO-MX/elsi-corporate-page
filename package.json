@@ -22,6 +22,7 @@
     "typecheck": "tsc --noEmit",
     "screenshots:capture": "pnpm build && playwright test tests/mission-screenshots.spec.ts",
     "screenshots:publish": "PUBLISH_MISSION_SCREENSHOTS=1 playwright test tests/mission-screenshots.spec.ts",
+    "admin:operations:e2e": "playwright test tests/admin-operations.e2e.spec.ts",
     "cloudflare:build": "opennextjs-cloudflare build",
     "smoke:supabase-rls": "node scripts/smoke-supabase-rls.mjs",
     "smoke:stripe:test": "node scripts/smoke-stripe-test.mjs",
