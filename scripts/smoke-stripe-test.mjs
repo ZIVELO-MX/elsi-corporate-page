@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
-const required = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"];
+const required = ["NEXT_PUBLIC_SUPABASE_URL", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"];
 for (const name of required) {
   if (!process.env[name]?.trim()) throw new Error(`${name} es requerido`);
 }
@@ -9,7 +9,9 @@ if (!process.env.STRIPE_SECRET_KEY.startsWith("sk_test_")) throw new Error("STRI
 if (process.env.SMOKE_KEEP_DATA !== "1") console.log("Smoke Stripe: los datos temporales se eliminarán al terminar.");
 
 const baseUrl = (process.env.APP_BASE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
-const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
+const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseSecretKey?.trim()) throw new Error("Define SUPABASE_SECRET_KEY o SUPABASE_SERVICE_ROLE_KEY");
+const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, supabaseSecretKey, { auth: { autoRefreshToken: false, persistSession: false } });
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const email = `smoke-stripe-${suffix}@example.invalid`;

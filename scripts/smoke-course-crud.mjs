@@ -5,7 +5,7 @@ const anonKey = process.env.SUPABASE_ANON_KEY
   ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ?? "";
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const serviceRoleKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 function requireTestUrl(value) {
   if (!value) throw new Error("Define SUPABASE_URL o NEXT_PUBLIC_SUPABASE_URL.");
@@ -34,7 +34,7 @@ async function expectOk(label, result) {
 async function main() {
   const supabaseUrl = requireTestUrl(url);
   const publicKey = requireValue(anonKey, "SUPABASE_ANON_KEY");
-  const adminKey = requireValue(serviceRoleKey, "SUPABASE_SERVICE_ROLE_KEY");
+  const adminKey = requireValue(serviceRoleKey, "SUPABASE_SECRET_KEY o SUPABASE_SERVICE_ROLE_KEY");
   const admin = createClient(supabaseUrl, adminKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const publicClient = createClient(supabaseUrl, publicKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const stamp = Date.now().toString(36);

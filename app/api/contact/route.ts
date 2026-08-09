@@ -12,7 +12,10 @@ function clientKey(request: Request) {
 
 async function verifyTurnstile(token: unknown, remoteip: string) {
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
-  if (!secret) return process.env.NODE_ENV !== "production";
+  // Turnstile is intentionally deferred for the first hosted deploy. Keep
+  // the existing validation and rate limit active until the widget is added
+  // to the client and a production secret is provisioned.
+  if (!secret) return true;
   if (typeof token !== "string" || !token) return false;
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ secret, response: token, remoteip }) });
   const result = await response.json().catch(() => ({ success: false }));

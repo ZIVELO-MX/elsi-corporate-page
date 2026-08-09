@@ -1,4 +1,4 @@
-# ELS-0041 — Leads, Turnstile, Resend y outbox
+# ELS-0041 — Leads, anti-spam, Resend y outbox
 
 Estado: `implemented — provider credentials and hosted validation pending`  
 Prioridad: P1  
@@ -8,18 +8,18 @@ Predecesora: ELS-0038
 
 ## Resultado
 
-Contacto persiste leads de forma segura, valida Turnstile en servidor y deja notificaciones preparadas en un outbox reintentable. La entrega por Resend permanece desactivada hasta que ELSI provea y valide un proveedor.
+Contacto persiste leads de forma segura con validación y rate limit básico, y deja notificaciones preparadas en un outbox reintentable. Turnstile y la entrega por Resend quedan diferidos hasta que ELSI provea y valide los proveedores.
 
 ## Estado actual
 
 - `components/public-contact-form.tsx` y `app/contacto/page.tsx` validan experiencia de prototipo.
 - `app/admin/contacto/page.tsx` no consume persistencia real.
-- No hay anti-spam server-side, proveedor de correo ni worker/outbox.
+- No hay Turnstile habilitado, proveedor de correo ni worker programado; el endpoint conserva validación y rate limit básico.
 
 ## Pasos
 
 1. [x] Implementar endpoint de contacto con schema estricto, límites y rate limit básico.
-2. [x] Verificar Turnstile server-side cuando existe secreto; bypass sólo fuera de producción.
+2. [x] Mantener anti-spam base con validación y rate limit; Turnstile queda diferido.
 3. [x] Persistir lead con campos acotados y mínimo de PII antes de notificar.
 4. [x] Insertar evento `lead.created` en outbox y devolver 202 si la notificación queda pendiente.
 5. [ ] Integrar Resend/worker idempotente cuando el propietario provea proveedor y remitente.
@@ -37,7 +37,7 @@ persistidos para atención manual y para una futura integración de correo.
 
 ## Validación automatizada
 
-- [x] Tests de validación, honeypot/rate limit, Turnstile y persistencia/outbox (contrato estático).
+- [x] Tests de validación, rate limit y persistencia/outbox (contrato estático).
 - [x] Tests de acceso admin y estados de lead.
 - [x] `pnpm typecheck`; lint/test/build ejecutados antes del push.
 
@@ -50,7 +50,7 @@ persistidos para atención manual y para una futura integración de correo.
 
 ## Pendiente del propietario
 
-- [ ] Proveer claves Turnstile y dominios permitidos.
+- [ ] Fase futura: proveer claves Turnstile, dominios permitidos e integrar el widget cliente con validación server-side.
 - [ ] Proveer API key de Resend, dominio/remitente verificado y destinatarios.
 - [ ] Aprobar plantillas, política de retención y correo operativo.
 

@@ -35,7 +35,11 @@ export function hasSupabasePublicConfig() {
 }
 
 export function getSupabaseServiceRoleKey() {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || null;
+  // `SUPABASE_SECRET_KEY` is the current Supabase name. Keep accepting the
+  // legacy variable so existing hosted environments can rotate gradually.
+  return process.env.SUPABASE_SECRET_KEY?.trim()
+    || process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    || null;
 }
 
 export function isSupabaseConfigured() {

@@ -70,6 +70,13 @@ El token de CI debe usar `Workers Scripts: Edit` y estar limitado a la cuenta de
 ELSI. `NEXT_PUBLIC_SITE_URL` se calcula desde el subdominio `workers.dev` de esa
 cuenta y no se guarda como secreto.
 
+## Deploy temporal en Vercel
+
+La matriz del primer deploy alojado en Vercel está documentada en
+[`docs/vercel-production-environment.md`](docs/vercel-production-environment.md).
+Supabase queda activo, mientras pagos y notificaciones permanecen apagados.
+Turnstile no se incluye en este deploy y se integrará en una fase posterior.
+
 ## Capturas de pull requests
 
 Cada PR debe indicar su misión en la descripción usando el campo `Misión: ELS-XXXX` (ver [`PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)). El workflow:
