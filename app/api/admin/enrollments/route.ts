@@ -11,9 +11,11 @@ export async function GET(request: Request) {
   const query = parseAdminQuery(request, SORTS, "enrolled_at");
   const search = escapePostgrestSearch(query.search);
   let enrollmentSearchClauses: string | null = null;
+  const certificate = query.filters.get("certificate");
+  const certificateJoin = certificate === "pending" || certificate === "available" ? "certificates!inner" : "certificates";
 
   let selection = client.from("enrollments")
-    .select("id,user_id,course_id,source,status,enrolled_at,completed_at,certificates(id,status,storage_path,original_filename,mime_type,size_bytes)", { count: "exact" });
+    .select(`id,user_id,course_id,source,status,enrolled_at,completed_at,${certificateJoin}(id,status,storage_path,original_filename,mime_type,size_bytes)`, { count: "exact" });
   if (search) {
     let profileMatches = await client.from("profiles").select("id").or(`full_name.ilike.%${search}%,email.ilike.%${search}%`).limit(500);
     if (profileMatches.error?.code === "42703") profileMatches = await client.from("profiles").select("id").ilike("full_name", `%${search}%`).limit(500);
@@ -36,13 +38,17 @@ export async function GET(request: Request) {
   if (userId) selection = selection.eq("user_id", userId);
   const courseId = query.filters.get("courseId");
   if (courseId) selection = selection.eq("course_id", courseId);
+  if (certificate === "pending" || certificate === "available") selection = selection.eq("certificates.status", certificate);
+  if (certificate === "none") selection = selection.is("certificates", null);
   let result = await selection.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to);
   if (result.error?.code === "42703") {
-    let fallback = client.from("enrollments").select("id,user_id,course_id,source,status,enrolled_at,completed_at,certificates(id,status,storage_path)", { count: "exact" });
+    let fallback = client.from("enrollments").select(`id,user_id,course_id,source,status,enrolled_at,completed_at,${certificateJoin}(id,status,storage_path)`, { count: "exact" });
     if (status === "in_progress" || status === "completed") fallback = fallback.eq("status", status);
     if (source === "internal" || source === "external" || source === "stripe") fallback = fallback.eq("source", source);
     if (userId) fallback = fallback.eq("user_id", userId);
     if (courseId) fallback = fallback.eq("course_id", courseId);
+    if (certificate === "pending" || certificate === "available") fallback = fallback.eq("certificates.status", certificate);
+    if (certificate === "none") fallback = fallback.is("certificates", null);
     if (enrollmentSearchClauses) fallback = fallback.or(enrollmentSearchClauses);
     result = await fallback.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to) as typeof result;
   }

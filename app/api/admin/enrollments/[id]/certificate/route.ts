@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabasePublicConfig } from "@/lib/supabase/env";
+import { hasPdfSignature, MAX_CERTIFICATE_BYTES, validateCertificateFileMetadata } from "@/lib/certificate-files";
 
-const MAX_BYTES = 10 * 1024 * 1024;
 const BUCKET = process.env.SUPABASE_CERTIFICATES_BUCKET?.trim() || "certificates";
 
 async function requireAdmin() {
@@ -24,10 +24,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "El archivo PDF es requerido" }, { status: 400 });
-  if (file.size === 0 || file.size > MAX_BYTES || file.type !== "application/pdf") return NextResponse.json({ error: "La constancia debe ser un PDF de hasta 10 MB" }, { status: 400 });
+  const metadataError = validateCertificateFileMetadata(file);
+  if (metadataError || file.size > MAX_CERTIFICATE_BYTES) return NextResponse.json({ error: metadataError ?? "La constancia debe ser un PDF de hasta 10 MB" }, { status: 400 });
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const signature = new TextDecoder().decode(bytes.slice(0, 5));
-  if (signature !== "%PDF-") return NextResponse.json({ error: "El archivo no es un PDF válido" }, { status: 400 });
+  if (!hasPdfSignature(bytes)) return NextResponse.json({ error: "El archivo no es un PDF válido" }, { status: 400 });
 
   const { data: enrollment } = await admin.from("enrollments").select("id").eq("id", enrollmentId).maybeSingle();
   if (!enrollment) return NextResponse.json({ error: "Inscripción no encontrada" }, { status: 404 });
@@ -50,7 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .upsert(metadata, { onConflict: "enrollment_id" })
     .select("id,enrollment_id,status,storage_path,original_filename,mime_type,size_bytes,issued_at")
     .single();
-  if (certificateResult.error?.code === "42703") {
+  if (certificateResult.error?.code === "42703" || certificateResult.error?.code === "PGRST204") {
     certificateResult = await admin
       .from("certificates")
       .upsert({ enrollment_id: enrollmentId, status: "pending", storage_path: storagePath, issued_at: null }, { onConflict: "enrollment_id" })
