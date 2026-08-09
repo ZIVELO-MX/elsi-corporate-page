@@ -28,6 +28,8 @@ export async function GET(request: Request) {
   if (modality === "online" || modality === "in_person") selection = selection.eq("modality", modality);
   const category = query.filters.get("category");
   if (category) selection = selection.eq("category", category.slice(0, 120));
+  const id = query.filters.get("id");
+  if (id) selection = selection.eq("id", id);
 
   const { data, error, count } = await selection.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to);
   if (error) return NextResponse.json({ error: "No fue posible consultar cursos" }, { status: 500 });

@@ -23,14 +23,19 @@ test("enrollment mutations require admin and enforce idempotent source/status co
 });
 
 test("admin enrollment screen uses persistent endpoints without mutation fallbacks", async () => {
-  const source = await read("app/admin/inscripciones/page.tsx");
+  const [source, pickers, upload] = await Promise.all([
+    read("app/admin/inscripciones/page.tsx"),
+    read("components/admin/enrollment-pickers.tsx"),
+    read("components/admin/certificate-upload-dialog.tsx"),
+  ]);
   assert.match(source, /useAdminCollection<PersistedEnrollment>/);
-  assert.match(source, /useAdminCollection<AdminUser>/);
-  assert.match(source, /useAdminCollection<PersistedCourse>/);
+  assert.match(pickers, /\/api\/admin\/users\?/);
+  assert.match(pickers, /\/api\/admin\/courses\?/);
   assert.match(source, /method: "POST"/);
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /enrollmentCollection\.items\.map/);
   assert.match(source, /Array\.isArray\(row\.certificates\)/);
+  assert.match(upload, /method: "POST"/);
   assert.doesNotMatch(source, /addEnrollment|completeEnrollment|markCertificateAvailable/);
 });
 
@@ -45,16 +50,16 @@ test("admin users endpoint and screen use Supabase data without exposing service
 });
 
 test("certificate storage stays private and owner-scoped", async () => {
-  const [upload, download, publish, migration, screen] = await Promise.all([
+  const [upload, download, publish, migration] = await Promise.all([
     read("app/api/admin/enrollments/[id]/certificate/route.ts"),
     read("app/api/certificates/[id]/download/route.ts"),
     read("app/api/admin/certificates/[id]/route.ts"),
     read("supabase/migrations/20260804000000_certificates_storage.sql"),
-    read("app/admin/inscripciones/page.tsx"),
   ]);
   assert.match(upload, /createSupabaseAdminClient/);
-  assert.match(upload, /application\/pdf/);
-  assert.match(upload, /MAX_BYTES/);
+  assert.match(upload, /validateCertificateFileMetadata/);
+  assert.match(upload, /MAX_CERTIFICATE_BYTES/);
+  assert.match(upload, /hasPdfSignature/);
   assert.match(upload, /storage\.from/);
   assert.match(upload, /status: "pending"/);
   assert.match(download, /enrollment\.user_id !== auth\.user\.id/);
@@ -62,7 +67,7 @@ test("certificate storage stays private and owner-scoped", async () => {
   assert.match(download, /NextResponse\.redirect/);
   assert.match(publish, /Primero carga el archivo/);
   assert.match(migration, /public = false/);
-  assert.match(screen, /\/api\/admin\/enrollments\/\$\{e\.id\}\/certificate/);
+  assert.match(await read("components/admin/certificate-upload-dialog.tsx"), /\/api\/admin\/enrollments\/\$\{entry\.enrollment\.id\}\/certificate/);
 });
 
 test("Supabase audit events record actor and resource changes without payload PII", async () => {
