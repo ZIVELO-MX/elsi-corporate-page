@@ -14,6 +14,7 @@ test("contact endpoint validates, rate-limits, verifies anti-spam and writes lea
   assert.match(migration, /outbox_events/);
   assert.match(migration, /lead\.created/);
   assert.match(source, /submit_contact_lead/);
+  assert.match(source, /if \(!secret\) return true/);
 });
 
 test("admin leads are protected and status transitions are constrained", async () => {

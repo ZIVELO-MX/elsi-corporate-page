@@ -11,7 +11,7 @@ Los PR se abren desde el inicio con un manifiesto autocontenido y se implementan
 | 3 | `feat/els-0035-supabase-auth` | ELS-0035 | Sesiones, Google Auth y roles |
 | 4 | `feat/els-0037-course-data` | ELS-0037 | Cursos públicos y CRUD administrativo |
 | 5 | `feat/els-0038-student-operations` | ELS-0038 | Usuarios, inscripciones y constancias |
-| 6 | `feat/els-0041-notifications-leads` | ELS-0041 | Leads, Turnstile, Resend y outbox |
+| 6 | `feat/els-0041-notifications-leads` | ELS-0041 | Leads, anti-spam base, Resend y outbox; Turnstile diferido |
 | 7 | `feat/els-0040-managed-content` | ELS-0040 | Contenido, soluciones y testimonios |
 | 8 | `feat/els-0048-stripe-checkout` | ELS-0048 | Órdenes y Payment Element |
 | 9 | `feat/els-0049-stripe-fulfillment` | ELS-0049 | Webhooks e inscripción atómica |
@@ -24,4 +24,3 @@ Los PR se abren desde el inicio con un manifiesto autocontenido y se implementan
 - Los PR de interfaz cambian a capturas `public`, `account` o `admin` cuando exista UI implementada.
 - Ninguna credencial se guarda en Git, logs, fixtures, capturas o descripciones.
 - Los pagos permanecen desactivados hasta completar ELS-0050.
-

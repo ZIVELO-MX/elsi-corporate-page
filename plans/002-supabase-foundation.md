@@ -54,7 +54,7 @@ La aplicación dispone de clientes Supabase tipados para servidor y navegador, m
 ## Pendiente del propietario
 
 - [ ] Crear/proveer el proyecto Supabase alojado.
-- [ ] Agregar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` a secretos administrados.
+- [ ] Agregar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_SECRET_KEY` a secretos administrados; conservar `anon`/`service_role` sólo como fallback legacy.
 - [ ] Confirmar región, política de backups y responsables de acceso.
 
 ## Terminado cuando

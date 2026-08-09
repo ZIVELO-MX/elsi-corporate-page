@@ -13,7 +13,7 @@ El único entorno alojado pasa de pagos desactivados a Stripe test y luego live 
 
 1. [x] Sincronizar la secuencia de ramas y dejar PRs apilados sin merge automático.
 2. [x] Versionar migraciones, RLS, constraints y contratos de datos en PRs precedentes.
-3. [ ] Configurar Supabase, Google OAuth, Turnstile, Resend y Stripe test en secretos.
+3. [ ] Configurar Supabase, Google OAuth, Resend y Stripe test en secretos. Turnstile queda fuera de este deploy y se planifica como fase posterior.
 4. [ ] Validar dominio, redirects, webhook, CSP/headers, rate limits y alertas alojadas.
 5. [ ] Ejecutar matriz E2E test: auth, permisos, catálogo, contacto, orden, 3DS, fallo, duplicado e inscripción.
 6. [ ] Registrar claves/signing secret live separadas y ejecutar smoke controlado.
@@ -32,7 +32,7 @@ El único entorno alojado pasa de pagos desactivados a Stripe test y luego live 
 ## Validación manual obligatoria
 
 - [ ] Google OAuth en el dominio final.
-- [ ] Contacto/Resend y Turnstile reales.
+- [ ] Contacto/Resend reales. Turnstile permanece como fase posterior.
 - [ ] Stripe test: aprobado, rechazo, 3DS, cancelación, expiración, duplicado y retraso.
 - [ ] Stripe live: transacción autorizada, webhook, inscripción y conciliación.
 - [ ] Safari/VoiceOver, teclado, mobile y reduced motion/contrast.
@@ -42,7 +42,7 @@ El único entorno alojado pasa de pagos desactivados a Stripe test y luego live 
 
 - [ ] Proyecto Supabase, dominio final y credenciales Google OAuth.
 - [ ] Claves Stripe test/live y signing secrets test/live.
-- [ ] Credenciales Turnstile/Resend y dominios/remitentes verificados.
+- [ ] Credenciales Resend y dominios/remitentes verificados. Turnstile queda pendiente para una fase posterior.
 - [ ] Métodos de pago, moneda, razón social, descriptor y soporte.
 - [ ] Ventana de cambio y autorización de la transacción real.
 
