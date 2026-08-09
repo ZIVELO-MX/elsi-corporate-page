@@ -44,7 +44,7 @@ export function AdminExportButton({ endpoint, filename, params = "", personalDat
       <Button type="button" variant="outline" size="sm" onClick={() => void download()} disabled={state === "loading"}>
         <Download aria-hidden="true" /> {state === "loading" ? "Exportando…" : "Exportar CSV"}
       </Button>
-      {state === "error" ? <span role="alert" className="sr-only">No fue posible exportar los datos.</span> : null}
+      {state === "error" ? <span role="alert" className="admin-export-error">No fue posible exportar.</span> : null}
     </span>
   );
 }

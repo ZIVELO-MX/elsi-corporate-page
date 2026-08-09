@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useRef, useState } from "react";
+import { Suspense, useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX, Quote, Trash2 } from "lucide-react";
 import { extractAdminError, useAdminCollection, type Testimonial } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
@@ -12,6 +12,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
+import { AdminListToolbar, AdminPageHeader } from "@/components/admin/page-header";
+import { adminPageParam, useAdminUrlState } from "@/lib/admin-url-state";
 
 type StatusFilter = "todos" | "activos" | "inactivos";
 type TestimonialRow = { id: string; author_name: string; author_role: string | null; quote: string; image_path: string | null; course_id?: string | null; consent_reference: string | null; is_active: boolean };
@@ -44,7 +46,7 @@ function Field({ label, children }: { label: string; children: (id: string) => R
   return <div><label htmlFor={id} className="admin-label">{label}</label>{children(id)}</div>;
 }
 
-export default function AdminTestimonials() {
+function TestimonialsWorkspace() {
   const { toast } = useToast();
   const courseOptions = useAdminCollection<CourseOption>("/api/admin/courses?pageSize=25&sort=title&direction=asc", "courses");
   const [editing, setEditing] = useState<string | null>(null);
@@ -53,17 +55,21 @@ export default function AdminTestimonials() {
   const initialFormRef = useRef<TestimonialForm | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-  const [page, setPage] = useState(1);
+  const { searchParams, update } = useAdminUrlState();
+  const query = searchParams.get("q") ?? "";
+  const rawStatus = searchParams.get("status");
+  const statusFilter: StatusFilter = rawStatus === "active" ? "activos" : rawStatus === "inactive" ? "inactivos" : "todos";
+  const page = adminPageParam(searchParams.get("page"));
+  const sort = searchParams.get("sort") ?? "sort_order";
+  const direction = searchParams.get("direction") === "desc" ? "desc" : "asc";
   const [submitting, setSubmitting] = useState(false);
 
   const testimonialUrl = useMemo(() => {
-    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "sort_order", direction: "asc" });
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort, direction });
     if (query.trim()) params.set("q", query.trim());
     if (statusFilter !== "todos") params.set("status", statusFilter === "activos" ? "active" : "inactive");
     return `/api/admin/testimonials?${params}`;
-  }, [page, query, statusFilter]);
+  }, [direction, page, query, sort, statusFilter]);
   const testimonialCollection = useAdminCollection<TestimonialRow>(testimonialUrl, "testimonials");
   const testimonials = useMemo(() => testimonialCollection.items.map(testimonialFromRow), [testimonialCollection.items]);
 
@@ -166,32 +172,25 @@ export default function AdminTestimonials() {
 
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", marginBottom: "1rem" }}>
-        <div>
-          <h1 className="admin-page-title">Testimonios</h1>
-          <p className="admin-page-sub">
-            {testimonialCollection.pagination.total} testimonios
-          </p>
-        </div>
-        <Button variant="primary" onClick={startCreate}>Crear testimonio</Button>
-      </div>
+      <AdminPageHeader title="Testimonios" description={`${testimonialCollection.pagination.total} testimonios`} actions={<Button variant="primary" onClick={startCreate}>Crear testimonio</Button>} />
 
       <p style={noteStyle}>
         Los testimonios deben ser reales y verificables. Los ejemplos precargados son de validación; sustitúyelos por casos auténticos de ELSI.
       </p>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
-        <div style={{ position: "relative", flex: 1, minWidth: "14rem" }}>
+      <AdminListToolbar>
+        <div data-grow="true" style={{ position: "relative" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="search" value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Buscar por autor, rol o texto" aria-label="Buscar testimonios"
+          <input type="search" value={query} onChange={(e) => update({ q: e.target.value, page: null })} placeholder="Buscar por autor, rol o texto" aria-label="Buscar testimonios"
             style={{ width: "100%", padding: "0.5rem 0.75rem 0.5rem 2rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }} />
         </div>
-        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }} aria-label="Filtrar por estado" className="admin-select">
+        <select value={rawStatus ?? "todos"} onChange={(e) => update({ status: e.target.value, page: null })} aria-label="Filtrar por estado" className="admin-select">
           <option value="todos">Todos los estados</option>
-          <option value="activos">Activos</option>
-          <option value="inactivos">Inactivos</option>
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
         </select>
-      </div>
+        <select value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDirection] = event.target.value.split(":"); update({ sort: nextSort, direction: nextDirection, page: null }); }} aria-label="Ordenar testimonios" className="admin-select"><option value="sort_order:asc">Orden editorial</option><option value="created_at:desc">Más recientes</option><option value="author_name:asc">Autor A–Z</option></select>
+      </AdminListToolbar>
 
       <Dialog open={showForm} onOpenChange={(open) => { if (!open) requestClose(); }}>
         <DialogContent style={{ maxWidth: "34rem", maxHeight: "85vh", overflowY: "auto" }}>
@@ -271,7 +270,7 @@ export default function AdminTestimonials() {
           }
         />
       )}
-      <AdminPagination pagination={testimonialCollection.pagination} onPageChange={setPage} />
+      <AdminPagination pagination={testimonialCollection.pagination} onPageChange={(nextPage) => update({ page: nextPage })} />
 
       <ConfirmDialog
         open={discardOpen}
@@ -302,4 +301,8 @@ export default function AdminTestimonials() {
       />
     </div>
   );
+}
+
+export default function AdminTestimonials() {
+  return <Suspense fallback={<TableSkeleton rows={4} widths={["11rem", "18rem", "9rem", "5rem"]} />}><TestimonialsWorkspace /></Suspense>;
 }

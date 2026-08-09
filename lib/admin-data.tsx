@@ -81,7 +81,7 @@ export type PageSection = {
   active: boolean;
 };
 
-export type LeadStatus = "nuevo" | "atendido";
+export type LeadStatus = "nuevo" | "en-seguimiento" | "cerrado";
 
 export type Lead = {
   id: string;

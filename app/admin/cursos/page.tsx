@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useRef, useState } from "react";
+import { Suspense, useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX } from "lucide-react";
 import { useAdminCollection, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
@@ -13,6 +13,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
+import { AdminListToolbar, AdminPageHeader } from "@/components/admin/page-header";
+import { adminPageParam, useAdminUrlState } from "@/lib/admin-url-state";
 
 type StatusFilter = "todos" | "active" | "inactive";
 
@@ -143,22 +145,25 @@ function Field({ label, children }: { label: string; children: (id: string) => R
   );
 }
 
-export default function AdminCourses() {
+function CoursesWorkspace() {
   const { toast } = useToast();
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CourseForm>(() => emptyForm());
   const initialFormRef = useRef<CourseForm | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-  const [page, setPage] = useState(1);
+  const { searchParams, update } = useAdminUrlState();
+  const query = searchParams.get("q") ?? "";
+  const statusFilter: StatusFilter = searchParams.get("visibility") === "active" ? "active" : searchParams.get("visibility") === "inactive" ? "inactive" : "todos";
+  const page = adminPageParam(searchParams.get("page"));
+  const sort = searchParams.get("sort") ?? "created_at";
+  const direction = searchParams.get("direction") === "asc" ? "asc" : "desc";
   const collectionUrl = useMemo(() => {
-    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "created_at", direction: "desc" });
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort, direction });
     if (query.trim()) params.set("q", query.trim());
     if (statusFilter !== "todos") params.set("visibility", statusFilter);
     return `/api/admin/courses?${params}`;
-  }, [page, query, statusFilter]);
+  }, [direction, page, query, sort, statusFilter]);
   const { items, pagination, loading, error, setItems } = useAdminCollection<PersistedCourse>(collectionUrl, "courses");
   const displayedCourses = useMemo(() => items.map(courseFromRow), [items]);
 
@@ -229,26 +234,19 @@ export default function AdminCourses() {
 
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", marginBottom: "1.5rem" }}>
-        <div>
-          <h1 className="admin-page-title">Cursos</h1>
-          <p className="admin-page-sub">
-            {pagination.total} cursos registrados
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+      <AdminPageHeader title="Cursos" description={`${pagination.total} cursos registrados`} actions={
+        <>
           <AdminExportButton endpoint="/api/admin/courses" filename="elsi-cursos.csv" params={collectionUrl.split("?")[1]} personalData={false} />
           <Button variant="primary" onClick={startCreate}>Crear curso</Button>
-        </div>
-      </div>
+        </>} />
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
-        <div style={{ position: "relative", flex: 1, minWidth: "14rem" }}>
+      <AdminListToolbar>
+        <div data-grow="true" style={{ position: "relative" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           <input
             type="search"
             value={query}
-            onChange={e => { setQuery(e.target.value); setPage(1); }}
+            onChange={e => update({ q: e.target.value, page: null })}
             placeholder="Buscar por título o categoría"
             aria-label="Buscar cursos"
             style={{ width: "100%", padding: "0.5rem 0.75rem 0.5rem 2rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }}
@@ -256,7 +254,7 @@ export default function AdminCourses() {
         </div>
         <select
           value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
+          onChange={e => update({ visibility: e.target.value, page: null })}
           aria-label="Filtrar por estado"
           className="admin-select"
         >
@@ -264,7 +262,8 @@ export default function AdminCourses() {
           <option value="active">Activos</option>
           <option value="inactive">Inactivos</option>
         </select>
-      </div>
+        <select value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDirection] = event.target.value.split(":"); update({ sort: nextSort, direction: nextDirection, page: null }); }} aria-label="Ordenar cursos" className="admin-select"><option value="created_at:desc">Más recientes</option><option value="created_at:asc">Más antiguos</option><option value="title:asc">Título A–Z</option><option value="price_cents:desc">Mayor precio</option></select>
+      </AdminListToolbar>
 
       <Dialog open={showForm} onOpenChange={(open) => { if (!open) requestClose(); }}>
         <DialogContent style={{ maxWidth: "34rem", maxHeight: "85vh", overflowY: "auto" }}>
@@ -403,7 +402,7 @@ export default function AdminCourses() {
           }
         />
       )}
-      <AdminPagination pagination={pagination} onPageChange={setPage} />
+      <AdminPagination pagination={pagination} onPageChange={(nextPage) => update({ page: nextPage })} />
 
       <ConfirmDialog
         open={discardOpen}
@@ -417,4 +416,8 @@ export default function AdminCourses() {
       />
     </div>
   );
+}
+
+export default function AdminCourses() {
+  return <Suspense fallback={<TableSkeleton rows={5} widths={["11rem", "7rem", "6rem", "5rem"]} />}><CoursesWorkspace /></Suspense>;
 }

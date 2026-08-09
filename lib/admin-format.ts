@@ -6,6 +6,7 @@ const adminMoneyFormatter = new Intl.NumberFormat("es-MX", {
 });
 
 const adminDateFormatter = new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" });
+const adminNumberFormatter = new Intl.NumberFormat("es-MX");
 
 export function formatAdminMoney(amount: number) {
   return adminMoneyFormatter.format(amount);
@@ -17,6 +18,10 @@ export function formatAdminDate(value: string) {
   const date = new Date(normalized);
   if (Number.isNaN(date.getTime())) return "—";
   return adminDateFormatter.format(date);
+}
+
+export function formatAdminNumber(value: number) {
+  return adminNumberFormatter.format(value);
 }
 
 export function newestFirst<T>(items: T[], dateOf: (item: T) => string) {
