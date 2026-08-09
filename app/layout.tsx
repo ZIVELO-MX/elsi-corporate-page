@@ -6,7 +6,12 @@ import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth-context";
 import { siteConfig } from "@/lib/site-config";
-import { SITE, SOCIAL_IMAGE, indexable } from "@/lib/seo";
+import {
+  DISCOVERY_ALTERNATES,
+  SITE,
+  SOCIAL_IMAGE,
+  indexable,
+} from "@/lib/seo";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -28,8 +33,22 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
+  creator: SITE.name,
+  publisher: SITE.name,
+  category: "Educación ambiental",
+  alternates: { types: DISCOVERY_ALTERNATES },
   robots: indexable
-    ? { index: true, follow: true, googleBot: { index: true, follow: true } }
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      }
     : { index: false, follow: false },
   manifest: "/manifest.webmanifest",
   icons: {
@@ -54,7 +73,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${manrope.variable} ${sora.variable}`}>
+    <html lang={SITE.language} className={`${manrope.variable} ${sora.variable}`}>
       <body data-section-labels={siteConfig.sectionLabels ? "true" : undefined}>
         <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
         <AuthProvider>

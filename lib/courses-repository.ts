@@ -2,6 +2,7 @@ import { createSupabasePublicClient } from "@/lib/supabase/server";
 import { CATALOG_CATEGORIES } from "@/lib/agentic-navigation";
 import type { Course, CourseModality, PublishState } from "@/lib/courses";
 import type { Database } from "@/lib/supabase/types";
+import { cache } from "react";
 
 type CourseRow = Database["public"]["Tables"]["courses"]["Row"];
 export type CourseInput = {
@@ -58,21 +59,21 @@ function mapCourse(row: CourseRow): Course {
   };
 }
 
-export async function listPublicCourses() {
+export const listPublicCourses = cache(async function listPublicCourses() {
   const client = createSupabasePublicClient();
   if (!client) return null;
   const { data, error } = await client.from("courses").select("*").eq("is_active", true).eq("content_status", "verified").order("created_at", { ascending: false });
   if (error) throw new Error("No fue posible consultar el catálogo");
   return (data ?? []).map(mapCourse);
-}
+});
 
-export async function getPublicCourse(slug: string) {
+export const getPublicCourse = cache(async function getPublicCourse(slug: string) {
   const client = createSupabasePublicClient();
   if (!client) return null;
   const { data, error } = await client.from("courses").select("*").eq("slug", slug).eq("is_active", true).eq("content_status", "verified").maybeSingle();
   if (error) throw new Error("No fue posible consultar el curso");
   return data ? mapCourse(data) : undefined;
-}
+});
 
 export function mapCourseInput(input: ReturnType<typeof validateCourseInput>): Database["public"]["Tables"]["courses"]["Insert"] {
   return {

@@ -8,6 +8,8 @@ const routes = [
   "/contacto",
   "/cursos",
   "/soluciones",
+  "/nosotros",
+  "/aviso-de-privacidad",
   "/soluciones/capacitacion",
   "/cursos/fundamentos-de-educacion-ambiental",
   "/login",
@@ -26,9 +28,12 @@ async function auditRoute(route) {
   const response = await fetch(`${baseUrl}${route}`);
   assert.equal(response.status, 200, `${route} must respond with 200`);
   const markup = await response.text();
+  const jsonLd = [...markup.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([^<]*)<\/script>/g)]
+    .map((match) => JSON.parse(match[1]));
   return {
     route,
     title: value(markup, /<title>([^<]*)<\/title>/),
+    description: value(markup, /<meta name="description" content="([^"]*)"\/?>/),
     canonical: value(
       markup,
       /<link rel="canonical" href="([^"]*)"\/?>/,
@@ -40,6 +45,9 @@ async function auditRoute(route) {
       markup,
     ),
     hasIcon: /<link rel="icon" href="[^"]+"/.test(markup),
+    hasLlmsAlternate: /<link(?=[^>]*rel="alternate")(?=[^>]*type="text\/plain")(?=[^>]*href="[^"]*\/llms\.txt")[^>]*>/.test(markup),
+    hasAgentNavigationAlternate: /<link(?=[^>]*rel="alternate")(?=[^>]*type="application\/json")(?=[^>]*href="[^"]*\/api\/navigation")[^>]*>/.test(markup),
+    jsonLd,
   };
 }
 
@@ -81,42 +89,66 @@ async function startServer() {
 
 const server = await startServer();
 let results;
+let discovery;
 
 try {
-  results = await Promise.all(routes.map(auditRoute));
+  [results, discovery] = await Promise.all([
+    Promise.all(routes.map(auditRoute)),
+    Promise.all([
+      fetch(`${baseUrl}/llms.txt`),
+      fetch(`${baseUrl}/api/navigation`),
+      fetch(`${baseUrl}/robots.txt`),
+      fetch(`${baseUrl}/sitemap.xml`),
+    ]),
+  ]);
 } finally {
   server.kill("SIGTERM");
   await once(server, "exit");
 }
 
 const byRoute = Object.fromEntries(results.map((result) => [result.route, result]));
+const [llmsResponse, navigationResponse, robotsResponse, sitemapResponse] = discovery;
+const [llms, navigation, robots, sitemap] = await Promise.all([
+  llmsResponse.text(),
+  navigationResponse.json(),
+  robotsResponse.text(),
+  sitemapResponse.text(),
+]);
 
 for (const route of [
   "/",
   "/contacto",
   "/cursos",
   "/soluciones",
+  "/nosotros",
+  "/aviso-de-privacidad",
   "/soluciones/capacitacion",
   "/cursos/fundamentos-de-educacion-ambiental",
 ]) {
   const result = byRoute[route];
   assert.ok(result.title, `${route} must have a title`);
+  assert.ok(result.description, `${route} must have a meta description`);
   assert.equal(result.h1Count, 1, `${route} must render one initial H1`);
   assert.ok(result.hasOgImage, `${route} must provide an Open Graph image`);
+  assert.equal(result.hasLlmsAlternate, true, `${route} must advertise llms.txt`);
+  assert.equal(result.hasAgentNavigationAlternate, true, `${route} must advertise the agent manifest`);
 }
 
-assert.equal(byRoute["/"].canonical, "https://elsi.example.com");
+const canonicalOrigin = byRoute["/"].canonical;
+const canonicalUrl = new URL(canonicalOrigin);
+assert.equal(canonicalUrl.protocol, "https:");
+assert.equal(canonicalUrl.pathname, "/");
 assert.equal(
   byRoute["/contacto"].canonical,
-  "https://elsi.example.com/contacto",
+  `${canonicalOrigin}/contacto`,
 );
 assert.equal(
   byRoute["/soluciones/capacitacion"].canonical,
-  "https://elsi.example.com/soluciones/capacitacion",
+  `${canonicalOrigin}/soluciones/capacitacion`,
 );
 assert.equal(
   byRoute["/cursos/fundamentos-de-educacion-ambiental"].canonical,
-  "https://elsi.example.com/cursos/fundamentos-de-educacion-ambiental",
+  `${canonicalOrigin}/cursos/fundamentos-de-educacion-ambiental`,
 );
 assert.doesNotMatch(
   byRoute["/soluciones/capacitacion"].title,
@@ -128,6 +160,25 @@ assert.match(
 );
 assert.equal(byRoute["/"].hasManifest, true);
 assert.equal(byRoute["/"].hasIcon, true);
+
+assert.equal(llmsResponse.status, 200);
+assert.match(llmsResponse.headers.get("content-type") ?? "", /^text\/plain/);
+assert.match(llms, /^# ELSI\n> /);
+assert.match(llms, /\/api\/navigation/);
+assert.doesNotMatch(llms, /\/admin|\/profile|\/checkout|\/login|\/register/);
+assert.equal(navigationResponse.status, 200);
+assert.match(navigationResponse.headers.get("content-type") ?? "", /^application\/json/);
+assert.match(navigationResponse.headers.get("x-robots-tag") ?? "", /noindex/);
+assert.equal(navigation.schemaVersion, "1.0");
+assert.equal(navigation.contentStatus, "preview");
+assert.equal(new URL(navigation.baseUrl).origin, canonicalOrigin);
+assert.deepEqual(navigation.resources, { courses: [], solutions: [] });
+assert.ok(navigation.actions.every((action) => action.method === "GET" && action.readOnly));
+assert.doesNotMatch(JSON.stringify(navigation), /\/admin|\/profile|\/checkout|\/login|\/register/);
+assert.equal(robotsResponse.status, 200);
+assert.match(robots, /Disallow: \/$/m);
+assert.equal(sitemapResponse.status, 200);
+assert.doesNotMatch(sitemap, /<url>/);
 
 for (const route of [
   "/login",
@@ -144,4 +195,4 @@ for (const route of [
   );
 }
 
-console.log(JSON.stringify(results, null, 2));
+console.log(JSON.stringify({ pages: results, discovery: { llms: llmsResponse.status, navigation: navigationResponse.status, robots: robotsResponse.status, sitemap: sitemapResponse.status } }, null, 2));

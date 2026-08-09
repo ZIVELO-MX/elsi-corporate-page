@@ -76,6 +76,6 @@ test("public editorial pages prefer persisted content and invalidate public rout
   assert.match(home, /sectionText/);
   assert.match(about, /listPublicContent/);
   assert.match(solutions, /mapPublicSolutions/);
-  assert.match(sitemap, /listPublicContent/);
+  assert.match(sitemap, /listPublicSolutions/);
   assert.match(api, /revalidatePublicContent/);
 });

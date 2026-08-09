@@ -2,6 +2,8 @@ import { PublicContactForm } from "@/components/public-contact-form";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { getPublicCourseBySlug } from "@/lib/courses";
 import { getPublicSolutionBySlug } from "@/lib/solutions";
+import { getPublicCourse } from "@/lib/courses-repository";
+import { getPublicSolution } from "@/lib/content-repository";
 
 type ContactSearchParams = Promise<{
   curso?: string | string[];
@@ -18,8 +20,16 @@ export default async function ContactoPage({
   searchParams: ContactSearchParams;
 }) {
   const params = await searchParams;
-  const course = getPublicCourseBySlug(first(params.curso) ?? "");
-  const solution = getPublicSolutionBySlug(first(params.solucion) ?? "");
+  const courseSlug = first(params.curso) ?? "";
+  const solutionSlug = first(params.solucion) ?? "";
+  const [persistedCourse, persistedSolution] = await Promise.all([
+    courseSlug ? getPublicCourse(courseSlug) : Promise.resolve(undefined),
+    solutionSlug ? getPublicSolution(solutionSlug) : Promise.resolve(undefined),
+  ]);
+  const course = persistedCourse === null
+    ? getPublicCourseBySlug(courseSlug)
+    : persistedCourse;
+  const solution = persistedSolution ?? getPublicSolutionBySlug(solutionSlug);
   const context = course
     ? { type: "course" as const, id: course.slug, label: course.title }
     : solution

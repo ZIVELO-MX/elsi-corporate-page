@@ -47,12 +47,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const client = await requireAdmin();
+  const [client, { id }] = await Promise.all([requireAdmin(), params]);
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { id } = await params;
-  const { data: previous } = await client.from("courses").select("slug").eq("id", id).maybeSingle();
   const { data, error } = await client.from("courses").update({ is_active: false }).eq("id", id).select("id,is_active,slug").single();
   if (error) return NextResponse.json({ error: "No fue posible desactivar el curso" }, { status: 400 });
-  revalidateCourseSurfaces(previous?.slug);
+  revalidateCourseSurfaces(data.slug);
   return NextResponse.json({ course: data });
 }
