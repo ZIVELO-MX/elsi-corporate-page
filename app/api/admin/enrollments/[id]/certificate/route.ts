@@ -36,11 +36,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { error: uploadError } = await admin.storage.from(BUCKET).upload(storagePath, bytes, { contentType: "application/pdf", upsert: false });
   if (uploadError) return NextResponse.json({ error: "No fue posible guardar la constancia" }, { status: 502 });
 
-  const { data: certificate, error: certificateError } = await admin
+  const metadata = {
+    enrollment_id: enrollmentId,
+    status: "pending" as const,
+    storage_path: storagePath,
+    original_filename: file.name.slice(0, 255),
+    mime_type: file.type,
+    size_bytes: file.size,
+    issued_at: null,
+  };
+  let certificateResult = await admin
     .from("certificates")
-    .upsert({ enrollment_id: enrollmentId, status: "pending", storage_path: storagePath, issued_at: null }, { onConflict: "enrollment_id" })
-    .select("id,enrollment_id,status,storage_path,issued_at")
+    .upsert(metadata, { onConflict: "enrollment_id" })
+    .select("id,enrollment_id,status,storage_path,original_filename,mime_type,size_bytes,issued_at")
     .single();
+  if (certificateResult.error?.code === "42703") {
+    certificateResult = await admin
+      .from("certificates")
+      .upsert({ enrollment_id: enrollmentId, status: "pending", storage_path: storagePath, issued_at: null }, { onConflict: "enrollment_id" })
+      .select("id,enrollment_id,status,storage_path,issued_at")
+      .single() as typeof certificateResult;
+  }
+  const { data: certificate, error: certificateError } = certificateResult;
   if (certificateError || !certificate) {
     await admin.storage.from(BUCKET).remove([storagePath]);
     return NextResponse.json({ error: "No fue posible registrar la constancia" }, { status: 500 });

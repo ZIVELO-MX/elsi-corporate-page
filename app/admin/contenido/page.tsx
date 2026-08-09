@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAdminData, type PageSection } from "@/lib/admin-data";
+import { useAdminResource, type PageSection } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -65,8 +65,8 @@ function solutionDraft(solution: SolutionRow): SolutionDraft {
 }
 
 export default function AdminContent() {
-  const { sections } = useAdminData();
   const { toast } = useToast();
+  const { data, loading, error } = useAdminResource<{ sections: SectionRow[]; solutions: SolutionRow[] }>("/api/admin/content");
   const [persistedSections, setPersistedSections] = useState<PageSection[] | null>(null);
   const [solutions, setSolutions] = useState<SolutionRow[]>([]);
   const [solutionDrafts, setSolutionDrafts] = useState<Record<string, SolutionDraft>>({});
@@ -75,21 +75,12 @@ export default function AdminContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    let active = true;
-    fetch("/api/admin/content")
-      .then((response) => response.ok ? response.json() : null)
-      .then((payload) => {
-        if (!active || !payload?.sections) return;
-        setPersistedSections((payload.sections as SectionRow[]).map(rowToSection));
-        setSolutions(Array.isArray(payload.solutions) ? payload.solutions as SolutionRow[] : []);
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, []);
+    if (!data) return;
+    setPersistedSections(data.sections.map(rowToSection));
+    setSolutions(data.solutions);
+  }, [data]);
 
-  // The provider data is a read-only snapshot while this screen refreshes its
-  // dedicated endpoint. Every mutation below still goes through the API.
-  const visibleSections = persistedSections ?? sections;
+  const visibleSections = persistedSections ?? [];
 
   const setDraft = (id: string, content: string) => setDrafts((current) => ({ ...current, [id]: content }));
   const draftOf = (section: PageSection) => drafts[section.id] ?? section.content;
@@ -159,6 +150,9 @@ export default function AdminContent() {
           Edita los textos y activa/desactiva secciones de la página corporativa. Los cambios se guardan al presionar Guardar.
         </p>
       </div>
+
+      {loading ? <p className="admin-page-sub">Cargando contenido…</p> : null}
+      {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {visibleSections.map((s) => {

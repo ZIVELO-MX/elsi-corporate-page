@@ -1,16 +1,19 @@
 "use client";
 
 import { Receipt } from "lucide-react";
-import { useState } from "react";
-import { useAdminData, type PendingPayment } from "@/lib/admin-data";
+import { useMemo, useState } from "react";
+import { extractAdminError, useAdminCollection, type PendingPayment, type Sale } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { formatAdminDate, formatAdminMoney, newestFirst } from "@/lib/admin-format";
+import { formatAdminDate, formatAdminMoney } from "@/lib/admin-format";
+
+type OrderRow = Sale & { status: "paid" | "pending" };
 
 function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onApprove: (payment: PendingPayment) => Promise<void> }) {
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -80,16 +83,26 @@ function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onAp
 }
 
 export default function AdminSales() {
-  const { loading, sales, pendingPayments, approvePendingPayment } = useAdminData();
+  const [page, setPage] = useState(1);
+  const url = useMemo(() => `/api/admin/orders?page=${page}&pageSize=25&sort=created_at&direction=desc`, [page]);
+  const { items, pagination, loading, error, reload } = useAdminCollection<OrderRow>(url, "orders");
+  const sales = items.filter((order): order is OrderRow & { status: "paid" } => order.status === "paid");
+  const pendingPayments = items.filter((order): order is PendingPayment => order.status === "pending");
 
   const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
+
+  const approvePendingPayment = async (id: string) => {
+    const response = await fetch("/api/admin/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ orderId: id }) });
+    if (!response.ok) throw new Error(await extractAdminError(response, "No fue posible aprobar la inscripción."));
+    reload();
+  };
 
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 className="admin-page-title">Ventas</h1>
         <p className="admin-page-sub">
-          {sales.length} ventas registradas &middot; {formatAdminMoney(totalRevenue)} total
+          {pagination.total} órdenes &middot; {formatAdminMoney(totalRevenue)} en ventas de esta página
         </p>
       </div>
 
@@ -108,11 +121,12 @@ export default function AdminSales() {
         {loading ? <TableSkeleton rows={2} widths={["9rem", "12rem", "5rem", "8rem"]} /> : <PendingPaymentTable rows={pendingPayments} onApprove={(payment) => approvePendingPayment(payment.id)} />}
       </section>
 
+      {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
       ) : (
         <AdminTable
-          rows={newestFirst(sales, (sale) => sale.soldAt)}
+          rows={sales}
           rowKey={(s) => s.id}
           minWidth="32rem"
           columns={[
@@ -137,6 +151,7 @@ export default function AdminSales() {
           }
         />
       )}
+      <AdminPagination pagination={pagination} onPageChange={setPage} />
     </div>
   );
 }

@@ -2,8 +2,9 @@
 
 import { useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX, Quote, Trash2 } from "lucide-react";
-import { useAdminData, type Testimonial } from "@/lib/admin-data";
+import { extractAdminError, useAdminCollection, type Testimonial } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -13,6 +14,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 
 type StatusFilter = "todos" | "activos" | "inactivos";
+type TestimonialRow = { id: string; author_name: string; author_role: string | null; quote: string; image_path: string | null; course_id?: string | null; consent_reference: string | null; is_active: boolean };
+type CourseOption = { id: string; title: string };
 
 type TestimonialForm = {
   authorName: string;
@@ -25,6 +28,14 @@ type TestimonialForm = {
 
 const emptyForm = (): TestimonialForm => ({ authorName: "", authorRole: "", quote: "", courseId: "", avatarUrl: "", consentReference: "" });
 
+function testimonialFromRow(row: TestimonialRow): Testimonial {
+  return { id: row.id, authorName: row.author_name, authorRole: row.author_role ?? "", quote: row.quote, avatarUrl: row.image_path ?? undefined, courseId: row.course_id ?? undefined, consentReference: row.consent_reference ?? undefined, active: row.is_active };
+}
+
+function testimonialPayload(testimonial: Omit<Testimonial, "id">) {
+  return { authorName: testimonial.authorName, authorRole: testimonial.authorRole, quote: testimonial.quote, imagePath: testimonial.avatarUrl, courseId: testimonial.courseId, consentReference: testimonial.consentReference, isActive: testimonial.active };
+}
+
 const fieldGridStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" };
 const noteStyle: React.CSSProperties = { margin: "0 0 1.25rem", padding: "0.625rem 0.875rem", fontSize: "0.8125rem", lineHeight: 1.5, color: "var(--text-muted)", background: "var(--paper)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)" };
 
@@ -34,8 +45,8 @@ function Field({ label, children }: { label: string; children: (id: string) => R
 }
 
 export default function AdminTestimonials() {
-  const { loading, testimonials, courses, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial } = useAdminData();
   const { toast } = useToast();
+  const courseOptions = useAdminCollection<CourseOption>("/api/admin/courses?pageSize=25&sort=title&direction=asc", "courses");
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<TestimonialForm>(() => emptyForm());
@@ -44,19 +55,52 @@ export default function AdminTestimonials() {
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [page, setPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+
+  const testimonialUrl = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "sort_order", direction: "asc" });
+    if (query.trim()) params.set("q", query.trim());
+    if (statusFilter !== "todos") params.set("status", statusFilter === "activos" ? "active" : "inactive");
+    return `/api/admin/testimonials?${params}`;
+  }, [page, query, statusFilter]);
+  const testimonialCollection = useAdminCollection<TestimonialRow>(testimonialUrl, "testimonials");
+  const testimonials = useMemo(() => testimonialCollection.items.map(testimonialFromRow), [testimonialCollection.items]);
+
+  const courses = courseOptions.items;
+  const loading = testimonialCollection.loading || courseOptions.loading;
+
+  const addTestimonial = async (testimonial: Omit<Testimonial, "id">) => {
+    const response = await fetch("/api/admin/testimonials", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(testimonialPayload(testimonial)) });
+    if (!response.ok) throw new Error(await extractAdminError(response, "No fue posible crear el testimonio."));
+    await response.json();
+    testimonialCollection.reload();
+  };
+
+  const updateTestimonial = async (id: string, patch: Partial<Testimonial>) => {
+    const current = testimonials.find((testimonial) => testimonial.id === id);
+    if (!current) throw new Error("Testimonio no encontrado.");
+    const next = { ...current, ...patch };
+    const response = await fetch(`/api/admin/testimonials/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(testimonialPayload(next)) });
+    if (!response.ok) throw new Error(await extractAdminError(response, "No fue posible actualizar el testimonio."));
+    testimonialCollection.reload();
+  };
+
+  const toggleTestimonial = async (id: string) => {
+    const current = testimonials.find((testimonial) => testimonial.id === id);
+    if (!current) throw new Error("Testimonio no encontrado.");
+    await updateTestimonial(id, { active: !current.active });
+  };
+
+  const deleteTestimonial = async (id: string) => {
+    const response = await fetch(`/api/admin/testimonials/${id}`, { method: "DELETE" });
+    if (!response.ok) throw new Error(await extractAdminError(response, "No fue posible eliminar el testimonio."));
+    testimonialCollection.reload();
+  };
 
   const courseTitle = (id?: string) => (id ? courses.find((c) => c.id === id)?.title ?? "—" : "—");
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return testimonials.filter((t) => {
-      if (statusFilter === "activos" && !t.active) return false;
-      if (statusFilter === "inactivos" && t.active) return false;
-      if (!q) return true;
-      return t.authorName.toLowerCase().includes(q) || t.authorRole.toLowerCase().includes(q) || t.quote.toLowerCase().includes(q);
-    });
-  }, [testimonials, query, statusFilter]);
+  const filtered = testimonials;
 
   const closeForm = () => {
     setShowForm(false);
@@ -126,7 +170,7 @@ export default function AdminTestimonials() {
         <div>
           <h1 className="admin-page-title">Testimonios</h1>
           <p className="admin-page-sub">
-            {filtered.length === testimonials.length ? `${testimonials.length} testimonios` : `${filtered.length} de ${testimonials.length} testimonios`}
+            {testimonialCollection.pagination.total} testimonios
           </p>
         </div>
         <Button variant="primary" onClick={startCreate}>Crear testimonio</Button>
@@ -139,10 +183,10 @@ export default function AdminTestimonials() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
         <div style={{ position: "relative", flex: 1, minWidth: "14rem" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por autor, rol o texto" aria-label="Buscar testimonios"
+          <input type="search" value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Buscar por autor, rol o texto" aria-label="Buscar testimonios"
             style={{ width: "100%", padding: "0.5rem 0.75rem 0.5rem 2rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }} />
         </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" className="admin-select">
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }} aria-label="Filtrar por estado" className="admin-select">
           <option value="todos">Todos los estados</option>
           <option value="activos">Activos</option>
           <option value="inactivos">Inactivos</option>
@@ -182,6 +226,7 @@ export default function AdminTestimonials() {
         </DialogContent>
       </Dialog>
 
+      {testimonialCollection.error ? <p role="alert" className="admin-page-sub">{testimonialCollection.error}</p> : null}
       {loading ? (
         <TableSkeleton rows={4} widths={["11rem", "18rem", "9rem", "5rem", "5rem"]} />
       ) : (
@@ -226,6 +271,7 @@ export default function AdminTestimonials() {
           }
         />
       )}
+      <AdminPagination pagination={testimonialCollection.pagination} onPageChange={setPage} />
 
       <ConfirmDialog
         open={discardOpen}

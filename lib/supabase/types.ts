@@ -6,21 +6,21 @@ export type Database = {
   public: {
     Tables: {
       certificates: {
-        Row: { id: string; enrollment_id: string; status: Database["public"]["Enums"]["certificate_status"]; storage_path: string | null; issued_at: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; enrollment_id: string; status?: Database["public"]["Enums"]["certificate_status"]; storage_path?: string | null; issued_at?: string | null; created_at?: string; updated_at?: string };
-        Update: { id?: string; enrollment_id?: string; status?: Database["public"]["Enums"]["certificate_status"]; storage_path?: string | null; issued_at?: string | null; created_at?: string; updated_at?: string };
+        Row: { id: string; enrollment_id: string; status: Database["public"]["Enums"]["certificate_status"]; storage_path: string | null; original_filename: string | null; mime_type: string | null; size_bytes: number | null; issued_at: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; enrollment_id: string; status?: Database["public"]["Enums"]["certificate_status"]; storage_path?: string | null; original_filename?: string | null; mime_type?: string | null; size_bytes?: number | null; issued_at?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; enrollment_id?: string; status?: Database["public"]["Enums"]["certificate_status"]; storage_path?: string | null; original_filename?: string | null; mime_type?: string | null; size_bytes?: number | null; issued_at?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       contact_leads: {
-        Row: { id: string; full_name: string; email: string; phone: string | null; company: string | null; message: string; source: string; status: Database["public"]["Enums"]["lead_status"]; turnstile_verified: boolean; created_at: string; updated_at: string };
-        Insert: { id?: string; full_name: string; email: string; phone?: string | null; company?: string | null; message: string; source?: string; status?: Database["public"]["Enums"]["lead_status"]; turnstile_verified?: boolean; created_at?: string; updated_at?: string };
-        Update: { id?: string; full_name?: string; email?: string; phone?: string | null; company?: string | null; message?: string; source?: string; status?: Database["public"]["Enums"]["lead_status"]; turnstile_verified?: boolean; created_at?: string; updated_at?: string };
+        Row: { id: string; full_name: string; email: string; phone: string | null; company: string | null; message: string; source: string; status: Database["public"]["Enums"]["lead_status"]; turnstile_verified: boolean; assigned_to: string | null; resolved_at: string | null; admin_notes: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; full_name: string; email: string; phone?: string | null; company?: string | null; message: string; source?: string; status?: Database["public"]["Enums"]["lead_status"]; turnstile_verified?: boolean; assigned_to?: string | null; resolved_at?: string | null; admin_notes?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; full_name?: string; email?: string; phone?: string | null; company?: string | null; message?: string; source?: string; status?: Database["public"]["Enums"]["lead_status"]; turnstile_verified?: boolean; assigned_to?: string | null; resolved_at?: string | null; admin_notes?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       courses: {
-        Row: { id: string; slug: string; title: string; short_description: string; description: string | null; duration_hours: number | null; audience: string | null; syllabus: Json; modality: Database["public"]["Enums"]["course_modality"]; location: string | null; starts_at: string | null; enrollment_link: string | null; price_cents: number; currency: string; content_status: Database["public"]["Enums"]["content_status"]; is_active: boolean; created_at: string; updated_at: string };
-        Insert: { id?: string; slug: string; title: string; short_description: string; description?: string | null; duration_hours?: number | null; audience?: string | null; syllabus?: Json; modality?: Database["public"]["Enums"]["course_modality"]; location?: string | null; starts_at?: string | null; enrollment_link?: string | null; price_cents?: number; currency?: string; content_status?: Database["public"]["Enums"]["content_status"]; is_active?: boolean; created_at?: string; updated_at?: string };
-        Update: { id?: string; slug?: string; title?: string; short_description?: string; description?: string | null; duration_hours?: number | null; audience?: string | null; syllabus?: Json; modality?: Database["public"]["Enums"]["course_modality"]; location?: string | null; starts_at?: string | null; enrollment_link?: string | null; price_cents?: number; currency?: string; content_status?: Database["public"]["Enums"]["content_status"]; is_active?: boolean; created_at?: string; updated_at?: string };
+        Row: { id: string; slug: string; title: string; category: string; short_description: string; description: string | null; duration_hours: number | null; audience: string | null; syllabus: Json; modality: Database["public"]["Enums"]["course_modality"]; location: string | null; starts_at: string | null; enrollment_link: string | null; price_cents: number; currency: string; content_status: Database["public"]["Enums"]["content_status"]; is_active: boolean; created_at: string; updated_at: string };
+        Insert: { id?: string; slug: string; title: string; category?: string; short_description: string; description?: string | null; duration_hours?: number | null; audience?: string | null; syllabus?: Json; modality?: Database["public"]["Enums"]["course_modality"]; location?: string | null; starts_at?: string | null; enrollment_link?: string | null; price_cents?: number; currency?: string; content_status?: Database["public"]["Enums"]["content_status"]; is_active?: boolean; created_at?: string; updated_at?: string };
+        Update: { id?: string; slug?: string; title?: string; category?: string; short_description?: string; description?: string | null; duration_hours?: number | null; audience?: string | null; syllabus?: Json; modality?: Database["public"]["Enums"]["course_modality"]; location?: string | null; starts_at?: string | null; enrollment_link?: string | null; price_cents?: number; currency?: string; content_status?: Database["public"]["Enums"]["content_status"]; is_active?: boolean; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       enrollments: {
@@ -36,9 +36,9 @@ export type Database = {
         Relationships: [];
       };
       orders: {
-        Row: { id: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency: string; status: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id: string | null; stripe_payment_intent_id: string | null; livemode: boolean; expires_at: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
-        Update: { id?: string; user_id?: string; course_id?: string; course_title?: string; amount_cents?: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key?: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
+        Row: { id: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency: string; status: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id: string | null; stripe_payment_intent_id: string | null; payment_method: string | null; payment_reference: string | null; reviewed_at: string | null; reviewed_by: string | null; livemode: boolean; expires_at: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id: string; course_id: string; course_title: string; amount_cents: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; payment_method?: string | null; payment_reference?: string | null; reviewed_at?: string | null; reviewed_by?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; user_id?: string; course_id?: string; course_title?: string; amount_cents?: number; currency?: string; status?: Database["public"]["Enums"]["order_status"]; idempotency_key?: string; stripe_checkout_session_id?: string | null; stripe_payment_intent_id?: string | null; payment_method?: string | null; payment_reference?: string | null; reviewed_at?: string | null; reviewed_by?: string | null; livemode?: boolean; expires_at?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       stripe_events: {
@@ -54,9 +54,9 @@ export type Database = {
         Relationships: [];
       };
       profiles: {
-        Row: { id: string; full_name: string | null; phone: string | null; role: Database["public"]["Enums"]["app_role"]; avatar_url: string | null; created_at: string; updated_at: string };
-        Insert: { id: string; full_name?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
-        Update: { id?: string; full_name?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
+        Row: { id: string; full_name: string | null; email: string | null; phone: string | null; role: Database["public"]["Enums"]["app_role"]; avatar_url: string | null; created_at: string; updated_at: string };
+        Insert: { id: string; full_name?: string | null; email?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
+        Update: { id?: string; full_name?: string | null; email?: string | null; phone?: string | null; role?: Database["public"]["Enums"]["app_role"]; avatar_url?: string | null; created_at?: string; updated_at?: string };
         Relationships: [];
       };
       solution_items: {
@@ -105,6 +105,11 @@ export type Database = {
       approve_pending_order: {
         Args: { p_order_id: string; p_admin_id: string };
         Returns: Json;
+      };
+      get_admin_summary: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_admin_course_enrollment_counts: {
+        Args: { p_course_ids: string[] };
+        Returns: { course_id: string; enrollment_count: number }[];
       };
     };
     Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed"; order_status: "pending" | "paid" | "failed" | "canceled"; stripe_event_status: "pending" | "processed" | "failed" };

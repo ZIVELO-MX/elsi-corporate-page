@@ -2,39 +2,38 @@
 
 import Link from "next/link";
 import { BookOpen, Users, ClipboardList, Receipt } from "lucide-react";
-import { useAdminData } from "@/lib/admin-data";
+import { useAdminResource } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAdminDate, formatAdminMoney, newestFirst } from "@/lib/admin-format";
+import { formatAdminDate, formatAdminMoney } from "@/lib/admin-format";
 
 const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
 
 export default function AdminDashboard() {
-  const { loading, error, courses, users, enrollments, sales, leads } = useAdminData();
-
-  const activeCourses = courses.filter((c) => c.status === "active");
-  const totalRevenue = sales.reduce((sum, s) => sum + s.amount, 0);
+  const { data, loading, error } = useAdminResource<{
+    summary: { courses: number; activeCourses: number; draftCourses: number; users: number; admins: number; enrollments: number; usersWithCourses: number; sales: number; revenueCents: number; newLeads: number; pendingCertificates: number };
+    recentCourses: { id: string; title: string; created_at: string; is_active: boolean }[];
+    recentEnrollments: { id: string; userName: string; courseName: string; enrolled_at: string }[];
+  }>("/api/admin/summary");
+  const summary = data?.summary ?? { courses: 0, activeCourses: 0, draftCourses: 0, users: 0, admins: 0, enrollments: 0, usersWithCourses: 0, sales: 0, revenueCents: 0, newLeads: 0, pendingCertificates: 0 };
 
   // KPI tiles double as shortcuts: each links to its section.
   const cards = [
-    { label: "Cursos activos", value: activeCourses.length, sub: `${courses.length} totales`, href: "/admin/cursos", Icon: BookOpen },
-    { label: "Usuarios registrados", value: users.length, sub: `${users.filter((u) => u.role === "admin").length} administradores`, href: "/admin/usuarios", Icon: Users },
-    { label: "Inscripciones", value: enrollments.length, sub: `${users.filter((u) => u.enrolledCourses > 0).length} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
-    { label: "Ventas registradas", value: sales.length, sub: `${formatAdminMoney(totalRevenue)} total`, href: "/admin/ventas", Icon: Receipt },
+    { label: "Cursos activos", value: summary.activeCourses, sub: `${summary.courses} totales`, href: "/admin/cursos", Icon: BookOpen },
+    { label: "Usuarios registrados", value: summary.users, sub: `${summary.admins} administradores`, href: "/admin/usuarios", Icon: Users },
+    { label: "Inscripciones", value: summary.enrollments, sub: `${summary.usersWithCourses} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
+    { label: "Ventas registradas", value: summary.sales, sub: `${formatAdminMoney(summary.revenueCents / 100)} total`, href: "/admin/ventas", Icon: Receipt },
   ];
 
   // "Needs attention": real derived counts of work waiting on the admin.
-  const newLeads = leads.filter((l) => l.status === "nuevo").length;
-  const pendingCerts = enrollments.filter((e) => e.status === "realizado" && e.certificateStatus === "pendiente").length;
-  const draftCourses = courses.filter((c) => c.status === "inactive").length;
   const attention = [
-    { n: newLeads, label: "Mensajes nuevos", sub: "Sin responder", href: "/admin/contacto" },
-    { n: pendingCerts, label: "Constancias pendientes", sub: "Realizados sin publicar", href: "/admin/inscripciones" },
-    { n: draftCourses, label: "Cursos en borrador", sub: "Inactivos o incompletos", href: "/admin/cursos" },
+    { n: summary.newLeads, label: "Mensajes nuevos", sub: "Sin responder", href: "/admin/contacto" },
+    { n: summary.pendingCertificates, label: "Constancias pendientes", sub: "Realizados sin publicar", href: "/admin/inscripciones" },
+    { n: summary.draftCourses, label: "Cursos en borrador", sub: "Inactivos o incompletos", href: "/admin/cursos" },
   ];
 
-  const recentCourses = newestFirst(courses, (course) => course.createdAt).slice(0, 4);
-  const recentEnrollments = newestFirst(enrollments, (enrollment) => enrollment.enrolledAt).slice(0, 4);
+  const recentCourses = data?.recentCourses ?? [];
+  const recentEnrollments = data?.recentEnrollments ?? [];
 
   return (
     <div>
@@ -109,7 +108,7 @@ export default function AdminDashboard() {
               ) : recentCourses.map((c) => (
                 <div key={c.id} className="admin-panel-row">
                   <span style={{ fontSize: "0.8125rem", fontWeight: 500 }}>{c.title}</span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><small style={{ color: "var(--text-muted)" }}>{formatAdminDate(c.createdAt)}</small><Badge variant={c.status === "active" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>{c.status === "active" ? "Activo" : "Inactivo"}</Badge></span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><small style={{ color: "var(--text-muted)" }}>{formatAdminDate(c.created_at)}</small><Badge variant={c.is_active ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>{c.is_active ? "Activo" : "Inactivo"}</Badge></span>
                 </div>
               ))}
             </div>
@@ -121,7 +120,7 @@ export default function AdminDashboard() {
                 <div key={e.id} className="admin-panel-row" style={{ display: "block" }}>
                   <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500 }}>{e.userName}</p>
                   <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>{e.courseName}</p>
-                  <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>{formatAdminDate(e.enrolledAt)}</p>
+                  <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>{formatAdminDate(e.enrolled_at)}</p>
                 </div>
               ))}
             </div>

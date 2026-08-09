@@ -4,9 +4,9 @@ import { requireAdminContentClient, revalidatePublicContent, validateSection } f
 export async function GET() {
   const client = await requireAdminContentClient();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const [sections, solutions, testimonials] = await Promise.all([client.from("page_sections").select("*").order("sort_order"), client.from("solutions").select("*").order("sort_order"), client.from("testimonials").select("*").order("sort_order")]);
-  if (sections.error || solutions.error || testimonials.error) return NextResponse.json({ error: "No fue posible consultar contenido" }, { status: 500 });
-  return NextResponse.json({ sections: sections.data ?? [], solutions: solutions.data ?? [], testimonials: testimonials.data ?? [] });
+  const [sections, solutions] = await Promise.all([client.from("page_sections").select("*").order("sort_order"), client.from("solutions").select("*").order("sort_order")]);
+  if (sections.error || solutions.error) return NextResponse.json({ error: "No fue posible consultar contenido" }, { status: 500 });
+  return NextResponse.json({ sections: sections.data ?? [], solutions: solutions.data ?? [] });
 }
 
 export async function POST(request: Request) {

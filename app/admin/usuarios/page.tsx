@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, SearchX } from "lucide-react";
-import { useAdminData, type AdminUser } from "@/lib/admin-data";
+import { useAdminCollection, type AdminUser } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
@@ -22,9 +23,6 @@ function SourceBadge({ source }: { source: "interna" | "externa" }) {
 }
 
 function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
-  const { enrollments } = useAdminData();
-  const userEnrollments = user ? enrollments.filter(e => e.userId === user.id) : [];
-
   return (
     <Dialog open={!!user} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent>
@@ -52,29 +50,10 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
             </div>
 
             <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.625rem" }}>
-              Cursos ({userEnrollments.length})
+              Cursos ({user.enrolledCourses})
             </p>
 
-            {userEnrollments.length === 0 ? (
-              <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>
-                Este usuario todavía no tiene inscripciones.
-              </p>
-            ) : (
-              <ul style={enrollmentListStyle}>
-                {userEnrollments.map(e => (
-                  <li key={e.id} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem",
-                    padding: "0.625rem 0.75rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                  }}>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.courseName}</p>
-                      <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>Inscrito el {formatAdminDate(e.enrolledAt)}</p>
-                    </div>
-                    <SourceBadge source={e.source} />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <UserEnrollments userId={user.id} />
           </>
         )}
       </DialogContent>
@@ -82,46 +61,51 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
   );
 }
 
+type UserEnrollmentRow = { id: string; enrolled_at: string; source: "internal" | "external" | "stripe"; course: { title: string } | null };
+
+function UserEnrollments({ userId }: { userId: string }) {
+  const { items, loading } = useAdminCollection<UserEnrollmentRow>(`/api/admin/enrollments?userId=${encodeURIComponent(userId)}&pageSize=25`, "enrollments");
+  if (loading) return <p className="admin-page-sub">Cargando inscripciones…</p>;
+  if (items.length === 0) return <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>Este usuario todavía no tiene inscripciones.</p>;
+  return (
+    <ul style={enrollmentListStyle}>
+      {items.map((enrollment) => (
+        <li key={enrollment.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.75rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)" }}>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{enrollment.course?.title ?? "Sin curso"}</p>
+            <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>Inscrito el {formatAdminDate(enrollment.enrolled_at)}</p>
+          </div>
+          <SourceBadge source={enrollment.source === "external" ? "externa" : "interna"} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function AdminUsers() {
-  const { loading, users, enrollments } = useAdminData();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AdminUser | null>(null);
-  const [persistedUsers, setPersistedUsers] = useState<AdminUser[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/admin/users")
-      .then(async response => response.ok ? response.json() : null)
-      .then(payload => {
-        if (!cancelled && payload?.users) setPersistedUsers(payload.users as AdminUser[]);
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
-  const displayedUsers = persistedUsers ?? users;
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return displayedUsers;
-    return displayedUsers.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
-  }, [displayedUsers, query]);
-
-  const enrollmentCount = (user: AdminUser) => persistedUsers ? user.enrolledCourses : enrollments.filter(e => e.userId === user.id).length;
+  const url = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "created_at", direction: "desc" });
+    if (query.trim()) params.set("q", query.trim());
+    return `/api/admin/users?${params}`;
+  }, [page, query]);
+  const { items: users, pagination, loading, error } = useAdminCollection<AdminUser>(url, "users");
 
   return (
     <div>
       <div style={{ marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem" }}>
         <div>
           <h1 className="admin-page-title">Usuarios</h1>
-        <p className="admin-page-sub">{displayedUsers.length} usuarios registrados</p>
+        <p className="admin-page-sub">{pagination.total} usuarios registrados</p>
         </div>
         <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           <input
             type="search"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setPage(1); }}
             placeholder="Buscar por nombre o correo"
             aria-label="Buscar usuarios"
             style={{
@@ -132,11 +116,12 @@ export default function AdminUsers() {
         </div>
       </div>
 
+      {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
         <TableSkeleton rows={5} widths={["9rem", "12rem", "5rem", "6rem", "6rem"]} />
       ) : (
         <AdminTable
-          rows={filtered}
+          rows={users}
           rowKey={(u) => u.id}
           minWidth="36rem"
           columns={[
@@ -160,7 +145,7 @@ export default function AdminUsers() {
                 </Badge>
               ),
             },
-            { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => enrollmentCount(u) },
+            { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => u.enrolledCourses },
             {
               key: "created", header: "Registro",
               cell: (u) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatAdminDate(u.createdAt)}</span>,
@@ -175,6 +160,7 @@ export default function AdminUsers() {
           }
         />
       )}
+      <AdminPagination pagination={pagination} onPageChange={setPage} />
 
       <UserDetailDialog user={selected} onClose={() => setSelected(null)} />
     </div>

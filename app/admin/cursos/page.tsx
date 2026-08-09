@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { Search, SearchX } from "lucide-react";
-import { useAdminData, type AdminCourse, type CourseModality } from "@/lib/admin-data";
+import { useAdminCollection, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -35,6 +36,7 @@ type PersistedCourse = {
   id: string;
   slug: string;
   title: string;
+  category?: string;
   short_description: string;
   description: string | null;
   duration_hours: number | null;
@@ -63,7 +65,7 @@ function courseFromRow(row: PersistedCourse): AdminCourse {
   return {
     id: row.id,
     title: row.title,
-    category: typeof syllabus.category === "string" ? syllabus.category : "General",
+    category: row.category ?? (typeof syllabus.category === "string" ? syllabus.category : "General"),
     slug: row.slug,
     price: row.price_cents / 100,
     status: row.is_active ? "active" : "inactive",
@@ -91,6 +93,7 @@ function coursePayload(course: Omit<AdminCourse, "id" | "students" | "createdAt"
   return {
     slug: course.slug,
     title: course.title,
+    category: course.category,
     shortDescription: course.synopsis,
     description: course.synopsis,
     durationHours: Number.isFinite(duration) ? duration : null,
@@ -140,7 +143,6 @@ function Field({ label, children }: { label: string; children: (id: string) => R
 }
 
 export default function AdminCourses() {
-  const { loading, courses } = useAdminData();
   const { toast } = useToast();
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -149,29 +151,15 @@ export default function AdminCourses() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-  const [persistedCourses, setPersistedCourses] = useState<AdminCourse[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/admin/courses")
-      .then(async response => response.ok ? response.json() : null)
-      .then(payload => {
-        if (!cancelled && payload?.courses) setPersistedCourses((payload.courses as PersistedCourse[]).map(courseFromRow));
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
-  const displayedCourses = persistedCourses ?? courses;
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return displayedCourses.filter(c => {
-      if (statusFilter !== "todos" && c.status !== statusFilter) return false;
-      if (!q) return true;
-      return c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q);
-    });
-  }, [displayedCourses, query, statusFilter]);
+  const [page, setPage] = useState(1);
+  const collectionUrl = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "created_at", direction: "desc" });
+    if (query.trim()) params.set("q", query.trim());
+    if (statusFilter !== "todos") params.set("visibility", statusFilter);
+    return `/api/admin/courses?${params}`;
+  }, [page, query, statusFilter]);
+  const { items, pagination, loading, error, setItems } = useAdminCollection<PersistedCourse>(collectionUrl, "courses");
+  const displayedCourses = useMemo(() => items.map(courseFromRow), [items]);
 
   const closeForm = () => {
     setShowForm(false);
@@ -206,9 +194,9 @@ export default function AdminCourses() {
     const nextCourse = { ...form, slug, status: currentCourse?.status ?? "active", contentStatus: currentCourse?.contentStatus ?? "fixture" };
     try {
       const saved = await persistCourse(editing ? `/api/admin/courses/${editing}` : "/api/admin/courses", editing ? "PATCH" : "POST", coursePayload(nextCourse));
-      setPersistedCourses((previous) => editing
-        ? (previous ?? displayedCourses).map(course => course.id === editing ? courseFromRow(saved) : course)
-        : [courseFromRow(saved), ...(previous ?? displayedCourses)]);
+      setItems((previous) => editing
+        ? previous.map((course) => course.id === editing ? saved : course)
+        : [saved, ...previous]);
     } catch (cause) {
       toast({ title: cause instanceof Error ? cause.message : "No fue posible conectar con el servidor.", variant: "error" });
       return;
@@ -244,9 +232,7 @@ export default function AdminCourses() {
         <div>
           <h1 className="admin-page-title">Cursos</h1>
           <p className="admin-page-sub">
-            {filtered.length === displayedCourses.length
-              ? `${displayedCourses.length} cursos registrados`
-              : `${filtered.length} de ${displayedCourses.length} cursos`}
+            {pagination.total} cursos registrados
           </p>
         </div>
         <Button variant="primary" onClick={startCreate}>Crear curso</Button>
@@ -258,7 +244,7 @@ export default function AdminCourses() {
           <input
             type="search"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setPage(1); }}
             placeholder="Buscar por título o categoría"
             aria-label="Buscar cursos"
             style={{ width: "100%", padding: "0.5rem 0.75rem 0.5rem 2rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" }}
@@ -266,7 +252,7 @@ export default function AdminCourses() {
         </div>
         <select
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+          onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
           aria-label="Filtrar por estado"
           className="admin-select"
         >
@@ -347,11 +333,12 @@ export default function AdminCourses() {
         </DialogContent>
       </Dialog>
 
+      {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
         <TableSkeleton rows={6} widths={["12rem", "8rem", "5rem", "5rem", "5rem", "4rem", "4rem"]} />
       ) : (
         <AdminTable
-          rows={filtered}
+          rows={displayedCourses}
           rowKey={(c) => c.id}
           minWidth="50rem"
           columns={[
@@ -372,7 +359,7 @@ export default function AdminCourses() {
                 <button type="button" onClick={async () => {
                   try {
                     const saved = await persistCourse(`/api/admin/courses/${c.id}`, "PATCH", { isActive: c.status !== "active" });
-                    setPersistedCourses((previous) => (previous ?? displayedCourses).map(course => course.id === c.id ? courseFromRow(saved) : course));
+                    setItems((previous) => previous.map((course) => course.id === c.id ? saved : course));
                   } catch (cause) {
                     toast({ title: cause instanceof Error ? cause.message : "No fue posible cambiar el estado.", variant: "error" });
                   }
@@ -392,7 +379,7 @@ export default function AdminCourses() {
                   const contentStatus = c.contentStatus === "verified" ? "fixture" : "verified";
                   try {
                     const saved = await persistCourse(`/api/admin/courses/${c.id}`, "PATCH", { contentStatus });
-                    setPersistedCourses((previous) => (previous ?? displayedCourses).map((course) => course.id === c.id ? courseFromRow(saved) : course));
+                    setItems((previous) => previous.map((course) => course.id === c.id ? saved : course));
                   } catch (cause) {
                     toast({ title: cause instanceof Error ? cause.message : "No fue posible cambiar la verificación editorial.", variant: "error" });
                   }
@@ -412,6 +399,7 @@ export default function AdminCourses() {
           }
         />
       )}
+      <AdminPagination pagination={pagination} onPageChange={setPage} />
 
       <ConfirmDialog
         open={discardOpen}

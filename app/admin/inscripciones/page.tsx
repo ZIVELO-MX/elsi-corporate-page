@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Upload, CheckCircle2, Search, SearchX, ClipboardList } from "lucide-react";
-import { useAdminData, type AdminCourse, type AdminUser, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
+import { useAdminCollection, type AdminCourse, type AdminUser, type EnrollmentSource, type Enrollment } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -20,11 +21,13 @@ type PersistedEnrollment = {
   id: string;
   user_id: string;
   course_id: string;
-  source: "internal" | "external";
+  source: "internal" | "external" | "stripe";
   status: "in_progress" | "completed";
   enrolled_at: string;
   certificates?: { id: string; status: "pending" | "available"; storage_path: string | null }
     | { id: string; status: "pending" | "available"; storage_path: string | null }[];
+  user?: { id: string; full_name: string | null; email?: string | null; avatar_url: string | null } | null;
+  course?: { id: string; title: string; modality: "online" | "in_person" } | null;
 };
 
 type PersistedCourse = {
@@ -72,9 +75,12 @@ function enrollmentFromRow(row: PersistedEnrollment, users: AdminUser[], courses
   return {
     id: row.id,
     userId: row.user_id,
-    userName: user?.name ?? `Alumno ${row.user_id.slice(0, 8)}`,
+    userName: row.user?.full_name ?? user?.name ?? "Sin nombre",
+    userEmail: row.user?.email ?? user?.email ?? "",
+    userAvatarUrl: row.user?.avatar_url ?? user?.avatarUrl,
     courseId: row.course_id,
-    courseName: course?.title ?? `Curso ${row.course_id.slice(0, 8)}`,
+    courseName: row.course?.title ?? course?.title ?? "Sin curso",
+    courseModality: row.course?.modality === "in_person" ? "presencial" : row.course?.modality === "online" ? "online" : course?.modality,
     enrolledAt: row.enrolled_at.slice(0, 10),
     source: row.source === "external" ? "externa" : "interna",
     status: row.status === "completed" ? "realizado" : "en-curso",
@@ -167,7 +173,6 @@ function CertificateDialog({
 }
 
 export default function AdminEnrollments() {
-  const { loading, courses, users, enrollments } = useAdminData();
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -179,43 +184,22 @@ export default function AdminEnrollments() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todas");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("todas");
+  const [page, setPage] = useState(1);
   const [manualTarget, setManualTarget] = useState<Enrollment | null>(null);
-  const [persistedEnrollments, setPersistedEnrollments] = useState<Enrollment[] | null>(null);
-  const [persistedUsers, setPersistedUsers] = useState<AdminUser[] | null>(null);
-  const [persistedCourses, setPersistedCourses] = useState<AdminCourse[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
-      fetch("/api/admin/enrollments"),
-      fetch("/api/admin/users"),
-      fetch("/api/admin/courses"),
-    ])
-      .then(async ([enrollmentsResponse, usersResponse, coursesResponse]) => {
-        if (!enrollmentsResponse.ok || !usersResponse.ok || !coursesResponse.ok) return null;
-        return Promise.all([enrollmentsResponse.json(), usersResponse.json(), coursesResponse.json()]);
-      })
-      .then(payload => {
-        if (!cancelled && payload) {
-          const [enrollmentsPayload, usersPayload, coursesPayload] = payload as [
-            { enrollments?: PersistedEnrollment[] },
-            { users?: AdminUser[] },
-            { courses?: PersistedCourse[] },
-          ];
-          const nextUsers = usersPayload.users ?? [];
-          const nextCourses = (coursesPayload.courses ?? []).map(courseFromRow);
-          setPersistedUsers(nextUsers);
-          setPersistedCourses(nextCourses);
-          setPersistedEnrollments((enrollmentsPayload.enrollments ?? []).map(row => enrollmentFromRow(row, nextUsers, nextCourses)));
-        }
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
-  const displayedEnrollments = persistedEnrollments ?? enrollments;
-  const availableUsers = persistedUsers ?? users;
-  const availableCourses = persistedCourses ?? courses;
+  const enrollmentUrl = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "enrolled_at", direction: "desc" });
+    if (query.trim()) params.set("q", query.trim());
+    if (statusFilter !== "todas") params.set("status", statusFilter === "realizado" ? "completed" : "in_progress");
+    if (sourceFilter !== "todas") params.set("source", sourceFilter === "externa" ? "external" : "internal");
+    return `/api/admin/enrollments?${params}`;
+  }, [page, query, sourceFilter, statusFilter]);
+  const enrollmentCollection = useAdminCollection<PersistedEnrollment>(enrollmentUrl, "enrollments");
+  const userOptions = useAdminCollection<AdminUser>("/api/admin/users?pageSize=25&sort=full_name&direction=asc&role=student", "users");
+  const courseRows = useAdminCollection<PersistedCourse>("/api/admin/courses?pageSize=25&sort=title&direction=asc&visibility=active", "courses");
+  const availableUsers = userOptions.items;
+  const availableCourses = useMemo(() => courseRows.items.map(courseFromRow), [courseRows.items]);
+  const displayedEnrollments = useMemo(() => enrollmentCollection.items.map((row) => enrollmentFromRow(row, availableUsers, availableCourses)), [availableCourses, availableUsers, enrollmentCollection.items]);
+  const loading = enrollmentCollection.loading || userOptions.loading || courseRows.loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,23 +222,15 @@ export default function AdminEnrollments() {
       toast({ title: payload?.error ?? "No fue posible registrar la inscripción.", variant: "error" });
       return;
     }
-    const payload = await response.json() as { enrollment: PersistedEnrollment };
-    setPersistedEnrollments((previous) => [...(previous ?? displayedEnrollments), enrollmentFromRow(payload.enrollment, availableUsers, availableCourses)]);
+    await response.json();
+    enrollmentCollection.reload();
     toast({ title: "Inscripción registrada.", variant: "success" });
     setSelectedUser("");
     setSelectedCourse("");
     setSource("interna");
   };
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return displayedEnrollments.filter(e => {
-      if (statusFilter !== "todas" && e.status !== statusFilter) return false;
-      if (sourceFilter !== "todas" && e.source !== sourceFilter) return false;
-      if (!q) return true;
-      return e.userName.toLowerCase().includes(q) || e.courseName.toLowerCase().includes(q);
-    });
-  }, [displayedEnrollments, query, statusFilter, sourceFilter]);
+  const filtered = displayedEnrollments;
 
   const selectableUsers = useMemo(() => availableUsers.filter((user) => user.role === "user"), [availableUsers]);
   const activeCourses = useMemo(() => availableCourses.filter((course) => course.status === "active"), [availableCourses]);
@@ -281,14 +257,14 @@ export default function AdminEnrollments() {
         toast({ title: "No fue posible actualizar todas las inscripciones.", variant: "error" });
         return;
       }
-      setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => certificateTarget.some(target => target.id === e.id) ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
+      enrollmentCollection.reload();
       toast({ title: `${certificateTarget.length} constancias cargadas.`, variant: "success" });
     } else if (certificateTarget[0]) {
       if (files.length !== 1) { toast({ title: "Selecciona un PDF.", variant: "error" }); return; }
       const form = new FormData(); form.set("file", files[0]);
       const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}/certificate`, { method: "POST", body: form });
       if (!response.ok) { toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }); return; }
-      setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => e.id === certificateTarget[0]?.id ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
+      enrollmentCollection.reload();
       toast({ title: isReplace ? "Constancia reemplazada." : "Constancia cargada.", variant: "success" });
     }
     setSelectedIds([]);
@@ -302,9 +278,7 @@ export default function AdminEnrollments() {
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 className="admin-page-title">Inscripciones</h1>
         <p className="admin-page-sub">
-          {filtered.length === displayedEnrollments.length
-            ? `${displayedEnrollments.length} inscripciones registradas`
-            : `${filtered.length} de ${displayedEnrollments.length} inscripciones`}
+          {enrollmentCollection.pagination.total} inscripciones registradas
         </p>
       </div>
 
@@ -346,18 +320,18 @@ export default function AdminEnrollments() {
           <input
             type="search"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setPage(1); }}
             placeholder="Buscar por alumno o curso"
             aria-label="Buscar inscripciones"
             style={{ ...filterControlStyle, width: "100%", paddingLeft: "2rem" }}
           />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" className="admin-select">
+        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }} aria-label="Filtrar por estado" className="admin-select">
           <option value="todas">Todos los estados</option>
           <option value="en-curso">En curso</option>
           <option value="realizado">Realizado</option>
         </select>
-        <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value as SourceFilter)} aria-label="Filtrar por origen" className="admin-select">
+        <select value={sourceFilter} onChange={e => { setSourceFilter(e.target.value as SourceFilter); setPage(1); }} aria-label="Filtrar por origen" className="admin-select">
           <option value="todas">Todos los orígenes</option>
           <option value="interna">Sitio ELSI</option>
           <option value="externa">Plataforma externa</option>
@@ -377,6 +351,8 @@ export default function AdminEnrollments() {
           </Button>
         </div>
       )}
+
+      {enrollmentCollection.error ? <p role="alert" className="admin-page-sub">{enrollmentCollection.error}</p> : null}
 
       {loading ? (
         <TableSkeleton rows={6} widths={["1.5rem", "9rem", "12rem", "6rem", "6rem", "6rem", "8rem"]} />
@@ -438,7 +414,7 @@ export default function AdminEnrollments() {
                       if (e.certificateId) {
                         const response = await fetch(`/api/admin/certificates/${e.certificateId}`, { method: "PATCH" });
                         if (!response.ok) { toast({ title: "Primero carga la constancia.", variant: "error" }); return; }
-                        setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(item => item.id === e.id ? { ...item, certificateStatus: "disponible" } : item));
+                        enrollmentCollection.reload();
                       } else { toast({ title: "Primero carga la constancia.", variant: "error" }); return; }
                       toast({ title: "Constancia publicada.", variant: "success" });
                     }}>
@@ -472,6 +448,7 @@ export default function AdminEnrollments() {
           }
         />
       )}
+      <AdminPagination pagination={enrollmentCollection.pagination} onPageChange={setPage} />
 
       <CertificateDialog
         enrollments={certificateTarget}
@@ -497,7 +474,7 @@ export default function AdminEnrollments() {
               fetch(`/api/admin/enrollments/${target.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })
                 .then(async response => {
                   if (!response.ok) throw new Error("No fue posible actualizar la inscripción");
-                  setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => e.id === target.id ? { ...e, status: "realizado" } : e));
+                  enrollmentCollection.reload();
                   toast({ title: "Curso marcado como realizado.", variant: "success" });
                 })
                 .catch(() => toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }));
