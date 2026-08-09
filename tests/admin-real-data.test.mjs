@@ -13,6 +13,32 @@ test("admin provider loads persisted collections instead of shipping fixtures", 
   assert.match(provider, /fetch\("\/api\/admin\/content"/);
   assert.match(provider, /fetch\("\/api\/admin\/orders"/);
   assert.doesNotMatch(provider, /INITIAL_(COURSES|USERS|ENROLLMENTS|SALES|SECTIONS|LEADS|TESTIMONIALS)/);
+  assert.doesNotMatch(provider, /Date\.now\(\)|tmp-/);
+});
+
+test("course, enrollment, and lead screens never report memory-only saves", async () => {
+  const [courses, enrollments, leads] = await Promise.all([
+    read("app/admin/cursos/page.tsx"),
+    read("app/admin/inscripciones/page.tsx"),
+    read("app/admin/contacto/page.tsx"),
+  ]);
+  assert.match(courses, /persistCourse\(editing \? `\/api\/admin\/courses\/\$\{editing\}` : "\/api\/admin\/courses"/);
+  assert.doesNotMatch(courses, /if \(!persistedCourses\)/);
+  assert.match(enrollments, /fetch\("\/api\/admin\/enrollments"/);
+  assert.doesNotMatch(enrollments, /else (?:add|complete|mark)/);
+  assert.match(leads, /method: "PATCH"/);
+  assert.doesNotMatch(leads, /markLeadAttended/);
+});
+
+test("admin money, dates, and recent records use explicit locale-aware formatting", async () => {
+  const { formatAdminDate, formatAdminMoney, newestFirst } = await import("../lib/admin-format.ts");
+  assert.match(formatAdminMoney(1234.5), /MXN/);
+  assert.notEqual(formatAdminDate("2026-08-08"), "—");
+  assert.equal(formatAdminDate("invalid"), "—");
+  assert.deepEqual(newestFirst([{ date: "2026-01-01" }, { date: "2026-08-08" }], (item) => item.date), [
+    { date: "2026-08-08" },
+    { date: "2026-01-01" },
+  ]);
 });
 
 test("admin sales and pending payments are projections of persisted orders", async () => {

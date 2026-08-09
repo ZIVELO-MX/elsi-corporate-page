@@ -17,6 +17,8 @@ const sectionTextareaStyle: React.CSSProperties = {
 };
 
 type SectionRow = { id: string; section_key: string; title: string; body: unknown; is_active: boolean };
+type SolutionRow = { id: string; slug: string; title: string; summary: string; body: unknown; content_status: "fixture" | "verified"; is_active: boolean; sort_order: number };
+type SolutionDraft = { slug: string; title: string; summary: string; contentStatus: "fixture" | "verified"; active: boolean };
 
 function rowToSection(section: SectionRow): PageSection {
   return {
@@ -47,10 +49,27 @@ async function patchSection(section: PageSection, patch: { content?: string; act
   }
 }
 
+async function patchSolution(id: string, solution: SolutionDraft): Promise<SolutionRow> {
+  const response = await fetch(`/api/admin/solutions/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...solution, isActive: solution.active }),
+  });
+  const payload = await response.json().catch(() => ({})) as { error?: unknown; solution?: SolutionRow };
+  if (!response.ok || !payload.solution) throw new Error(typeof payload.error === "string" ? payload.error : "No fue posible guardar la solución.");
+  return payload.solution;
+}
+
+function solutionDraft(solution: SolutionRow): SolutionDraft {
+  return { slug: solution.slug, title: solution.title, summary: solution.summary, contentStatus: solution.content_status, active: solution.is_active };
+}
+
 export default function AdminContent() {
   const { sections } = useAdminData();
   const { toast } = useToast();
   const [persistedSections, setPersistedSections] = useState<PageSection[] | null>(null);
+  const [solutions, setSolutions] = useState<SolutionRow[]>([]);
+  const [solutionDrafts, setSolutionDrafts] = useState<Record<string, SolutionDraft>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,13 +81,14 @@ export default function AdminContent() {
       .then((payload) => {
         if (!active || !payload?.sections) return;
         setPersistedSections((payload.sections as SectionRow[]).map(rowToSection));
+        setSolutions(Array.isArray(payload.solutions) ? payload.solutions as SolutionRow[] : []);
       })
       .catch(() => undefined);
     return () => { active = false; };
   }, []);
 
-  // Persisted content wins; the in-memory fixture sections are only a read
-  // fallback when Supabase has not answered yet (prototype mode).
+  // The provider data is a read-only snapshot while this screen refreshes its
+  // dedicated endpoint. Every mutation below still goes through the API.
   const visibleSections = persistedSections ?? sections;
 
   const setDraft = (id: string, content: string) => setDrafts((current) => ({ ...current, [id]: content }));
@@ -84,7 +104,7 @@ export default function AdminContent() {
     clearError(section.id);
     try {
       await patchSection(section, { content });
-      setPersistedSections((current) => current?.map((item) => item.id === section.id ? { ...item, content } : item) ?? current);
+      setPersistedSections((current) => (current ?? visibleSections).map((item) => item.id === section.id ? { ...item, content } : item));
       clearDraft(section.id);
       toast({ title: "Cambios guardados.", variant: "success" });
     } catch (cause) {
@@ -100,12 +120,34 @@ export default function AdminContent() {
 
   const toggleActive = async (section: PageSection) => {
     const active = !section.active;
-    setPersistedSections((current) => current?.map((item) => item.id === section.id ? { ...item, active } : item) ?? current);
+    setPersistedSections((current) => (current ?? visibleSections).map((item) => item.id === section.id ? { ...item, active } : item));
     try {
       await patchSection(section, { active });
     } catch {
-      setPersistedSections((current) => current?.map((item) => item.id === section.id ? { ...item, active: section.active } : item) ?? current);
+      setPersistedSections((current) => (current ?? visibleSections).map((item) => item.id === section.id ? { ...item, active: section.active } : item));
       toast({ title: "No fue posible cambiar la visibilidad.", variant: "error" });
+    }
+  };
+
+  const editSolution = (solution: SolutionRow, patch: Partial<SolutionDraft>) => {
+    setSolutionDrafts((current) => ({ ...current, [solution.id]: { ...(current[solution.id] ?? solutionDraft(solution)), ...patch } }));
+    clearError(solution.id);
+  };
+
+  const saveSolution = async (solution: SolutionRow) => {
+    const draft = solutionDrafts[solution.id];
+    if (!draft) return;
+    setSavingId(solution.id);
+    clearError(solution.id);
+    try {
+      const saved = await patchSolution(solution.id, draft);
+      setSolutions((current) => current.map((item) => item.id === solution.id ? saved : item));
+      setSolutionDrafts((current) => { const next = { ...current }; delete next[solution.id]; return next; });
+      toast({ title: "Solución guardada.", variant: "success" });
+    } catch (cause) {
+      setErrors((current) => ({ ...current, [solution.id]: cause instanceof Error ? cause.message : "No fue posible guardar la solución." }));
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -166,6 +208,33 @@ export default function AdminContent() {
                 </div>
               )}
             </div>
+          );
+        })}
+      </div>
+
+      <div style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="admin-section-title">Soluciones</h2>
+        <p className="admin-page-sub">Administra el contenido, la visibilidad y la verificación editorial de las soluciones públicas.</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {solutions.map((solution) => {
+          const draft = solutionDrafts[solution.id] ?? solutionDraft(solution);
+          const dirty = solution.id in solutionDrafts;
+          const error = errors[solution.id];
+          return (
+            <section key={solution.id} style={{ padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: `1px solid ${error ? "var(--danger, #b3261e)" : "var(--border)"}` }}>
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(10rem, 1fr) minmax(10rem, 1fr)", gap: "0.75rem" }}>
+                <label className="admin-label">Título<input value={draft.title} onChange={(event) => editSolution(solution, { title: event.target.value })} className="admin-input" /></label>
+                <label className="admin-label">Slug<input value={draft.slug} onChange={(event) => editSolution(solution, { slug: event.target.value })} className="admin-input" /></label>
+              </div>
+              <label className="admin-label" style={{ display: "block", marginTop: "0.75rem" }}>Resumen<textarea value={draft.summary} onChange={(event) => editSolution(solution, { summary: event.target.value })} rows={3} className="admin-input" style={{ resize: "vertical", fontFamily: "inherit" }} /></label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "end", marginTop: "0.75rem" }}>
+                <label className="admin-label">Visibilidad<select value={draft.active ? "active" : "inactive"} onChange={(event) => editSolution(solution, { active: event.target.value === "active" })} className="admin-select"><option value="active">Visible</option><option value="inactive">Oculta</option></select></label>
+                <label className="admin-label">Editorial<select value={draft.contentStatus} onChange={(event) => editSolution(solution, { contentStatus: event.target.value as SolutionDraft["contentStatus"] })} className="admin-select"><option value="fixture">Pendiente</option><option value="verified">Verificada</option></select></label>
+                {dirty ? <div style={{ display: "flex", gap: "0.5rem", marginLeft: "auto" }}><Button type="button" onClick={() => { setSolutionDrafts((current) => { const next = { ...current }; delete next[solution.id]; return next; }); clearError(solution.id); }} disabled={savingId === solution.id}>Cancelar</Button><Button type="button" variant="primary" onClick={() => void saveSolution(solution)} disabled={savingId === solution.id}>{savingId === solution.id ? "Guardando…" : "Guardar"}</Button></div> : null}
+              </div>
+              {error ? <p role="alert" style={{ color: "var(--danger, #b3261e)", fontSize: "0.8125rem" }}>{error}</p> : null}
+            </section>
           );
         })}
       </div>

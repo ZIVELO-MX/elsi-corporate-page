@@ -78,10 +78,10 @@ export type Database = {
         Relationships: [];
       };
       testimonials: {
-        Row: { id: string; quote: string; author_name: string; author_role: string | null; image_path: string | null; consent_reference: string | null; is_active: boolean; sort_order: number; created_at: string; updated_at: string };
-        Insert: { id?: string; quote: string; author_name: string; author_role?: string | null; image_path?: string | null; consent_reference?: string | null; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
-        Update: { id?: string; quote?: string; author_name?: string; author_role?: string | null; image_path?: string | null; consent_reference?: string | null; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
-        Relationships: [];
+        Row: { id: string; quote: string; author_name: string; author_role: string | null; image_path: string | null; consent_reference: string | null; course_id: string | null; is_active: boolean; sort_order: number; created_at: string; updated_at: string };
+        Insert: { id?: string; quote: string; author_name: string; author_role?: string | null; image_path?: string | null; consent_reference?: string | null; course_id?: string | null; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
+        Update: { id?: string; quote?: string; author_name?: string; author_role?: string | null; image_path?: string | null; consent_reference?: string | null; course_id?: string | null; is_active?: boolean; sort_order?: number; created_at?: string; updated_at?: string };
+        Relationships: [{ foreignKeyName: "testimonials_course_id_fkey"; columns: ["course_id"]; isOneToOne: false; referencedRelation: "courses"; referencedColumns: ["id"] }];
       };
     };
     Views: Record<string, never>;

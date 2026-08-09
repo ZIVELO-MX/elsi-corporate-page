@@ -72,6 +72,8 @@ test("course patch mapper is partial and merges syllabus without clobbering meta
   assert.match(repo, /export function mapCoursePatch/);
   assert.match(repo, /if \(input\.contentStatus !== undefined\) update\.content_status = input\.contentStatus;/);
   assert.match(repo, /if \(input\.isActive !== undefined\) update\.is_active = input\.isActive;/);
+  assert.match(repo, /Estado editorial inválido/);
+  assert.match(repo, /Visibilidad inválida/);
   assert.match(repo, /\.\.\.\(isObject\(existingSyllabus\) \? existingSyllabus : \{\}\), \.\.\.input\.syllabus/);
 });
 

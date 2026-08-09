@@ -11,6 +11,7 @@ export type AdminCourse = {
   slug: string;
   price: number;
   status: "active" | "inactive";
+  contentStatus: "fixture" | "verified";
   externalUrl: string;
   students: number;
   createdAt: string;
@@ -58,6 +59,7 @@ export type Sale = {
   courseId: string;
   courseName: string;
   amount: number;
+  currency: string;
   soldAt: string;
 };
 
@@ -93,6 +95,7 @@ export type Testimonial = {
   quote: string;
   avatarUrl?: string;
   courseId?: string;
+  consentReference?: string;
   active: boolean;
 };
 
@@ -107,40 +110,25 @@ type AdminData = {
   sections: PageSection[];
   leads: Lead[];
   testimonials: Testimonial[];
-  addCourse: (c: Omit<AdminCourse, "id" | "students" | "createdAt">) => void;
-  updateCourse: (id: string, data: Partial<AdminCourse>) => void;
-  toggleCourse: (id: string) => void;
-  addEnrollment: (userId: string, courseId: string, source?: EnrollmentSource) => void;
-  completeEnrollment: (id: string, method: "constancia" | "manual") => void;
-  completeEnrollmentsBulk: (ids: string[]) => void;
-  markCertificateAvailable: (id: string) => void;
-  addSale: (userId: string, courseId: string, amount: number) => void;
-  updateSection: (id: string, data: Partial<PageSection>) => void;
-  markLeadAttended: (id: string) => void;
-  addTestimonial: (t: Omit<Testimonial, "id">) => void;
-  updateTestimonial: (id: string, data: Partial<Testimonial>) => void;
-  toggleTestimonial: (id: string) => void;
-  deleteTestimonial: (id: string) => void;
+  addTestimonial: (t: Omit<Testimonial, "id">) => Promise<void>;
+  updateTestimonial: (id: string, data: Partial<Testimonial>) => Promise<void>;
+  toggleTestimonial: (id: string) => Promise<void>;
+  deleteTestimonial: (id: string) => Promise<void>;
   getUserName: (id: string) => string;
   getCourseName: (id: string) => string;
   approvePendingPayment: (id: string) => Promise<void>;
 };
 
-// Maps the admin course shape to the API's CourseInput payload, including only
-// the fields present so partial edits never clobber untouched columns.
-function coursePayload(data: Partial<AdminCourse>): Record<string, unknown> {
-  const payload: Record<string, unknown> = {};
-  if (data.title !== undefined) payload.title = data.title;
-  if (data.slug !== undefined) payload.slug = data.slug;
-  if (data.synopsis !== undefined) payload.shortDescription = data.synopsis;
-  if (data.price !== undefined) payload.priceCents = Math.round(data.price * 100);
-  if (data.status !== undefined) payload.isActive = data.status === "active";
-  if (data.externalUrl !== undefined) payload.enrollmentLink = data.externalUrl;
-  if (data.duration !== undefined) { const hours = parseInt(data.duration, 10); payload.durationHours = Number.isFinite(hours) ? hours : null; }
-  if (data.targetAudience !== undefined) payload.audience = data.targetAudience;
-  if (data.modality !== undefined) payload.modality = data.modality;
-  if (data.presencialLocation !== undefined) payload.location = data.presencialLocation;
-  return payload;
+function testimonialPayload(testimonial: Omit<Testimonial, "id">) {
+  return {
+    authorName: testimonial.authorName,
+    authorRole: testimonial.authorRole,
+    quote: testimonial.quote,
+    imagePath: testimonial.avatarUrl,
+    courseId: testimonial.courseId,
+    consentReference: testimonial.consentReference,
+    isActive: testimonial.active,
+  };
 }
 
 async function extractError(response: Response, fallback: string): Promise<string> {
@@ -189,6 +177,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
           return {
             id: String(course.id), title: String(course.title), category: "General", slug: String(course.slug),
             price: Number(course.price_cents ?? 0) / 100, status: course.is_active ? "active" : "inactive",
+            contentStatus: course.content_status === "verified" ? "verified" : "fixture",
             externalUrl: String(course.enrollment_link ?? ""), students: 0,
             createdAt: String(course.created_at ?? "").slice(0, 10),
             synopsis: String(course.short_description ?? ""), duration: course.duration_hours ? `${course.duration_hours} horas` : "",
@@ -230,6 +219,16 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         }) : [];
         const persistedSales = Array.isArray(salesPayload.sales) ? salesPayload.sales as Sale[] : [];
         const persistedPendingPayments = Array.isArray(salesPayload.pendingPayments) ? salesPayload.pendingPayments as PendingPayment[] : [];
+        const persistedTestimonials = Array.isArray(contentPayload.testimonials) ? contentPayload.testimonials.map((row) => {
+          const testimonial = row as Record<string, unknown>;
+          return {
+            id: String(testimonial.id), authorName: String(testimonial.author_name ?? ""), authorRole: String(testimonial.author_role ?? ""),
+            quote: String(testimonial.quote ?? ""), avatarUrl: typeof testimonial.image_path === "string" ? testimonial.image_path : undefined,
+            courseId: typeof testimonial.course_id === "string" ? testimonial.course_id : undefined,
+            consentReference: typeof testimonial.consent_reference === "string" ? testimonial.consent_reference : undefined,
+            active: Boolean(testimonial.is_active),
+          } satisfies Testimonial;
+        }) : [];
 
         setUsers(persistedUsers);
         setCourses(persistedCourses);
@@ -238,6 +237,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         setSections(persistedSections);
         setSales(persistedSales);
         setPendingPayments(persistedPendingPayments);
+        setTestimonials(persistedTestimonials);
         setError(null);
       } catch (loadError) {
         if (!cancelled) setError(loadError instanceof Error ? loadError.message : "No fue posible cargar los datos del panel.");
@@ -249,57 +249,6 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     void loadAdminData();
     return () => { cancelled = true; };
   }, []);
-
-  const addCourse = useCallback((c: Omit<AdminCourse, "id" | "students" | "createdAt">) => {
-    const tempId = "tmp-" + Date.now();
-    const optimistic: AdminCourse = { ...c, id: tempId, students: 0, createdAt: new Date().toISOString().split("T")[0] };
-    setCourses(prev => [...prev, optimistic]);
-    void fetch("/api/admin/courses", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(coursePayload(c)) })
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({})) as { course?: { id?: unknown } };
-        if (!response.ok) throw new Error(await extractError(response, "No fue posible crear el curso."));
-        if (body.course?.id) setCourses(prev => prev.map(x => x.id === tempId ? { ...optimistic, id: String(body.course!.id) } : x));
-        setError(null);
-      })
-      .catch((cause: unknown) => {
-        setCourses(prev => prev.filter(x => x.id !== tempId));
-        setError(cause instanceof Error ? cause.message : "No fue posible crear el curso.");
-      });
-  }, []);
-
-  const updateCourse = useCallback((id: string, data: Partial<AdminCourse>) => {
-    let previous: AdminCourse | undefined;
-    setCourses(prev => { previous = prev.find(c => c.id === id); return prev.map(c => c.id === id ? { ...c, ...data } : c); });
-    const payload = coursePayload(data);
-    if (Object.keys(payload).length === 0) return;
-    const snapshot = previous;
-    void fetch(`/api/admin/courses/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
-      .then(async (response) => { if (!response.ok) throw new Error(await extractError(response, "No fue posible guardar el curso.")); setError(null); })
-      .catch((cause: unknown) => {
-        if (snapshot) setCourses(prev => prev.map(c => c.id === id ? snapshot : c));
-        setError(cause instanceof Error ? cause.message : "No fue posible guardar el curso.");
-      });
-  }, []);
-
-  const toggleCourse = useCallback((id: string) => {
-    let previous: AdminCourse | undefined;
-    let nextStatus: AdminCourse["status"] = "active";
-    setCourses(prev => { previous = prev.find(c => c.id === id); nextStatus = previous?.status === "active" ? "inactive" : "active"; return prev.map(c => c.id === id ? { ...c, status: nextStatus } : c); });
-    const snapshot = previous;
-    void fetch(`/api/admin/courses/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ isActive: nextStatus === "active" }) })
-      .then(async (response) => { if (!response.ok) throw new Error(await extractError(response, "No fue posible actualizar el curso.")); setError(null); })
-      .catch((cause: unknown) => {
-        if (snapshot) setCourses(prev => prev.map(c => c.id === id ? snapshot : c));
-        setError(cause instanceof Error ? cause.message : "No fue posible actualizar el curso.");
-      });
-  }, []);
-
-  const addEnrollment = useCallback((userId: string, courseId: string, source: EnrollmentSource = "interna") => {
-    const id = "e" + Date.now();
-    const userName = users.find(u => u.id === userId)?.name ?? "Desconocido";
-    const courseName = courses.find(c => c.id === courseId)?.title ?? "Desconocido";
-    setEnrollments(prev => [...prev, { id, userId, userName, courseId, courseName, enrolledAt: new Date().toISOString().split("T")[0], source, status: "en-curso" }]);
-  }, [courses, users]);
 
   const approvePendingPayment = useCallback(async (id: string) => {
     const response = await fetch("/api/admin/orders", {
@@ -333,60 +282,40 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         userName: approved.userName,
         courseId: approved.courseId,
         courseName: approved.courseName,
-        amount: approved.amount,
-        soldAt: approved.soldAt,
+          amount: approved.amount,
+          currency: approved.currency,
+          soldAt: approved.soldAt,
       }, ...previous]);
     }
   }, [pendingPayments]);
 
-  // "constancia" = admin cargo una constancia -> finalizacion automatica, pendiente de publicacion.
-  // "manual" = boton de respaldo para casos excepcionales, sin constancia asociada.
-  const completeEnrollment = useCallback((id: string, method: "constancia" | "manual") => {
-    setEnrollments(prev => prev.map(e => e.id === id
-      ? { ...e, status: "realizado", certificateStatus: method === "constancia" ? "pendiente" : e.certificateStatus }
-      : e));
+  const addTestimonial = useCallback(async (testimonial: Omit<Testimonial, "id">) => {
+    const response = await fetch("/api/admin/testimonials", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(testimonialPayload(testimonial)) });
+    if (!response.ok) throw new Error(await extractError(response, "No fue posible crear el testimonio."));
+    const payload = await response.json() as { testimonial: Record<string, unknown> };
+    const row = payload.testimonial;
+    setTestimonials((current) => [...current, { ...testimonial, id: String(row.id) }]);
   }, []);
 
-  const completeEnrollmentsBulk = useCallback((ids: string[]) => {
-    const idSet = new Set(ids);
-    setEnrollments(prev => prev.map(e => idSet.has(e.id)
-      ? { ...e, status: "realizado", certificateStatus: "pendiente" }
-      : e));
-  }, []);
+  const updateTestimonial = useCallback(async (id: string, data: Partial<Testimonial>) => {
+    const current = testimonials.find((testimonial) => testimonial.id === id);
+    if (!current) throw new Error("Testimonio no encontrado.");
+    const next = { ...current, ...data };
+    const response = await fetch(`/api/admin/testimonials/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(testimonialPayload(next)) });
+    if (!response.ok) throw new Error(await extractError(response, "No fue posible actualizar el testimonio."));
+    setTestimonials((items) => items.map((testimonial) => testimonial.id === id ? next : testimonial));
+  }, [testimonials]);
 
-  const markCertificateAvailable = useCallback((id: string) => {
-    setEnrollments(prev => prev.map(e => e.id === id ? { ...e, certificateStatus: "disponible" } : e));
-  }, []);
+  const toggleTestimonial = useCallback(async (id: string) => {
+    const current = testimonials.find((testimonial) => testimonial.id === id);
+    if (!current) throw new Error("Testimonio no encontrado.");
+    await updateTestimonial(id, { active: !current.active });
+  }, [testimonials, updateTestimonial]);
 
-  const addSale = useCallback((userId: string, courseId: string, amount: number) => {
-    const id = "s" + Date.now();
-    const userName = users.find(u => u.id === userId)?.name ?? "Desconocido";
-    const courseName = courses.find(c => c.id === courseId)?.title ?? "Desconocido";
-    setSales(prev => [...prev, { id, userId, userName, courseId, courseName, amount, soldAt: new Date().toISOString().split("T")[0] }]);
-  }, [courses, users]);
-
-  const updateSection = useCallback((id: string, data: Partial<PageSection>) => {
-    setSections(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
-  }, []);
-
-  const markLeadAttended = useCallback((id: string) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "atendido" } : l));
-  }, []);
-
-  const addTestimonial = useCallback((t: Omit<Testimonial, "id">) => {
-    setTestimonials(prev => [...prev, { ...t, id: "t" + Date.now() }]);
-  }, []);
-
-  const updateTestimonial = useCallback((id: string, data: Partial<Testimonial>) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
-  }, []);
-
-  const toggleTestimonial = useCallback((id: string) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, active: !t.active } : t));
-  }, []);
-
-  const deleteTestimonial = useCallback((id: string) => {
-    setTestimonials(prev => prev.filter(t => t.id !== id));
+  const deleteTestimonial = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/testimonials/${id}`, { method: "DELETE" });
+    if (!response.ok) throw new Error(await extractError(response, "No fue posible eliminar el testimonio."));
+    setTestimonials((items) => items.filter((testimonial) => testimonial.id !== id));
   }, []);
 
   const getUserName = useCallback((id: string) => {
@@ -398,8 +327,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   }, [courses]);
 
   const value = useMemo(
-    () => ({ loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment }),
-    [loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addCourse, updateCourse, toggleCourse, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable, addSale, updateSection, markLeadAttended, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment],
+    () => ({ loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment }),
+    [loading, error, courses, users, enrollments, sales, pendingPayments, sections, leads, testimonials, addTestimonial, updateTestimonial, toggleTestimonial, deleteTestimonial, getUserName, getCourseName, approvePendingPayment],
   );
 
   return (

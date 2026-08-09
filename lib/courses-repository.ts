@@ -117,6 +117,8 @@ export function validateCoursePatch(raw: unknown): Partial<CourseInput> {
     if (!["online", "presencial"].includes(input.modality)) throw new Error("Modalidad inválida");
     out.modality = input.modality;
   }
+  if (input.contentStatus !== undefined && !["fixture", "verified"].includes(input.contentStatus)) throw new Error("Estado editorial inválido");
+  if (input.isActive !== undefined && typeof input.isActive !== "boolean") throw new Error("Visibilidad inválida");
   for (const key of ["description", "durationHours", "audience", "syllabus", "location", "startsAt", "enrollmentLink", "currency", "contentStatus", "isActive"] as const) {
     if (input[key] !== undefined) Object.assign(out, { [key]: input[key] });
   }

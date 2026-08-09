@@ -24,7 +24,7 @@ test("enrollment mutations require admin and enforce idempotent source/status co
   assert.match(item, /in_progress.*completed/);
 });
 
-test("admin enrollment screen uses persistent endpoints with fixture fallback", async () => {
+test("admin enrollment screen uses persistent endpoints without mutation fallbacks", async () => {
   const source = await read("app/admin/inscripciones/page.tsx");
   assert.match(source, /fetch\("\/api\/admin\/enrollments"\)/);
   assert.match(source, /fetch\("\/api\/admin\/users"\)/);
@@ -35,6 +35,7 @@ test("admin enrollment screen uses persistent endpoints with fixture fallback", 
   assert.match(source, /method: "PATCH"/);
   assert.match(source, /persistedEnrollments \?\? enrollments/);
   assert.match(source, /Array\.isArray\(row\.certificates\)/);
+  assert.doesNotMatch(source, /addEnrollment|completeEnrollment|markCertificateAvailable/);
 });
 
 test("admin users endpoint and screen use Supabase data without exposing service role", async () => {

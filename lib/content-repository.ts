@@ -19,8 +19,35 @@ export function validateSection(input: { sectionKey: unknown; title: unknown; bo
   return { section_key: sectionKey, title: cleanText(input.title, 160), body, is_active: input.isActive !== false, sort_order: Number.isInteger(input.sortOrder) ? input.sortOrder as number : 0 } satisfies Database["public"]["Tables"]["page_sections"]["Insert"];
 }
 
-export function validateTestimonial(input: { quote: unknown; authorName: unknown; authorRole?: unknown; imagePath?: unknown; consentReference?: unknown; isActive?: unknown; sortOrder?: unknown }) {
-  return { quote: cleanText(input.quote, 1200), author_name: cleanText(input.authorName, 160), author_role: input.authorRole ? cleanText(input.authorRole, 160) : null, image_path: input.imagePath ? cleanText(input.imagePath, 500) : null, consent_reference: input.consentReference ? cleanText(input.consentReference, 200) : null, is_active: input.isActive === true, sort_order: Number.isInteger(input.sortOrder) ? input.sortOrder as number : 0 } satisfies Database["public"]["Tables"]["testimonials"]["Insert"];
+export function validateTestimonial(input: { quote: unknown; authorName: unknown; authorRole?: unknown; imagePath?: unknown; consentReference?: unknown; courseId?: unknown; isActive?: unknown; sortOrder?: unknown }) {
+  const consentReference = input.consentReference ? cleanText(input.consentReference, 200) : null;
+  const isActive = input.isActive === true;
+  if (isActive && !consentReference) throw new Error("La referencia de consentimiento es obligatoria para publicar");
+  return {
+    quote: cleanText(input.quote, 1200),
+    author_name: cleanText(input.authorName, 160),
+    author_role: input.authorRole ? cleanText(input.authorRole, 160) : null,
+    image_path: input.imagePath ? cleanText(input.imagePath, 500) : null,
+    consent_reference: consentReference,
+    ...(input.courseId !== undefined ? { course_id: typeof input.courseId === "string" && input.courseId.trim() ? input.courseId.trim() : null } : {}),
+    is_active: isActive,
+    sort_order: Number.isInteger(input.sortOrder) ? input.sortOrder as number : 0,
+  } satisfies Database["public"]["Tables"]["testimonials"]["Insert"];
+}
+
+export function validateSolution(input: { slug: unknown; title: unknown; summary: unknown; body?: unknown; contentStatus?: unknown; isActive?: unknown; sortOrder?: unknown }) {
+  const slug = cleanText(input.slug, 120).toLowerCase();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error("Slug inválido");
+  if (input.contentStatus !== undefined && !["fixture", "verified"].includes(String(input.contentStatus))) throw new Error("Estado editorial inválido");
+  return {
+    slug,
+    title: cleanText(input.title, 160),
+    summary: cleanText(input.summary, 500),
+    ...(input.body !== undefined ? { body: input.body as Json } : {}),
+    content_status: input.contentStatus === "verified" ? "verified" as const : "fixture" as const,
+    is_active: input.isActive === true,
+    ...(Number.isInteger(input.sortOrder) ? { sort_order: input.sortOrder as number } : {}),
+  } satisfies Database["public"]["Tables"]["solutions"]["Update"];
 }
 
 export async function requireAdminContentClient() {

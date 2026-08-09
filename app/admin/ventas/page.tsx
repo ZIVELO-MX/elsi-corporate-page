@@ -10,6 +10,7 @@ import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatAdminDate, formatAdminMoney, newestFirst } from "@/lib/admin-format";
 
 function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onApprove: (payment: PendingPayment) => Promise<void> }) {
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -40,9 +41,9 @@ function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onAp
         columns={[
           { key: "user", header: "Usuario", primary: true, cell: (payment) => <span style={{ fontWeight: 500 }}>{payment.userName}</span> },
           { key: "course", header: "Curso", cell: (payment) => <span className="admin-cell-truncate admin-cell-muted" title={payment.courseName}>{payment.courseName}</span> },
-          { key: "amount", header: "Monto", align: "right", cell: (payment) => <span style={{ fontWeight: 600 }}>{`$${payment.amount.toFixed(2)}`}</span> },
+          { key: "amount", header: "Monto", align: "right", cell: (payment) => <span style={{ fontWeight: 600 }}>{formatAdminMoney(payment.amount)}</span> },
           { key: "status", header: "Estado", cell: () => <Badge variant="outline">Pendiente</Badge> },
-          { key: "date", header: "Fecha", cell: (payment) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{payment.soldAt}</span> },
+          { key: "date", header: "Fecha", cell: (payment) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatAdminDate(payment.soldAt)}</span> },
         ]}
         actions={(payment) => (
           <Button type="button" size="sm" variant="outline" disabled={approvingId !== null} onClick={() => setSelectedPayment(payment)}>
@@ -63,7 +64,7 @@ function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onAp
             <dl className="grid gap-3 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--paper-warm)] p-4 text-sm">
               <div><dt className="font-bold text-[var(--text-muted)]">Alumno</dt><dd className="font-semibold text-[var(--text)]">{selectedPayment.userName}</dd></div>
               <div><dt className="font-bold text-[var(--text-muted)]">Curso</dt><dd className="font-semibold text-[var(--text)]">{selectedPayment.courseName}</dd></div>
-              <div><dt className="font-bold text-[var(--text-muted)]">Monto</dt><dd className="font-semibold text-[var(--text)]">${selectedPayment.amount.toFixed(2)}</dd></div>
+              <div><dt className="font-bold text-[var(--text-muted)]">Monto</dt><dd className="font-semibold text-[var(--text)]">{formatAdminMoney(selectedPayment.amount)}</dd></div>
             </dl>
           )}
           <div className="mt-5 flex justify-end gap-2">
@@ -88,7 +89,7 @@ export default function AdminSales() {
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 className="admin-page-title">Ventas</h1>
         <p className="admin-page-sub">
-          {sales.length} ventas registradas &middot; {totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora"}
+          {sales.length} ventas registradas &middot; {formatAdminMoney(totalRevenue)} total
         </p>
       </div>
 
@@ -111,7 +112,7 @@ export default function AdminSales() {
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
       ) : (
         <AdminTable
-          rows={sales}
+          rows={newestFirst(sales, (sale) => sale.soldAt)}
           rowKey={(s) => s.id}
           minWidth="32rem"
           columns={[
@@ -121,11 +122,11 @@ export default function AdminSales() {
               key: "amount", header: "Monto", align: "right",
               cell: (s) => (
                 <span style={{ fontWeight: 600 }}>
-                  {s.amount === 0 ? <span style={{ color: "var(--moss)" }}>Gratis</span> : `$${s.amount.toFixed(2)}`}
+                  {s.amount === 0 ? <span style={{ color: "var(--moss)" }}>Sin costo</span> : formatAdminMoney(s.amount)}
                 </span>
               ),
             },
-            { key: "date", header: "Fecha", cell: (s) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{s.soldAt}</span> },
+            { key: "date", header: "Fecha", cell: (s) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatAdminDate(s.soldAt)}</span> },
           ]}
           empty={
             <EmptyState

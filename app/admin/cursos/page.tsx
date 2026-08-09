@@ -46,6 +46,7 @@ type PersistedCourse = {
   enrollment_link: string | null;
   price_cents: number;
   is_active: boolean;
+  content_status: "fixture" | "verified";
   created_at: string;
   students?: number;
 };
@@ -66,6 +67,7 @@ function courseFromRow(row: PersistedCourse): AdminCourse {
     slug: row.slug,
     price: row.price_cents / 100,
     status: row.is_active ? "active" : "inactive",
+    contentStatus: row.content_status,
     externalUrl: row.enrollment_link ?? "",
     students: row.students ?? 0,
     createdAt: row.created_at.slice(0, 10),
@@ -99,11 +101,22 @@ function coursePayload(course: Omit<AdminCourse, "id" | "students" | "createdAt"
     startsAt,
     enrollmentLink: course.externalUrl || null,
     priceCents: Math.round(course.price * 100),
-    // Do not send contentStatus: create defaults to "fixture" server-side and
-    // an edit must preserve the stored publish/verification state instead of
-    // silently reverting a verified course back to fixture.
+    contentStatus: course.contentStatus,
     isActive: course.status === "active",
   };
+}
+
+async function persistCourse(url: string, method: "POST" | "PATCH", data: Record<string, unknown>) {
+  const response = await fetch(url, {
+    method,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const payload = await response.json().catch(() => ({})) as { course?: PersistedCourse; error?: unknown };
+  if (!response.ok || !payload.course) {
+    throw new Error(typeof payload.error === "string" ? payload.error : "No fue posible guardar el curso.");
+  }
+  return payload.course;
 }
 
 const emptyForm = (): CourseForm => ({
@@ -127,7 +140,7 @@ function Field({ label, children }: { label: string; children: (id: string) => R
 }
 
 export default function AdminCourses() {
-  const { loading, courses, addCourse, updateCourse, toggleCourse } = useAdminData();
+  const { loading, courses } = useAdminData();
   const { toast } = useToast();
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -189,26 +202,16 @@ export default function AdminCourses() {
       toast({ title: "Ya existe un curso con ese slug.", variant: "error" });
       return;
     }
-    const nextCourse = { ...form, slug, status: editing ? displayedCourses.find(c => c.id === editing)?.status ?? "active" : "active" };
-    if (persistedCourses) {
-      const response = await fetch(editing ? `/api/admin/courses/${editing}` : "/api/admin/courses", {
-        method: editing ? "PATCH" : "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(coursePayload(nextCourse)),
-      });
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        toast({ title: payload?.error ?? "No fue posible guardar el curso.", variant: "error" });
-        return;
-      }
-      const payload = await response.json() as { course: PersistedCourse };
-      setPersistedCourses(prev => editing
-        ? (prev ?? []).map(course => course.id === editing ? courseFromRow(payload.course) : course)
-        : [...(prev ?? []), courseFromRow(payload.course)]);
-    } else if (editing) {
-      updateCourse(editing, nextCourse);
-    } else {
-      addCourse(nextCourse);
+    const currentCourse = editing ? displayedCourses.find(c => c.id === editing) : undefined;
+    const nextCourse = { ...form, slug, status: currentCourse?.status ?? "active", contentStatus: currentCourse?.contentStatus ?? "fixture" };
+    try {
+      const saved = await persistCourse(editing ? `/api/admin/courses/${editing}` : "/api/admin/courses", editing ? "PATCH" : "POST", coursePayload(nextCourse));
+      setPersistedCourses((previous) => editing
+        ? (previous ?? displayedCourses).map(course => course.id === editing ? courseFromRow(saved) : course)
+        : [courseFromRow(saved), ...(previous ?? displayedCourses)]);
+    } catch (cause) {
+      toast({ title: cause instanceof Error ? cause.message : "No fue posible conectar con el servidor.", variant: "error" });
+      return;
     }
     toast({ title: editing ? "Cambios guardados." : "Curso creado.", variant: "success" });
     closeForm();
@@ -350,7 +353,7 @@ export default function AdminCourses() {
         <AdminTable
           rows={filtered}
           rowKey={(c) => c.id}
-          minWidth="42rem"
+          minWidth="50rem"
           columns={[
             {
               key: "title", header: "Título", primary: true,
@@ -367,19 +370,34 @@ export default function AdminCourses() {
               key: "status", header: "Estado",
               cell: (c) => (
                 <button type="button" onClick={async () => {
-                  if (!persistedCourses) { toggleCourse(c.id); return; }
-                  const next: AdminCourse = { ...c, status: c.status === "active" ? "inactive" : "active" };
-                  const response = await fetch(`/api/admin/courses/${c.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(coursePayload(next)) });
-                  if (response.ok) {
-                    const payload = await response.json() as { course: PersistedCourse };
-                    setPersistedCourses(prev => (prev ?? []).map(course => course.id === c.id ? courseFromRow(payload.course) : course));
-                  } else toast({ title: "No fue posible cambiar el estado.", variant: "error" });
+                  try {
+                    const saved = await persistCourse(`/api/admin/courses/${c.id}`, "PATCH", { isActive: c.status !== "active" });
+                    setPersistedCourses((previous) => (previous ?? displayedCourses).map(course => course.id === c.id ? courseFromRow(saved) : course));
+                  } catch (cause) {
+                    toast({ title: cause instanceof Error ? cause.message : "No fue posible cambiar el estado.", variant: "error" });
+                  }
                 }}
                   aria-label={`Cambiar estado de ${c.title}; actualmente ${c.status === "active" ? "activo" : "inactivo"}`}
                   style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
                   <Badge variant={c.status === "active" ? "default" : "secondary"}>
                     {c.status === "active" ? "Activo" : "Inactivo"}
                   </Badge>
+                </button>
+              ),
+            },
+            {
+              key: "editorial", header: "Editorial",
+              cell: (c) => (
+                <button type="button" onClick={async () => {
+                  const contentStatus = c.contentStatus === "verified" ? "fixture" : "verified";
+                  try {
+                    const saved = await persistCourse(`/api/admin/courses/${c.id}`, "PATCH", { contentStatus });
+                    setPersistedCourses((previous) => (previous ?? displayedCourses).map((course) => course.id === c.id ? courseFromRow(saved) : course));
+                  } catch (cause) {
+                    toast({ title: cause instanceof Error ? cause.message : "No fue posible cambiar la verificación editorial.", variant: "error" });
+                  }
+                }} aria-label={`Cambiar verificación editorial de ${c.title}; actualmente ${c.contentStatus === "verified" ? "verificado" : "pendiente"}`} style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
+                  <Badge variant={c.contentStatus === "verified" ? "default" : "outline"}>{c.contentStatus === "verified" ? "Verificado" : "Pendiente"}</Badge>
                 </button>
               ),
             },

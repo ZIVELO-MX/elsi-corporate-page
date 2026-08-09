@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { formatAdminDate } from "@/lib/admin-format";
 
 const dialogAvatarStyle: React.CSSProperties = { width: "2.5rem", height: "2.5rem", borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "1rem", color: "var(--secondary-foreground)", flexShrink: 0 };
 const enrollmentListStyle: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "16rem", overflowY: "auto" };
@@ -46,7 +47,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
                 {user.role === "admin" ? "Admin" : "Usuario"}
               </Badge>
               <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", alignSelf: "center" }}>
-                Registrado el {user.createdAt}
+                Registrado el {formatAdminDate(user.createdAt)}
               </span>
             </div>
 
@@ -67,7 +68,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
                   }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.courseName}</p>
-                      <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>Inscrito el {e.enrolledAt}</p>
+                      <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>Inscrito el {formatAdminDate(e.enrolledAt)}</p>
                     </div>
                     <SourceBadge source={e.source} />
                   </li>
@@ -162,7 +163,7 @@ export default function AdminUsers() {
             { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => enrollmentCount(u) },
             {
               key: "created", header: "Registro",
-              cell: (u) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{u.createdAt}</span>,
+              cell: (u) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatAdminDate(u.createdAt)}</span>,
             },
           ]}
           empty={
