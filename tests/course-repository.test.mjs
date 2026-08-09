@@ -60,7 +60,8 @@ test("course CRUD routes preserve validation, conflict handling, and revalidatio
   assert.match(item, /mapCoursePatch\(input, previous\.syllabus\)/);
   assert.match(item, /status: error\.code === "23505" \? 409 : 400/);
   assert.match(item, /update\(\{ is_active: false \}\)/);
-  assert.match(item, /revalidateCourseSurfaces\(previous\?\.slug\)/);
+  assert.match(item, /select\("id,is_active,slug"\)\.single\(\)/);
+  assert.match(item, /revalidateCourseSurfaces\(data\.slug\)/);
 });
 
 test("course patch mapper is partial and merges syllabus without clobbering metadata", async () => {

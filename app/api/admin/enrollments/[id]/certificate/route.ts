@@ -18,9 +18,8 @@ async function requireAdmin() {
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const admin = await requireAdmin();
+  const [admin, { id: enrollmentId }] = await Promise.all([requireAdmin(), params]);
   if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { id: enrollmentId } = await params;
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "El archivo PDF es requerido" }, { status: 400 });
