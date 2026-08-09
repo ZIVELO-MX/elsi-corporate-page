@@ -16,6 +16,11 @@ Este documento concentra decisiones y datos de negocio que no bloquean la implem
 - [ ] Definir la política de reemplazo y conservación histórica de PDFs. El comportamiento vigente sustituye la referencia activa y retira el archivo anterior solo después de guardar el nuevo.
 - [ ] Confirmar si “Marcar realizado” sin constancia debe seguir disponible como excepción operativa o requerir una nota/segunda aprobación.
 
+## ELS-0075 — Exportaciones CSV
+
+- [ ] Confirmar el periodo de retención y los responsables autorizados para conservar archivos CSV descargados con datos personales.
+- [ ] Definir si futuras exportaciones deben ocultar teléfono, correo, mensajes o referencias de pago según el rol administrativo. En esta etapa existe un único rol `admin`, por lo que la confirmación es obligatoria antes de exportar datos personales.
+
 ## Política de datos durante validaciones
 
 - Los smokes y recorridos Playwright solo pueden crear registros con prefijos temporales identificables de la misión.

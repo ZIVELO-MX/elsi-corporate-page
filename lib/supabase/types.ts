@@ -5,6 +5,12 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      audit_events: {
+        Row: { id: string; actor_id: string | null; action: "insert" | "update" | "delete"; resource_type: string; resource_id: string | null; metadata: Json; created_at: string };
+        Insert: { id?: string; actor_id?: string | null; action: "insert" | "update" | "delete"; resource_type: string; resource_id?: string | null; metadata?: Json; created_at?: string };
+        Update: { id?: string; actor_id?: string | null; action?: "insert" | "update" | "delete"; resource_type?: string; resource_id?: string | null; metadata?: Json; created_at?: string };
+        Relationships: [];
+      };
       certificates: {
         Row: { id: string; enrollment_id: string; status: Database["public"]["Enums"]["certificate_status"]; storage_path: string | null; original_filename: string | null; mime_type: string | null; size_bytes: number | null; issued_at: string | null; created_at: string; updated_at: string };
         Insert: { id?: string; enrollment_id: string; status?: Database["public"]["Enums"]["certificate_status"]; storage_path?: string | null; original_filename?: string | null; mime_type?: string | null; size_bytes?: number | null; issued_at?: string | null; created_at?: string; updated_at?: string };

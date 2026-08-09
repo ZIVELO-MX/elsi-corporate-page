@@ -5,6 +5,7 @@ import { Search, SearchX, Inbox, CheckCircle2, Mail, Phone } from "lucide-react"
 import { useAdminCollection, type Lead, type LeadStatus } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
+import { AdminExportButton } from "@/components/admin/export-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -86,14 +87,17 @@ export default function AdminContacto() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
-          <h1 className="admin-page-title" style={{ margin: 0 }}>Contacto</h1>
-          {newCount > 0 && <Badge variant="default" style={{ fontSize: "0.75rem" }}>{newCount} nuevo{newCount > 1 ? "s" : ""}</Badge>}
+      <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
+            <h1 className="admin-page-title" style={{ margin: 0 }}>Contacto</h1>
+            {newCount > 0 && <Badge variant="default" style={{ fontSize: "0.75rem" }}>{newCount} nuevo{newCount > 1 ? "s" : ""}</Badge>}
+          </div>
+          <p className="admin-page-sub" style={{ marginTop: "0.25rem" }}>
+            {pagination.total} mensaje{pagination.total === 1 ? "" : "s"} del formulario de contacto
+          </p>
         </div>
-        <p className="admin-page-sub" style={{ marginTop: "0.25rem" }}>
-          {pagination.total} mensaje{pagination.total === 1 ? "" : "s"} del formulario de contacto
-        </p>
+        <AdminExportButton endpoint="/api/admin/leads" filename="elsi-contacto.csv" params={url.split("?")[1]} />
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>

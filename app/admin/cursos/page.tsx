@@ -5,6 +5,7 @@ import { Search, SearchX } from "lucide-react";
 import { useAdminCollection, type AdminCourse, type CourseModality } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
+import { AdminExportButton } from "@/components/admin/export-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -235,7 +236,10 @@ export default function AdminCourses() {
             {pagination.total} cursos registrados
           </p>
         </div>
-        <Button variant="primary" onClick={startCreate}>Crear curso</Button>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <AdminExportButton endpoint="/api/admin/courses" filename="elsi-cursos.csv" params={collectionUrl.split("?")[1]} personalData={false} />
+          <Button variant="primary" onClick={startCreate}>Crear curso</Button>
+        </div>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>

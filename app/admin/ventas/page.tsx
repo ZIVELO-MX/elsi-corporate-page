@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { extractAdminError, useAdminCollection, type PendingPayment, type Sale } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
+import { AdminExportButton } from "@/components/admin/export-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from "@/components/ui/skeleton";
@@ -99,11 +100,14 @@ export default function AdminSales() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h1 className="admin-page-title">Ventas</h1>
-        <p className="admin-page-sub">
-          {pagination.total} órdenes &middot; {formatAdminMoney(totalRevenue)} en ventas de esta página
-        </p>
+      <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+        <div>
+          <h1 className="admin-page-title">Ventas</h1>
+          <p className="admin-page-sub">
+            {pagination.total} órdenes &middot; {formatAdminMoney(totalRevenue)} en ventas de esta página
+          </p>
+        </div>
+        <AdminExportButton endpoint="/api/admin/orders" filename="elsi-ventas.csv" params={url.split("?")[1]} />
       </div>
 
       <p style={{ margin: "0 0 1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-muted)", fontSize: "0.8125rem" }}>

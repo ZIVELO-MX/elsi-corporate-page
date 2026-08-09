@@ -6,6 +6,7 @@ import { CheckCircle2, ClipboardList, Search, SearchX, Upload } from "lucide-rea
 import { useAdminCollection, type Enrollment, type EnrollmentSource } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
+import { AdminExportButton } from "@/components/admin/export-button";
 import { CertificateUploadDialog } from "@/components/admin/certificate-upload-dialog";
 import { CoursePicker, UserPicker, type AdminCourseOption } from "@/components/admin/enrollment-pickers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -214,9 +215,12 @@ function EnrollmentWorkspace() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h1 className="admin-page-title">Inscripciones</h1>
-        <p className="admin-page-sub">{enrollmentCollection.pagination.total} inscripciones registradas</p>
+      <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+        <div>
+          <h1 className="admin-page-title">Inscripciones</h1>
+          <p className="admin-page-sub">{enrollmentCollection.pagination.total} inscripciones registradas</p>
+        </div>
+        <AdminExportButton endpoint="/api/admin/enrollments" filename="elsi-inscripciones.csv" params={enrollmentUrl.split("?")[1]} />
       </div>
 
       <details className="admin-panel" style={{ marginBottom: "1rem" }}>
