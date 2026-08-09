@@ -18,20 +18,18 @@ test("contact endpoint validates, rate-limits, verifies anti-spam and writes lea
 
 test("admin leads are protected and status transitions are constrained", async () => {
   const [list, update, form] = await Promise.all([read("app/api/admin/leads/route.ts"), read("app/api/admin/leads/[id]/route.ts"), read("components/public-contact-form.tsx")]);
-  for (const source of [list, update]) {
-    assert.match(source, /auth\.getUser/);
-    assert.match(source, /profiles/);
-    assert.match(source, /role.*admin/);
-  }
+  assert.match(list, /requireAdminClient/);
+  assert.match(update, /requireAdminClient/);
+  assert.match(await read("lib/admin-auth.ts"), /auth\.getUser[\s\S]*profiles[\s\S]*role.*admin/);
   assert.match(update, /new.*contacted.*closed/);
   assert.match(form, /\/api\/contact/);
 });
 
 test("admin contact screen hydrates leads and persists attendance", async () => {
   const source = await read("app/admin/contacto/page.tsx");
-  assert.match(source, /fetch\("\/api\/admin\/leads"\)/);
+  assert.match(source, /\/api\/admin\/leads\?/);
   assert.match(source, /\/api\/admin\/leads\/\$\{lead\.id\}/);
-  assert.match(source, /persistedLeads \?\? leads/);
+  assert.match(source, /useAdminCollection/);
 });
 
 test("notification worker claims outbox events and retries Resend idempotently", async () => {

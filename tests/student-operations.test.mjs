@@ -14,11 +14,9 @@ test("profile endpoint scopes Supabase data to the authenticated user", async ()
 
 test("enrollment mutations require admin and enforce idempotent source/status contracts", async () => {
   const [collection, item] = await Promise.all([read("app/api/admin/enrollments/route.ts"), read("app/api/admin/enrollments/[id]/route.ts")]);
-  for (const source of [collection, item]) {
-    assert.match(source, /auth\.getUser/);
-    assert.match(source, /profiles/);
-    assert.match(source, /role.*admin/);
-  }
+  assert.match(collection, /requireAdminClient/);
+  assert.match(await read("lib/admin-auth.ts"), /auth\.getUser[\s\S]*profiles[\s\S]*role.*admin/);
+  assert.match(item, /auth\.getUser[\s\S]*profiles[\s\S]*role.*admin/);
   assert.match(collection, /23505/);
   assert.match(collection, /internal.*external/);
   assert.match(item, /in_progress.*completed/);
@@ -26,14 +24,12 @@ test("enrollment mutations require admin and enforce idempotent source/status co
 
 test("admin enrollment screen uses persistent endpoints without mutation fallbacks", async () => {
   const source = await read("app/admin/inscripciones/page.tsx");
-  assert.match(source, /fetch\("\/api\/admin\/enrollments"\)/);
-  assert.match(source, /fetch\("\/api\/admin\/users"\)/);
-  assert.match(source, /fetch\("\/api\/admin\/courses"\)/);
-  assert.match(source, /setPersistedUsers/);
-  assert.match(source, /setPersistedCourses/);
+  assert.match(source, /useAdminCollection<PersistedEnrollment>/);
+  assert.match(source, /useAdminCollection<AdminUser>/);
+  assert.match(source, /useAdminCollection<PersistedCourse>/);
   assert.match(source, /method: "POST"/);
   assert.match(source, /method: "PATCH"/);
-  assert.match(source, /persistedEnrollments \?\? enrollments/);
+  assert.match(source, /enrollmentCollection\.items\.map/);
   assert.match(source, /Array\.isArray\(row\.certificates\)/);
   assert.doesNotMatch(source, /addEnrollment|completeEnrollment|markCertificateAvailable/);
 });
@@ -43,9 +39,9 @@ test("admin users endpoint and screen use Supabase data without exposing service
   assert.match(route, /createSupabaseAdminClient/);
   assert.match(route, /auth\.admin\.listUsers/);
   assert.match(route, /role/);
-  assert.match(route, /profile\.role === "admin" \? "admin" : "user"/);
-  assert.match(screen, /fetch\("\/api\/admin\/users"\)/);
-  assert.match(screen, /persistedUsers \?\? users/);
+  assert.match(route, /profile\.role === "admin" \? "admin" as const : "user" as const/);
+  assert.match(screen, /\/api\/admin\/users\?/);
+  assert.match(screen, /useAdminCollection<AdminUser>/);
 });
 
 test("certificate storage stays private and owner-scoped", async () => {
@@ -87,7 +83,9 @@ test("RLS smoke test documents hosted student/admin isolation without secrets", 
   assert.match(smoke, /set local role authenticated/);
   assert.match(smoke, /request\.jwt\.claim\.sub/);
   assert.match(smoke, /student_foreign_enrollments/);
+  assert.match(smoke, /student_foreign_profiles/);
   assert.match(smoke, /admin_audit_events_visible/);
+  assert.match(smoke, /admin_summary_visible/);
   assert.match(smoke, /rollback/);
   assert.match(readme, /Smoke test de RLS/);
   assert.doesNotMatch(smoke, /service_role|SUPABASE_SERVICE_ROLE_KEY/);

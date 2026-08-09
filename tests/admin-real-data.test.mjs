@@ -4,16 +4,21 @@ import { readFile } from "node:fs/promises";
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
-test("admin provider loads persisted collections instead of shipping fixtures", async () => {
-  const provider = await read("lib/admin-data.tsx");
-  assert.match(provider, /fetch\("\/api\/admin\/courses"/);
-  assert.match(provider, /fetch\("\/api\/admin\/users"/);
-  assert.match(provider, /fetch\("\/api\/admin\/enrollments"/);
-  assert.match(provider, /fetch\("\/api\/admin\/leads"/);
-  assert.match(provider, /fetch\("\/api\/admin\/content"/);
-  assert.match(provider, /fetch\("\/api\/admin\/orders"/);
-  assert.doesNotMatch(provider, /INITIAL_(COURSES|USERS|ENROLLMENTS|SALES|SECTIONS|LEADS|TESTIMONIALS)/);
-  assert.doesNotMatch(provider, /Date\.now\(\)|tmp-/);
+test("admin screens request their own bounded resources without a global collection provider", async () => {
+  const [shell, data, dashboard, courses, users] = await Promise.all([
+    read("components/admin-shell.tsx"),
+    read("lib/admin-data.tsx"),
+    read("app/admin/page.tsx"),
+    read("app/admin/cursos/page.tsx"),
+    read("app/admin/usuarios/page.tsx"),
+  ]);
+  assert.doesNotMatch(shell, /AdminDataProvider/);
+  assert.doesNotMatch(data, /createContext|useContext/);
+  assert.match(data, /useAdminCollection/);
+  assert.match(dashboard, /\/api\/admin\/summary/);
+  assert.match(courses, /\/api\/admin\/courses\?/);
+  assert.match(users, /\/api\/admin\/users\?/);
+  assert.doesNotMatch(data, /INITIAL_(COURSES|USERS|ENROLLMENTS|SALES|SECTIONS|LEADS|TESTIMONIALS)/);
 });
 
 test("course, enrollment, and lead screens never report memory-only saves", async () => {
@@ -24,7 +29,7 @@ test("course, enrollment, and lead screens never report memory-only saves", asyn
   ]);
   assert.match(courses, /persistCourse\(editing \? `\/api\/admin\/courses\/\$\{editing\}` : "\/api\/admin\/courses"/);
   assert.doesNotMatch(courses, /if \(!persistedCourses\)/);
-  assert.match(enrollments, /fetch\("\/api\/admin\/enrollments"/);
+  assert.match(enrollments, /\/api\/admin\/enrollments\?/);
   assert.doesNotMatch(enrollments, /else (?:add|complete|mark)/);
   assert.match(leads, /method: "PATCH"/);
   assert.doesNotMatch(leads, /markLeadAttended/);
@@ -46,7 +51,7 @@ test("admin sales and pending payments are projections of persisted orders", asy
     read("app/api/admin/orders/route.ts"),
     read("app/admin/ventas/page.tsx"),
   ]);
-  assert.match(route, /role.*admin/);
+  assert.match(route, /requireAdminClient/);
   assert.match(route, /in\("status", \["paid", "pending"\]\)/);
   assert.match(route, /amount_cents/);
   assert.match(screen, /Stripe confirma un pago/);
