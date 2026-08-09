@@ -76,9 +76,9 @@ test("admin derived collections avoid handler-only state and chained iterations"
 
   assert.match(courses, /const initialFormRef = useRef/);
   assert.doesNotMatch(courses, /setInitialForm/);
-  assert.match(enrollments, /const selectableUsers = useMemo/);
-  assert.match(enrollments, /const activeCourses = useMemo/);
-  assert.match(enrollments, /filtered\.flatMap/);
+  assert.match(enrollments, /const selectedTargets = useMemo/);
+  assert.match(enrollments, /const grouped = useMemo/);
+  assert.match(enrollments, /groups\.get\(enrollment\.courseId\)/);
   assert.match(sales, /Stripe confirma un pago/);
   assert.doesNotMatch(sales, /Registrar venta/);
 });
