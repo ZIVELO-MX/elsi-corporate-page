@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { hasSupabasePublicConfig } from "@/lib/supabase/env";
+import { requireAdminClient } from "@/lib/admin-auth";
+import { adminPage, escapePostgrestSearch, parseAdminQuery } from "@/lib/admin-query";
 import { mapCourseInput, validateCourseInput } from "@/lib/courses-repository";
 
-async function requireAdmin() {
-  if (!hasSupabasePublicConfig()) return null;
-  const client = await createSupabaseServerClient();
-  if (!client) return null;
-  const { data: auth } = await client.auth.getUser();
-  if (!auth.user) return null;
-  const { data: profile } = await client.from("profiles").select("role").eq("id", auth.user.id).maybeSingle();
-  return profile?.role === "admin" ? client : null;
-}
+const SORTS = ["created_at", "title", "price_cents", "category"] as const;
 
 function revalidateCourseSurfaces(slug?: string) {
   revalidatePath("/cursos");
@@ -20,22 +12,47 @@ function revalidateCourseSurfaces(slug?: string) {
   if (slug) revalidatePath(`/cursos/${slug}`);
 }
 
-export async function GET() {
-  const client = await requireAdmin();
+export async function GET(request: Request) {
+  const client = await requireAdminClient();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { data, error } = await client.from("courses").select("*").order("created_at", { ascending: false });
+  const query = parseAdminQuery(request, SORTS, "created_at");
+  const search = escapePostgrestSearch(query.search);
+
+  let selection = client.from("courses").select("*", { count: "exact" });
+  if (search) selection = selection.or(`title.ilike.%${search}%,slug.ilike.%${search}%`);
+  const visibility = query.filters.get("visibility");
+  if (visibility === "active" || visibility === "inactive") selection = selection.eq("is_active", visibility === "active");
+  const editorial = query.filters.get("editorial");
+  if (editorial === "fixture" || editorial === "verified") selection = selection.eq("content_status", editorial);
+  const modality = query.filters.get("modality");
+  if (modality === "online" || modality === "in_person") selection = selection.eq("modality", modality);
+  const category = query.filters.get("category");
+  if (category) selection = selection.eq("category", category.slice(0, 120));
+
+  const { data, error, count } = await selection.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to);
   if (error) return NextResponse.json({ error: "No fue posible consultar cursos" }, { status: 500 });
-  const { data: enrollments, error: enrollmentError } = await client.from("enrollments").select("course_id");
-  if (enrollmentError) return NextResponse.json({ error: "No fue posible consultar estudiantes" }, { status: 500 });
-  const studentCounts = new Map<string, number>();
-  for (const enrollment of enrollments ?? []) {
-    studentCounts.set(enrollment.course_id, (studentCounts.get(enrollment.course_id) ?? 0) + 1);
+
+  const ids = (data ?? []).map((course) => course.id);
+  let studentCounts = new Map<string, number>();
+  if (ids.length > 0) {
+    const counts = await client.rpc("get_admin_course_enrollment_counts", { p_course_ids: ids });
+    if (!counts.error) {
+      studentCounts = new Map((counts.data ?? []).map((row) => [row.course_id, Number(row.enrollment_count)]));
+    } else {
+      // Compatibility while the additive ELS-0073 migration reaches Supabase.
+      const fallback = await client.from("enrollments").select("course_id").in("course_id", ids);
+      for (const enrollment of fallback.data ?? []) {
+        studentCounts.set(enrollment.course_id, (studentCounts.get(enrollment.course_id) ?? 0) + 1);
+      }
+    }
   }
-  return NextResponse.json({ courses: (data ?? []).map((course) => ({ ...course, students: studentCounts.get(course.id) ?? 0 })) });
+
+  const courses = (data ?? []).map((course) => ({ ...course, category: course.category ?? "General", students: studentCounts.get(course.id) ?? 0 }));
+  return NextResponse.json({ courses, ...adminPage(courses, count, query) });
 }
 
 export async function POST(request: Request) {
-  const client = await requireAdmin();
+  const client = await requireAdminClient();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   try {
     const input = validateCourseInput(await request.json());

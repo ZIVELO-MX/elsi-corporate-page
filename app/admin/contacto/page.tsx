@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, SearchX, Inbox, CheckCircle2, Mail, Phone } from "lucide-react";
-import { useAdminData, type Lead, type LeadStatus } from "@/lib/admin-data";
+import { useAdminCollection, type Lead, type LeadStatus } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
+import { AdminPagination } from "@/components/admin/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -19,9 +20,14 @@ type PersistedLead = {
   full_name: string;
   email: string;
   phone: string | null;
+  company: string | null;
   message: string;
   source: string | null;
   status: "new" | "contacted" | "closed";
+  assigned_to?: string | null;
+  resolved_at?: string | null;
+  admin_notes?: string | null;
+  course_title?: string | null;
   created_at: string;
 };
 
@@ -31,8 +37,12 @@ function leadFromRow(row: PersistedLead): Lead {
     name: row.full_name,
     email: row.email,
     phone: row.phone ?? "",
+    company: row.company ?? undefined,
     message: row.message,
     courseSlug: row.source?.startsWith("course:") ? row.source.slice(7) : undefined,
+    assignedTo: row.assigned_to ?? undefined,
+    resolvedAt: row.resolved_at ?? undefined,
+    adminNotes: row.admin_notes ?? undefined,
     createdAt: row.created_at.slice(0, 10),
     status: row.status === "new" ? "nuevo" : "atendido",
   };
@@ -47,41 +57,22 @@ function StatusBadge({ status }: { status: LeadStatus }) {
 }
 
 export default function AdminContacto() {
-  const { loading, leads, courses } = useAdminData();
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [page, setPage] = useState(1);
   const [openLead, setOpenLead] = useState<Lead | null>(null);
-  const [persistedLeads, setPersistedLeads] = useState<Lead[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/admin/leads")
-      .then(async response => response.ok ? response.json() : null)
-      .then(payload => {
-        if (!cancelled && payload?.leads) setPersistedLeads((payload.leads as PersistedLead[]).map(leadFromRow));
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
-  const displayedLeads = persistedLeads ?? leads;
-
-  const courseTitle = (slug?: string) => {
-    if (!slug) return null;
-    return courses.find((c) => c.slug === slug)?.title ?? slug.replaceAll("-", " ");
-  };
-
-  const newCount = useMemo(() => displayedLeads.filter((l) => l.status === "nuevo").length, [displayedLeads]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return displayedLeads.filter((l) => {
-      if (statusFilter !== "todos" && l.status !== statusFilter) return false;
-      if (!q) return true;
-      return l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q) || l.message.toLowerCase().includes(q);
-    });
-  }, [displayedLeads, query, statusFilter]);
+  const url = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "created_at", direction: "desc" });
+    if (query.trim()) params.set("q", query.trim());
+    if (statusFilter !== "todos") params.set("status", statusFilter === "nuevo" ? "new" : "contacted");
+    return `/api/admin/leads?${params}`;
+  }, [page, query, statusFilter]);
+  const { items, pagination, loading, error, setItems } = useAdminCollection<PersistedLead>(url, "leads");
+  const displayedLeads = useMemo(() => items.map(leadFromRow), [items]);
+  const courseTitles = useMemo(() => new Map(items.map((lead) => [lead.id, lead.course_title ?? null])), [items]);
+  const newCount = displayedLeads.filter((lead) => lead.status === "nuevo").length;
+  const courseTitle = (lead: Lead) => courseTitles.get(lead.id) ?? (lead.courseSlug ? lead.courseSlug.replaceAll("-", " ") : null);
 
   const attend = async (lead: Lead) => {
     const response = await fetch(`/api/admin/leads/${lead.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "contacted" }) });
@@ -89,7 +80,7 @@ export default function AdminContacto() {
       toast({ title: "No fue posible actualizar el mensaje.", variant: "error" });
       return;
     }
-    setPersistedLeads((previous) => (previous ?? displayedLeads).map(item => item.id === lead.id ? { ...item, status: "atendido" } : item));
+    setItems((previous) => previous.map((item) => item.id === lead.id ? { ...item, status: "contacted" } : item));
     toast({ title: "Mensaje marcado como atendido.", variant: "success" });
   };
 
@@ -101,9 +92,7 @@ export default function AdminContacto() {
           {newCount > 0 && <Badge variant="default" style={{ fontSize: "0.75rem" }}>{newCount} nuevo{newCount > 1 ? "s" : ""}</Badge>}
         </div>
         <p className="admin-page-sub" style={{ marginTop: "0.25rem" }}>
-          {filtered.length === displayedLeads.length
-            ? `${displayedLeads.length} mensaje${displayedLeads.length === 1 ? "" : "s"} del formulario de contacto`
-            : `${filtered.length} de ${displayedLeads.length} mensajes`}
+          {pagination.total} mensaje{pagination.total === 1 ? "" : "s"} del formulario de contacto
         </p>
       </div>
 
@@ -113,24 +102,25 @@ export default function AdminContacto() {
           <input
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
             placeholder="Buscar por nombre, correo o mensaje"
             aria-label="Buscar mensajes de contacto"
             style={{ ...filterControlStyle, width: "100%", paddingLeft: "2rem" }}
           />
         </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusFilter)} aria-label="Filtrar por estado" className="admin-select">
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }} aria-label="Filtrar por estado" className="admin-select">
           <option value="todos">Todos los estados</option>
           <option value="nuevo">Nuevos</option>
           <option value="atendido">Atendidos</option>
         </select>
       </div>
 
+      {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
         <TableSkeleton rows={5} widths={["9rem", "14rem", "9rem", "6rem", "6rem", "9rem"]} />
       ) : (
         <AdminTable
-          rows={filtered}
+          rows={displayedLeads}
           rowKey={(l) => l.id}
           minWidth="46rem"
           actionsHeader=""
@@ -145,7 +135,7 @@ export default function AdminContacto() {
                 </div>
               ),
             },
-            { key: "course", header: "Curso", cell: (l) => <span className="admin-cell-truncate admin-cell-muted" title={courseTitle(l.courseSlug) ?? undefined}>{courseTitle(l.courseSlug) ?? "—"}</span> },
+            { key: "course", header: "Curso", cell: (l) => <span className="admin-cell-truncate admin-cell-muted" title={courseTitle(l) ?? undefined}>{courseTitle(l) ?? "—"}</span> },
             { key: "date", header: "Fecha", cell: (l) => <span className="admin-cell-muted">{formatAdminDate(l.createdAt)}</span> },
             { key: "status", header: "Estado", cell: (l) => <StatusBadge status={l.status} /> },
           ]}
@@ -176,13 +166,14 @@ export default function AdminContacto() {
           }
         />
       )}
+      <AdminPagination pagination={pagination} onPageChange={setPage} />
 
       <Dialog open={!!openLead} onOpenChange={(open) => { if (!open) setOpenLead(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Mensaje de {openLead?.name}</DialogTitle>
             <DialogDescription>
-              {openLead?.email} · {openLead?.phone}{openLead?.courseSlug ? ` · ${courseTitle(openLead.courseSlug)}` : ""} · {formatAdminDate(openLead?.createdAt ?? "")}
+              {openLead?.email} · {openLead?.phone}{openLead?.courseSlug && openLead ? ` · ${courseTitle(openLead)}` : ""} · {formatAdminDate(openLead?.createdAt ?? "")}
             </DialogDescription>
           </DialogHeader>
           <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "var(--text)", whiteSpace: "pre-wrap", margin: "0 0 1rem" }}>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-context";
-import { AdminDataProvider } from "@/lib/admin-data";
 import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -69,8 +68,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AdminDataProvider>
-      <ToastProvider>
+    <ToastProvider>
       <div className="admin-mobile-bar">
         <button
           type="button"
@@ -138,7 +136,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-      </ToastProvider>
-    </AdminDataProvider>
+    </ToastProvider>
   );
 }
