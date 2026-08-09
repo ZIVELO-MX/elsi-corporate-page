@@ -87,7 +87,8 @@ export function CertificateUploadDialog({ enrollments, onClose, onChanged }: { e
   };
 
   const uploadReady = async () => {
-    const ids = orderedEntries.filter((entry) => entry.file && entry.status !== "success").map((entry) => entry.enrollment.id);
+    const ids: string[] = [];
+    for (const entry of orderedEntries) if (entry.file && entry.status !== "success") ids.push(entry.enrollment.id);
     if (ids.length === 0) return;
     setBatchRunning(true);
     let changed = false;
@@ -134,7 +135,7 @@ export function CertificateUploadDialog({ enrollments, onClose, onChanged }: { e
                     accept="application/pdf,.pdf"
                     disabled={batchRunning || entry.status === "success"}
                     aria-describedby={`${inputId}-status`}
-                    style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0 }}
+                    className="sr-only"
                     onChange={(event) => void chooseFile(entry.enrollment.id, event.target.files?.[0] ?? null)}
                   />
                   {entry.status === "error" && entry.file ? (

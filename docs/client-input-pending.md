@@ -21,6 +21,12 @@ Este documento concentra decisiones y datos de negocio que no bloquean la implem
 - [ ] Confirmar el periodo de retención y los responsables autorizados para conservar archivos CSV descargados con datos personales.
 - [ ] Definir si futuras exportaciones deben ocultar teléfono, correo, mensajes o referencias de pago según el rol administrativo. En esta etapa existe un único rol `admin`, por lo que la confirmación es obligatoria antes de exportar datos personales.
 
+## ELS-0076 — Operación administrativa
+
+- [ ] Definir qué personas pueden conceder o retirar el rol administrador. El sistema exige confirmación, bloquea la auto-degradación y nunca permite retirar al último administrador.
+- [ ] Definir responsables nominales, SLA y protocolo de reasignación para mensajes de Contacto. El panel ya permite responsable, notas y estados Nuevo, En seguimiento y Cerrado.
+- [ ] Definir el protocolo comercial para pagos fallidos o cancelados (contacto, reintento, devolución o cierre). El panel los muestra como incidencias sin ejecutar acciones financieras automáticas.
+
 ## Política de datos durante validaciones
 
 - Los smokes y recorridos Playwright solo pueden crear registros con prefijos temporales identificables de la misión.

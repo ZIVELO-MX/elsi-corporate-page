@@ -7,7 +7,8 @@ import { ToastProvider } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LayoutDashboard, BookOpen, Users, ClipboardList, Receipt, FileText, Inbox, Quote, Settings, Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
@@ -25,18 +26,44 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 800px)");
+    const sync = () => { setIsMobile(media.matches); if (!media.matches) setSidebarOpen(false); };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   // Close the mobile drawer on Escape. Route-change closing is handled where the
   // navigation happens (each drawer link and the backdrop call setSidebarOpen(false)),
   // so no pathname effect is needed — that would be a cascading render on every route.
   useEffect(() => {
     if (!sidebarOpen) return;
+    const sidebar = sidebarRef.current;
+    const toggle = toggleRef.current;
+    const focusable = sidebar ? [...sidebar.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')] : [];
+    focusable[0]?.focus();
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSidebarOpen(false);
+      if (e.key === "Escape") { e.preventDefault(); setSidebarOpen(false); return; }
+      if (e.key !== "Tab" || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [sidebarOpen]);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      toggle?.focus();
+    };
+  }, [isMobile, sidebarOpen]);
 
   if (!user) {
     return (
@@ -71,6 +98,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <ToastProvider>
       <div className="admin-mobile-bar">
         <button
+          ref={toggleRef}
           type="button"
           aria-expanded={sidebarOpen}
           aria-controls="admin-sidebar"
@@ -92,10 +120,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="admin-shell">
         <aside
+          ref={sidebarRef}
           id="admin-sidebar"
           className="admin-sidebar"
           data-open={sidebarOpen}
           aria-label="Navegación de administración"
+          inert={isMobile && !sidebarOpen ? true : undefined}
         >
           <div className="admin-sidebar-heading">
             <p>Administración</p>
@@ -119,9 +149,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="admin-sidebar-account">
             <div className="admin-sidebar-user">
-              <div className="admin-avatar-chip">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              <Avatar size="sm"><AvatarImage src={user.avatarUrl} alt="" /><AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback></Avatar>
               <div>
                 <p className="admin-sidebar-user-name">{user.name}</p>
                 <p className="admin-sidebar-user-email">{user.email}</p>
@@ -132,7 +160,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </aside>
-        <main className="admin-main">
+        <main className="admin-main" inert={isMobile && sidebarOpen ? true : undefined}>
           {children}
         </main>
       </div>

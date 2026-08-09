@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { Search, SearchX } from "lucide-react";
-import { useAdminCollection, type AdminUser } from "@/lib/admin-data";
+import { extractAdminError, useAdminCollection, type AdminUser } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
 import { AdminExportButton } from "@/components/admin/export-button";
@@ -11,8 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatAdminDate } from "@/lib/admin-format";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
+import { AdminListToolbar, AdminPageHeader } from "@/components/admin/page-header";
+import { adminPageParam, useAdminUrlState } from "@/lib/admin-url-state";
 
-const dialogAvatarStyle: React.CSSProperties = { width: "2.5rem", height: "2.5rem", borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: "1rem", color: "var(--secondary-foreground)", flexShrink: 0 };
 const enrollmentListStyle: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "16rem", overflowY: "auto" };
 
 function SourceBadge({ source }: { source: "interna" | "externa" }) {
@@ -31,9 +35,7 @@ function UserDetailDialog({ user, onClose }: { user: AdminUser | null; onClose: 
           <>
             <DialogHeader>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <div style={dialogAvatarStyle}>
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                <Avatar><AvatarImage src={user.avatarUrl} alt="" /><AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback></Avatar>
                 <div>
                   <DialogTitle>{user.name}</DialogTitle>
                   <DialogDescription style={{ marginTop: "0.125rem" }}>{user.email}</DialogDescription>
@@ -83,32 +85,53 @@ function UserEnrollments({ userId }: { userId: string }) {
   );
 }
 
-export default function AdminUsers() {
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
+function UsersWorkspace() {
+  const { toast } = useToast();
+  const { searchParams, update } = useAdminUrlState();
+  const query = searchParams.get("q") ?? "";
+  const role = searchParams.get("role") ?? "todos";
+  const sort = searchParams.get("sort") ?? "created_at";
+  const direction = searchParams.get("direction") === "asc" ? "asc" : "desc";
+  const page = adminPageParam(searchParams.get("page"));
   const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [roleTarget, setRoleTarget] = useState<{ user: AdminUser; role: "admin" | "user" } | null>(null);
+  const [roleSaving, setRoleSaving] = useState(false);
   const url = useMemo(() => {
-    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "created_at", direction: "desc" });
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort, direction });
     if (query.trim()) params.set("q", query.trim());
+    if (role === "admin" || role === "student") params.set("role", role);
     return `/api/admin/users?${params}`;
-  }, [page, query]);
-  const { items: users, pagination, loading, error } = useAdminCollection<AdminUser>(url, "users");
+  }, [direction, page, query, role, sort]);
+  const { items: users, pagination, loading, error, reload } = useAdminCollection<AdminUser>(url, "users");
+
+  const changeRole = async () => {
+    if (!roleTarget) return;
+    setRoleSaving(true);
+    const response = await fetch(`/api/admin/users/${roleTarget.user.id}/role`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role: roleTarget.role === "admin" ? "admin" : "student" }),
+    });
+    setRoleSaving(false);
+    if (!response.ok) {
+      toast({ title: await extractAdminError(response, "No fue posible cambiar el rol."), variant: "error" });
+      return;
+    }
+    toast({ title: "Rol actualizado.", variant: "success" });
+    setRoleTarget(null);
+    reload();
+  };
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem" }}>
-        <div>
-          <h1 className="admin-page-title">Usuarios</h1>
-        <p className="admin-page-sub">{pagination.total} usuarios registrados</p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-          <AdminExportButton endpoint="/api/admin/users" filename="elsi-usuarios.csv" params={url.split("?")[1]} />
-          <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
+      <AdminPageHeader title="Usuarios" description={`${pagination.total} usuarios registrados`} actions={<AdminExportButton endpoint="/api/admin/users" filename="elsi-usuarios.csv" params={url.split("?")[1]} />} />
+      <AdminListToolbar>
+          <div data-grow="true" style={{ position: "relative" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           <input
             type="search"
             value={query}
-            onChange={e => { setQuery(e.target.value); setPage(1); }}
+            onChange={e => update({ q: e.target.value, page: null })}
             placeholder="Buscar por nombre o correo"
             aria-label="Buscar usuarios"
             style={{
@@ -117,8 +140,9 @@ export default function AdminUsers() {
             }}
           />
           </div>
-        </div>
-      </div>
+          <select value={role} onChange={(event) => update({ role: event.target.value, page: null })} aria-label="Filtrar por rol" className="admin-select"><option value="todos">Todos los roles</option><option value="student">Usuarios</option><option value="admin">Administradores</option></select>
+          <select value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDirection] = event.target.value.split(":"); update({ sort: nextSort, direction: nextDirection, page: null }); }} aria-label="Ordenar usuarios" className="admin-select"><option value="created_at:desc">Más recientes</option><option value="created_at:asc">Más antiguos</option><option value="full_name:asc">Nombre A–Z</option><option value="full_name:desc">Nombre Z–A</option></select>
+      </AdminListToolbar>
 
       {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
@@ -132,8 +156,8 @@ export default function AdminUsers() {
             {
               key: "name", header: "Nombre", primary: true,
               cell: (u) => (
-                <button type="button" onClick={() => setSelected(u)} className="admin-user-row-btn">
-                  {u.name}
+                <button type="button" onClick={() => setSelected(u)} className="admin-user-row-btn" style={{ display: "inline-flex", alignItems: "center", gap: ".5rem" }}>
+                  <Avatar size="sm"><AvatarImage src={u.avatarUrl} alt="" /><AvatarFallback>{u.name.charAt(0).toUpperCase()}</AvatarFallback></Avatar>{u.name}
                 </button>
               ),
             },
@@ -144,9 +168,7 @@ export default function AdminUsers() {
             {
               key: "role", header: "Rol",
               cell: (u) => (
-                <Badge variant={u.role === "admin" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
-                  {u.role === "admin" ? "Admin" : "Usuario"}
-                </Badge>
+                <select value={u.role} disabled={roleSaving} onChange={(event) => setRoleTarget({ user: u, role: event.target.value as "admin" | "user" })} aria-label={`Cambiar rol de ${u.name}`} className="admin-select"><option value="user">Usuario</option><option value="admin">Admin</option></select>
               ),
             },
             { key: "courses", header: "Cursos inscritos", align: "right", cell: (u) => u.enrolledCourses },
@@ -164,9 +186,14 @@ export default function AdminUsers() {
           }
         />
       )}
-      <AdminPagination pagination={pagination} onPageChange={setPage} />
+      <AdminPagination pagination={pagination} onPageChange={(nextPage) => update({ page: nextPage })} />
 
       <UserDetailDialog user={selected} onClose={() => setSelected(null)} />
+      <ConfirmDialog open={roleTarget !== null} title="¿Cambiar rol?" description={roleTarget ? `${roleTarget.user.name} tendrá rol de ${roleTarget.role === "admin" ? "administrador" : "usuario"}. Tu propio acceso y el último administrador están protegidos.` : ""} confirmLabel={roleSaving ? "Guardando…" : "Confirmar cambio"} onClose={() => { if (!roleSaving) setRoleTarget(null); }} onConfirm={() => void changeRole()} />
     </div>
   );
+}
+
+export default function AdminUsers() {
+  return <Suspense fallback={<TableSkeleton rows={5} widths={["9rem", "12rem", "5rem", "6rem", "6rem"]} />}><UsersWorkspace /></Suspense>;
 }

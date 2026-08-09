@@ -117,6 +117,10 @@ export type Database = {
         Args: { p_course_ids: string[] };
         Returns: { course_id: string; enrollment_count: number }[];
       };
+      change_admin_user_role: {
+        Args: { p_user_id: string; p_role: Database["public"]["Enums"]["app_role"] };
+        Returns: Database["public"]["Tables"]["profiles"]["Row"];
+      };
     };
     Enums: { app_role: "student" | "admin"; certificate_status: "pending" | "available"; content_status: "fixture" | "verified"; course_modality: "online" | "in_person"; enrollment_source: "internal" | "external" | "stripe"; enrollment_status: "in_progress" | "completed"; lead_status: "new" | "contacted" | "closed"; outbox_status: "pending" | "processing" | "processed" | "failed"; order_status: "pending" | "paid" | "failed" | "canceled"; stripe_event_status: "pending" | "processed" | "failed" };
     CompositeTypes: Record<string, never>;

@@ -13,22 +13,29 @@ type Summary = {
   revenueCents: number;
   newLeads: number;
   pendingCertificates: number;
+  pendingPayments: number;
+  failedPayments: number;
+  canceledPayments: number;
 };
 
 const EMPTY_SUMMARY: Summary = {
   courses: 0, activeCourses: 0, draftCourses: 0, users: 0, admins: 0,
   enrollments: 0, usersWithCourses: 0, sales: 0, revenueCents: 0,
-  newLeads: 0, pendingCertificates: 0,
+  newLeads: 0, pendingCertificates: 0, pendingPayments: 0,
+  failedPayments: 0, canceledPayments: 0,
 };
 
 export async function GET() {
   const client = await requireAdminClient();
   if (!client) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  const [summaryResult, recentCourses, recentEnrollments] = await Promise.all([
+  const [summaryResult, recentCourses, recentEnrollments, pendingPayments, failedPayments, canceledPayments] = await Promise.all([
     client.rpc("get_admin_summary"),
     client.from("courses").select("id,title,created_at,is_active,content_status").order("created_at", { ascending: false }).limit(4),
     client.from("enrollments").select("id,user_id,course_id,enrolled_at,status").order("enrolled_at", { ascending: false }).limit(4),
+    client.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    client.from("orders").select("id", { count: "exact", head: true }).eq("status", "failed"),
+    client.from("orders").select("id", { count: "exact", head: true }).eq("status", "canceled"),
   ]);
 
   let summary = summaryResult.data as Summary | null;
@@ -65,6 +72,13 @@ export async function GET() {
       }).length,
     };
   }
+
+  summary = {
+    ...(summary ?? EMPTY_SUMMARY),
+    pendingPayments: pendingPayments.count ?? 0,
+    failedPayments: failedPayments.count ?? 0,
+    canceledPayments: canceledPayments.count ?? 0,
+  };
 
   if (recentCourses.error || recentEnrollments.error) return NextResponse.json({ error: "No fue posible consultar el resumen" }, { status: 500 });
   const rows = recentEnrollments.data ?? [];

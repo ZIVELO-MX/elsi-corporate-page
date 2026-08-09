@@ -1,7 +1,7 @@
 "use client";
 
 import { Receipt } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { extractAdminError, useAdminCollection, type PendingPayment, type Sale } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
@@ -13,8 +13,18 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatAdminDate, formatAdminMoney } from "@/lib/admin-format";
+import { AdminListToolbar, AdminPageHeader } from "@/components/admin/page-header";
+import { adminPageParam, useAdminUrlState } from "@/lib/admin-url-state";
 
-type OrderRow = Sale & { status: "paid" | "pending" };
+type OrderStatus = "paid" | "pending" | "failed" | "canceled";
+type OrderRow = Sale & { status: OrderStatus };
+
+function OrderStatusBadge({ status }: { status: OrderStatus }) {
+  if (status === "paid") return <Badge variant="default">Pagado</Badge>;
+  if (status === "pending") return <Badge variant="outline">Pendiente</Badge>;
+  if (status === "failed") return <Badge variant="destructive">Fallido</Badge>;
+  return <Badge variant="secondary">Cancelado</Badge>;
+}
 
 function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onApprove: (payment: PendingPayment) => Promise<void> }) {
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -83,9 +93,19 @@ function PendingPaymentTable({ rows, onApprove }: { rows: PendingPayment[]; onAp
   );
 }
 
-export default function AdminSales() {
-  const [page, setPage] = useState(1);
-  const url = useMemo(() => `/api/admin/orders?page=${page}&pageSize=25&sort=created_at&direction=desc`, [page]);
+function SalesWorkspace() {
+  const { searchParams, update } = useAdminUrlState();
+  const page = adminPageParam(searchParams.get("page"));
+  const query = searchParams.get("q") ?? "";
+  const status = searchParams.get("status") ?? "todos";
+  const sort = searchParams.get("sort") ?? "created_at";
+  const direction = searchParams.get("direction") === "asc" ? "asc" : "desc";
+  const url = useMemo(() => {
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort, direction });
+    if (query.trim()) params.set("q", query.trim());
+    if (["paid", "pending", "failed", "canceled"].includes(status)) params.set("status", status);
+    return `/api/admin/orders?${params}`;
+  }, [direction, page, query, sort, status]);
   const { items, pagination, loading, error, reload } = useAdminCollection<OrderRow>(url, "orders");
   const sales = items.filter((order): order is OrderRow & { status: "paid" } => order.status === "paid");
   const pendingPayments = items.filter((order): order is PendingPayment => order.status === "pending");
@@ -100,21 +120,19 @@ export default function AdminSales() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
-        <div>
-          <h1 className="admin-page-title">Ventas</h1>
-          <p className="admin-page-sub">
-            {pagination.total} órdenes &middot; {formatAdminMoney(totalRevenue)} en ventas de esta página
-          </p>
-        </div>
-        <AdminExportButton endpoint="/api/admin/orders" filename="elsi-ventas.csv" params={url.split("?")[1]} />
-      </div>
+      <AdminPageHeader title="Ventas" description={`${pagination.total} órdenes · ${formatAdminMoney(totalRevenue)} pagado en esta página`} actions={<AdminExportButton endpoint="/api/admin/orders" filename="elsi-ventas.csv" params={url.split("?")[1]} />} />
+
+      <AdminListToolbar>
+        <input data-grow="true" type="search" value={query} onChange={(event) => update({ q: event.target.value, page: null })} placeholder="Buscar por alumno, curso o referencia" aria-label="Buscar órdenes" className="admin-input" />
+        <select value={status} onChange={(event) => update({ status: event.target.value, page: null })} aria-label="Filtrar órdenes por estado" className="admin-select"><option value="todos">Todos los estados</option><option value="pending">Pendientes</option><option value="paid">Pagados</option><option value="failed">Fallidos</option><option value="canceled">Cancelados</option></select>
+        <select value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDirection] = event.target.value.split(":"); update({ sort: nextSort, direction: nextDirection, page: null }); }} aria-label="Ordenar órdenes" className="admin-select"><option value="created_at:desc">Más recientes</option><option value="created_at:asc">Más antiguas</option><option value="amount_cents:desc">Mayor monto</option><option value="amount_cents:asc">Menor monto</option></select>
+      </AdminListToolbar>
 
       <p style={{ margin: "0 0 1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-muted)", fontSize: "0.8125rem" }}>
         Las ventas se generan automáticamente cuando Stripe confirma un pago. No se crean registros manuales desde este panel.
       </p>
 
-      <section aria-labelledby="pending-payments-title" style={{ marginBottom: "2rem" }}>
+      {(status === "todos" || status === "pending") ? <section aria-labelledby="pending-payments-title" style={{ marginBottom: "2rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
           <h2 id="pending-payments-title" className="admin-section-title">Pagos pendientes</h2>
           <Badge variant="outline">{pendingPayments.length}</Badge>
@@ -123,14 +141,14 @@ export default function AdminSales() {
           Revisa casos en los que Stripe aún no confirmó el pago. Aprobar manualmente crea la inscripción y deja registro de la acción.
         </p>
         {loading ? <TableSkeleton rows={2} widths={["9rem", "12rem", "5rem", "8rem"]} /> : <PendingPaymentTable rows={pendingPayments} onApprove={(payment) => approvePendingPayment(payment.id)} />}
-      </section>
+      </section> : null}
 
       {error ? <p role="alert" className="admin-page-sub">{error}</p> : null}
       {loading ? (
         <TableSkeleton rows={4} widths={["9rem", "12rem", "5rem", "6rem"]} />
       ) : (
         <AdminTable
-          rows={sales}
+          rows={items}
           rowKey={(s) => s.id}
           minWidth="32rem"
           columns={[
@@ -144,18 +162,23 @@ export default function AdminSales() {
                 </span>
               ),
             },
+            { key: "status", header: "Estado", cell: (s) => <OrderStatusBadge status={s.status} /> },
             { key: "date", header: "Fecha", cell: (s) => <span className="admin-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatAdminDate(s.soldAt)}</span> },
           ]}
           empty={
             <EmptyState
               icon={<Receipt size={20} aria-hidden="true" />}
-              title="Sin ventas todavía"
-              hint="Registra la primera venta con el formulario de arriba."
+              title="Sin órdenes"
+              hint="No hay órdenes que coincidan con los filtros actuales."
             />
           }
         />
       )}
-      <AdminPagination pagination={pagination} onPageChange={setPage} />
+      <AdminPagination pagination={pagination} onPageChange={(nextPage) => update({ page: nextPage })} />
     </div>
   );
+}
+
+export default function AdminSales() {
+  return <Suspense fallback={<TableSkeleton rows={5} widths={["9rem", "12rem", "5rem", "6rem"]} />}><SalesWorkspace /></Suspense>;
 }

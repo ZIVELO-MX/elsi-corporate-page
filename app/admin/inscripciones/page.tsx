@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { formatAdminDate } from "@/lib/admin-format";
 import type { AdminUser } from "@/lib/admin-data";
+import { AdminPageHeader } from "@/components/admin/page-header";
 
 type PersistedEnrollment = {
   id: string;
@@ -32,7 +33,7 @@ type PersistedEnrollment = {
   course?: { id: string; title: string; modality: "online" | "in_person" } | null;
 };
 
-type FilterPatch = Partial<Record<"q" | "status" | "source" | "certificate" | "courseId" | "page", string | null>>;
+type FilterPatch = Partial<Record<"q" | "status" | "source" | "certificate" | "courseId" | "page" | "sort" | "direction", string | null>>;
 
 const filterControlStyle: React.CSSProperties = { padding: "0.5rem 0.75rem", fontSize: "0.8125rem", border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)" };
 const bulkBannerStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.75rem 1rem", background: "var(--primary-light)", borderRadius: "var(--radius)", marginBottom: "1rem" };
@@ -116,6 +117,8 @@ function EnrollmentWorkspace() {
   const certificateFilter = enumParam(searchParams.get("certificate"), ["todas", "sin-constancia", "pendiente", "disponible"] as const, "todas");
   const courseId = searchParams.get("courseId") ?? "";
   const page = pageParam(searchParams.get("page"));
+  const sort = enumParam(searchParams.get("sort"), ["enrolled_at", "status", "source"] as const, "enrolled_at");
+  const direction = searchParams.get("direction") === "asc" ? "asc" : "desc";
 
   const updateUrl = useCallback((patch: FilterPatch) => {
     const next = new URLSearchParams(searchParams.toString());
@@ -127,14 +130,14 @@ function EnrollmentWorkspace() {
   }, [pathname, searchParams]);
 
   const enrollmentUrl = useMemo(() => {
-    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort: "enrolled_at", direction: "desc" });
+    const params = new URLSearchParams({ page: String(page), pageSize: "25", sort, direction });
     if (query.trim()) params.set("q", query.trim());
     if (statusFilter !== "todas") params.set("status", statusFilter === "realizado" ? "completed" : "in_progress");
     if (sourceFilter !== "todas") params.set("source", sourceFilter === "externa" ? "external" : "internal");
     if (certificateFilter !== "todas") params.set("certificate", certificateFilter === "sin-constancia" ? "none" : certificateFilter === "pendiente" ? "pending" : "available");
     if (courseId) params.set("courseId", courseId);
     return `/api/admin/enrollments?${params}`;
-  }, [certificateFilter, courseId, page, query, sourceFilter, statusFilter]);
+  }, [certificateFilter, courseId, direction, page, query, sort, sourceFilter, statusFilter]);
   const enrollmentCollection = useAdminCollection<PersistedEnrollment>(enrollmentUrl, "enrollments");
   const displayedEnrollments = useMemo(() => enrollmentCollection.items.map(enrollmentFromRow), [enrollmentCollection.items]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
@@ -215,13 +218,7 @@ function EnrollmentWorkspace() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
-        <div>
-          <h1 className="admin-page-title">Inscripciones</h1>
-          <p className="admin-page-sub">{enrollmentCollection.pagination.total} inscripciones registradas</p>
-        </div>
-        <AdminExportButton endpoint="/api/admin/enrollments" filename="elsi-inscripciones.csv" params={enrollmentUrl.split("?")[1]} />
-      </div>
+      <AdminPageHeader title="Inscripciones" description={`${enrollmentCollection.pagination.total} inscripciones registradas`} actions={<AdminExportButton endpoint="/api/admin/enrollments" filename="elsi-inscripciones.csv" params={enrollmentUrl.split("?")[1]} />} />
 
       <details className="admin-panel" style={{ marginBottom: "1rem" }}>
         <summary style={{ cursor: "pointer", fontSize: "0.875rem", fontWeight: 800 }}>Registrar inscripción</summary>
@@ -257,6 +254,7 @@ function EnrollmentWorkspace() {
         <select value={certificateFilter} onChange={(event) => updateUrl({ certificate: event.target.value, page: null })} aria-label="Filtrar por constancia" className="admin-select">
           <option value="todas">Todas las constancias</option><option value="sin-constancia">Sin constancia</option><option value="pendiente">Pendiente</option><option value="disponible">Disponible</option>
         </select>
+        <select value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDirection] = event.target.value.split(":"); updateUrl({ sort: nextSort, direction: nextDirection, page: null }); }} aria-label="Ordenar inscripciones" className="admin-select"><option value="enrolled_at:desc">Más recientes</option><option value="enrolled_at:asc">Más antiguas</option><option value="status:asc">Estado</option><option value="source:asc">Origen</option></select>
       </div>
 
       <details className="admin-panel" style={{ marginBottom: "1rem" }}>

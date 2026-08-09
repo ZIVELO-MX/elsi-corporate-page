@@ -29,4 +29,3 @@ export async function fetchAllPages<Row>(loadPage: (from: number, to: number) =>
     if (page.length < EXPORT_BATCH_SIZE) return rows;
   }
 }
-

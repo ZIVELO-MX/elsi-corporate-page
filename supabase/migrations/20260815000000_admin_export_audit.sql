@@ -7,4 +7,3 @@ alter table public.audit_events
 alter table public.audit_events
   add constraint audit_events_metadata_object
   check (jsonb_typeof(metadata) = 'object');
-

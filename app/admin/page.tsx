@@ -5,31 +5,34 @@ import { BookOpen, Users, ClipboardList, Receipt } from "lucide-react";
 import { useAdminResource } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatAdminDate, formatAdminMoney } from "@/lib/admin-format";
+import { formatAdminDate, formatAdminMoney, formatAdminNumber } from "@/lib/admin-format";
+import { AdminPageHeader } from "@/components/admin/page-header";
 
 const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
 
 export default function AdminDashboard() {
   const { data, loading, error } = useAdminResource<{
-    summary: { courses: number; activeCourses: number; draftCourses: number; users: number; admins: number; enrollments: number; usersWithCourses: number; sales: number; revenueCents: number; newLeads: number; pendingCertificates: number };
+    summary: { courses: number; activeCourses: number; draftCourses: number; users: number; admins: number; enrollments: number; usersWithCourses: number; sales: number; revenueCents: number; newLeads: number; pendingCertificates: number; pendingPayments: number; failedPayments: number; canceledPayments: number };
     recentCourses: { id: string; title: string; created_at: string; is_active: boolean }[];
     recentEnrollments: { id: string; userName: string; courseName: string; enrolled_at: string }[];
   }>("/api/admin/summary");
-  const summary = data?.summary ?? { courses: 0, activeCourses: 0, draftCourses: 0, users: 0, admins: 0, enrollments: 0, usersWithCourses: 0, sales: 0, revenueCents: 0, newLeads: 0, pendingCertificates: 0 };
+  const summary = data?.summary ?? { courses: 0, activeCourses: 0, draftCourses: 0, users: 0, admins: 0, enrollments: 0, usersWithCourses: 0, sales: 0, revenueCents: 0, newLeads: 0, pendingCertificates: 0, pendingPayments: 0, failedPayments: 0, canceledPayments: 0 };
 
   // KPI tiles double as shortcuts: each links to its section.
   const cards = [
-    { label: "Cursos activos", value: summary.activeCourses, sub: `${summary.courses} totales`, href: "/admin/cursos", Icon: BookOpen },
-    { label: "Usuarios registrados", value: summary.users, sub: `${summary.admins} administradores`, href: "/admin/usuarios", Icon: Users },
-    { label: "Inscripciones", value: summary.enrollments, sub: `${summary.usersWithCourses} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
-    { label: "Ventas registradas", value: summary.sales, sub: `${formatAdminMoney(summary.revenueCents / 100)} total`, href: "/admin/ventas", Icon: Receipt },
+    { label: "Cursos activos", value: summary.activeCourses, sub: `${formatAdminNumber(summary.courses)} totales`, href: "/admin/cursos", Icon: BookOpen },
+    { label: "Usuarios registrados", value: summary.users, sub: `${formatAdminNumber(summary.admins)} administradores`, href: "/admin/usuarios", Icon: Users },
+    { label: "Inscripciones", value: summary.enrollments, sub: `${formatAdminNumber(summary.usersWithCourses)} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
+    { label: "Ventas registradas", value: summary.sales, sub: `${formatAdminMoney(summary.revenueCents / 100)} total`, href: "/admin/ventas?status=paid", Icon: Receipt },
   ];
 
   // "Needs attention": real derived counts of work waiting on the admin.
   const attention = [
-    { n: summary.newLeads, label: "Mensajes nuevos", sub: "Sin responder", href: "/admin/contacto" },
-    { n: summary.pendingCertificates, label: "Constancias pendientes", sub: "Realizados sin publicar", href: "/admin/inscripciones" },
-    { n: summary.draftCourses, label: "Cursos en borrador", sub: "Inactivos o incompletos", href: "/admin/cursos" },
+    { n: summary.pendingPayments, label: "Pagos pendientes", sub: "Requieren revisión", href: "/admin/ventas?status=pending" },
+    { n: summary.failedPayments + summary.canceledPayments, label: "Pagos con incidencia", sub: "Fallidos o cancelados", href: "/admin/ventas?status=failed" },
+    { n: summary.newLeads, label: "Mensajes nuevos", sub: "Sin responder", href: "/admin/contacto?status=new" },
+    { n: summary.pendingCertificates, label: "Constancias pendientes", sub: "Realizados sin publicar", href: "/admin/inscripciones?certificate=pending" },
+    { n: summary.draftCourses, label: "Cursos por revisar", sub: "Inactivos o provisionales", href: "/admin/cursos?visibility=inactive" },
   ];
 
   const recentCourses = data?.recentCourses ?? [];
@@ -37,10 +40,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div style={{ marginBottom: "1.75rem" }}>
-        <h1 className="admin-page-title" style={{ marginBottom: "0.5rem" }}>Dashboard</h1>
-        <p className="admin-page-sub">Resumen general de la plataforma. Toca una tarjeta para ir a su sección.</p>
-      </div>
+      <AdminPageHeader title="Dashboard" description="Cola operativa y accesos directos a cada sección." />
 
       {error && (
         <div role="alert" style={{ marginBottom: "1.25rem", padding: "0.75rem 1rem", border: "1px solid var(--danger)", borderRadius: "var(--radius-sm)", color: "var(--danger)", background: "var(--card)" }}>
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                   <p className="admin-kpi-label">{card.label}</p>
                   <span aria-hidden="true" className="admin-kpi-icon"><card.Icon size={16} strokeWidth={2} /></span>
                 </div>
-                <p className="admin-kpi-value">{card.value}</p>
+                <p className="admin-kpi-value">{formatAdminNumber(card.value)}</p>
                 <p className="admin-kpi-sub">{card.sub}</p>
               </Link>
             ))}
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
           <div className="admin-attention-grid">
             {attention.map((a) => (
               <Link key={a.label} href={a.href} className="admin-attention-tile" data-alert={a.n > 0}>
-                <span className="admin-attention-num">{a.n}</span>
+                <span className="admin-attention-num">{formatAdminNumber(a.n)}</span>
                 <span className="admin-attention-text">
                   {a.label}
                   <small>{a.n > 0 ? a.sub : "Todo al día"}</small>

@@ -16,21 +16,21 @@ export async function GET(request: Request) {
     if (matches.error?.code === "42703") matches = await client.from("profiles").select("id").ilike("full_name", `%${search}%`).limit(500);
     matchingUserIds = (matches.data ?? []).map((profile) => profile.id);
   }
-  let selection = client.from("orders").select("*", { count: "exact" }).in("status", ["paid", "pending"]);
+  let selection = client.from("orders").select("*", { count: "exact" }).in("status", ["paid", "pending", "failed", "canceled"]);
   if (search) {
     const userClause = matchingUserIds.length ? `,user_id.in.(${matchingUserIds.join(",")})` : "";
     selection = selection.or(`course_title.ilike.%${search}%,payment_reference.ilike.%${search}%${userClause}`);
   }
   const requestedStatus = query.filters.get("status");
-  if (requestedStatus === "paid" || requestedStatus === "pending") selection = selection.eq("status", requestedStatus);
+  if (["paid", "pending", "failed", "canceled"].includes(requestedStatus ?? "")) selection = selection.eq("status", requestedStatus as "paid" | "pending" | "failed" | "canceled");
   let result = await selection.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to);
   if (result.error?.code === "42703") {
-    let fallback = client.from("orders").select("*", { count: "exact" }).in("status", ["paid", "pending"]);
+    let fallback = client.from("orders").select("*", { count: "exact" }).in("status", ["paid", "pending", "failed", "canceled"]);
     if (search) {
       const userClause = matchingUserIds.length ? `,user_id.in.(${matchingUserIds.join(",")})` : "";
       fallback = fallback.or(`course_title.ilike.%${search}%${userClause}`);
     }
-    if (requestedStatus === "paid" || requestedStatus === "pending") fallback = fallback.eq("status", requestedStatus);
+    if (["paid", "pending", "failed", "canceled"].includes(requestedStatus ?? "")) fallback = fallback.eq("status", requestedStatus as "paid" | "pending" | "failed" | "canceled");
     result = await fallback.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(query.from, query.to);
   }
   if (result.error) return NextResponse.json({ error: "No fue posible consultar ventas" }, { status: 500 });

@@ -29,8 +29,8 @@ export const GET = createAdminCsvExport<OrderExport>({
     const query = parseAdminQuery(request, SORTS, "created_at");
     const requestedStatus = query.filters.get("status");
     const rows = await fetchAllPages<OrderRow>((from, to) => {
-      let selection = client.from("orders").select("*").in("status", ["paid", "pending"]);
-      if (requestedStatus === "paid" || requestedStatus === "pending") selection = selection.eq("status", requestedStatus);
+      let selection = client.from("orders").select("*").in("status", ["paid", "pending", "failed", "canceled"]);
+      if (["paid", "pending", "failed", "canceled"].includes(requestedStatus ?? "")) selection = selection.eq("status", requestedStatus as "paid" | "pending" | "failed" | "canceled");
       return selection.order(query.sort, { ascending: query.ascending }).order("id", { ascending: query.ascending }).range(from, to);
     });
     const profilePages = await Promise.all(chunks([...new Set(rows.map((row) => row.user_id))]).map(async (ids) => {
