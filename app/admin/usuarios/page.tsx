@@ -5,6 +5,7 @@ import { Search, SearchX } from "lucide-react";
 import { useAdminCollection, type AdminUser } from "@/lib/admin-data";
 import { AdminTable } from "@/components/admin/data-table";
 import { AdminPagination } from "@/components/admin/pagination";
+import { AdminExportButton } from "@/components/admin/export-button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
@@ -100,7 +101,9 @@ export default function AdminUsers() {
           <h1 className="admin-page-title">Usuarios</h1>
         <p className="admin-page-sub">{pagination.total} usuarios registrados</p>
         </div>
-        <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          <AdminExportButton endpoint="/api/admin/users" filename="elsi-usuarios.csv" params={url.split("?")[1]} />
+          <div style={{ position: "relative", width: "16rem", maxWidth: "100%" }}>
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           <input
             type="search"
@@ -113,6 +116,7 @@ export default function AdminUsers() {
               border: "1px solid var(--input)", borderRadius: "var(--radius-sm)", background: "var(--paper)", color: "var(--text)",
             }}
           />
+          </div>
         </div>
       </div>
 
