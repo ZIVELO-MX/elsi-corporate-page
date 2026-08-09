@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
+import { formatAdminDate } from "@/lib/admin-format";
 
 type StatusFilter = "todos" | LeadStatus;
 
@@ -46,7 +47,7 @@ function StatusBadge({ status }: { status: LeadStatus }) {
 }
 
 export default function AdminContacto() {
-  const { loading, leads, courses, markLeadAttended } = useAdminData();
+  const { loading, leads, courses } = useAdminData();
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
@@ -83,14 +84,12 @@ export default function AdminContacto() {
   }, [displayedLeads, query, statusFilter]);
 
   const attend = async (lead: Lead) => {
-    if (persistedLeads) {
-      const response = await fetch(`/api/admin/leads/${lead.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "contacted" }) });
-      if (!response.ok) {
-        toast({ title: "No fue posible actualizar el mensaje.", variant: "error" });
-        return;
-      }
-      setPersistedLeads(prev => (prev ?? []).map(item => item.id === lead.id ? { ...item, status: "atendido" } : item));
-    } else markLeadAttended(lead.id);
+    const response = await fetch(`/api/admin/leads/${lead.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "contacted" }) });
+    if (!response.ok) {
+      toast({ title: "No fue posible actualizar el mensaje.", variant: "error" });
+      return;
+    }
+    setPersistedLeads((previous) => (previous ?? displayedLeads).map(item => item.id === lead.id ? { ...item, status: "atendido" } : item));
     toast({ title: "Mensaje marcado como atendido.", variant: "success" });
   };
 
@@ -147,7 +146,7 @@ export default function AdminContacto() {
               ),
             },
             { key: "course", header: "Curso", cell: (l) => <span className="admin-cell-truncate admin-cell-muted" title={courseTitle(l.courseSlug) ?? undefined}>{courseTitle(l.courseSlug) ?? "—"}</span> },
-            { key: "date", header: "Fecha", cell: (l) => <span className="admin-cell-muted">{l.createdAt}</span> },
+            { key: "date", header: "Fecha", cell: (l) => <span className="admin-cell-muted">{formatAdminDate(l.createdAt)}</span> },
             { key: "status", header: "Estado", cell: (l) => <StatusBadge status={l.status} /> },
           ]}
           actions={(l) => (
@@ -183,7 +182,7 @@ export default function AdminContacto() {
           <DialogHeader>
             <DialogTitle>Mensaje de {openLead?.name}</DialogTitle>
             <DialogDescription>
-              {openLead?.email} · {openLead?.phone}{openLead?.courseSlug ? ` · ${courseTitle(openLead.courseSlug)}` : ""} · {openLead?.createdAt}
+              {openLead?.email} · {openLead?.phone}{openLead?.courseSlug ? ` · ${courseTitle(openLead.courseSlug)}` : ""} · {formatAdminDate(openLead?.createdAt ?? "")}
             </DialogDescription>
           </DialogHeader>
           <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "var(--text)", whiteSpace: "pre-wrap", margin: "0 0 1rem" }}>

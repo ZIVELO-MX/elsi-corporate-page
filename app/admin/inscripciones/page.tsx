@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TableSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
+import { formatAdminDate } from "@/lib/admin-format";
 
 type StatusFilter = "todas" | "en-curso" | "realizado";
 type SourceFilter = "todas" | EnrollmentSource;
@@ -36,6 +37,7 @@ type PersistedCourse = {
   location: string | null;
   price_cents: number;
   is_active: boolean;
+  content_status: "fixture" | "verified";
   created_at: string;
 };
 
@@ -47,6 +49,7 @@ function courseFromRow(row: PersistedCourse): AdminCourse {
     slug: row.id,
     price: row.price_cents / 100,
     status: row.is_active ? "active" : "inactive",
+    contentStatus: row.content_status,
     externalUrl: "",
     students: 0,
     createdAt: row.created_at.slice(0, 10),
@@ -146,7 +149,7 @@ function CertificateDialog({
         <label style={uploadLabelStyle}>
           <Upload size={20} color="var(--text-muted)" />
           <span style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-            {isBulk ? "Arrastra los archivos o hacé click para elegirlos" : "Arrastra el archivo o hacé click para elegirlo"}
+            {isBulk ? "Arrastra los archivos o haz clic para elegirlos" : "Arrastra el archivo o haz clic para elegirlo"}
           </span>
           <input type="file" multiple={isBulk} accept=".pdf" style={{ display: "none" }} onChange={(event) => onFiles(Array.from(event.target.files ?? []))} />
         </label>
@@ -164,7 +167,7 @@ function CertificateDialog({
 }
 
 export default function AdminEnrollments() {
-  const { loading, courses, users, enrollments, addEnrollment, completeEnrollment, completeEnrollmentsBulk, markCertificateAvailable } = useAdminData();
+  const { loading, courses, users, enrollments } = useAdminData();
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -225,22 +228,18 @@ export default function AdminEnrollments() {
       toast({ title: "Ese alumno ya está inscrito en el curso.", variant: "error" });
       return;
     }
-    if (persistedEnrollments) {
-      const response = await fetch("/api/admin/enrollments", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ userId: selectedUser, courseId: selectedCourse, source: source === "externa" ? "external" : "internal" }),
-      });
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        toast({ title: payload?.error ?? "No fue posible registrar la inscripción.", variant: "error" });
-        return;
-      }
-      const payload = await response.json() as { enrollment: PersistedEnrollment };
-      setPersistedEnrollments(prev => [...(prev ?? []), enrollmentFromRow(payload.enrollment, users, courses)]);
-    } else {
-      addEnrollment(selectedUser, selectedCourse, source);
+    const response = await fetch("/api/admin/enrollments", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ userId: selectedUser, courseId: selectedCourse, source: source === "externa" ? "external" : "internal" }),
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      toast({ title: payload?.error ?? "No fue posible registrar la inscripción.", variant: "error" });
+      return;
     }
+    const payload = await response.json() as { enrollment: PersistedEnrollment };
+    setPersistedEnrollments((previous) => [...(previous ?? displayedEnrollments), enrollmentFromRow(payload.enrollment, availableUsers, availableCourses)]);
     toast({ title: "Inscripción registrada.", variant: "success" });
     setSelectedUser("");
     setSelectedCourse("");
@@ -276,24 +275,20 @@ export default function AdminEnrollments() {
 
   const confirmCertificates = async (files: File[]) => {
     if (certificateTarget.length > 1) {
-      if (persistedEnrollments) {
-        if (files.length !== certificateTarget.length) { toast({ title: "Selecciona un PDF por inscripción.", variant: "error" }); return; }
-        const responses = await Promise.all(certificateTarget.map((e, index) => { const form = new FormData(); form.set("file", files[index]); return fetch(`/api/admin/enrollments/${e.id}/certificate`, { method: "POST", body: form }); }));
-        if (responses.some(response => !response.ok)) {
-          toast({ title: "No fue posible actualizar todas las inscripciones.", variant: "error" });
-          return;
-        }
-        setPersistedEnrollments(prev => (prev ?? []).map(e => certificateTarget.some(target => target.id === e.id) ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
-      } else completeEnrollmentsBulk(certificateTarget.map(e => e.id));
+      if (files.length !== certificateTarget.length) { toast({ title: "Selecciona un PDF por inscripción.", variant: "error" }); return; }
+      const responses = await Promise.all(certificateTarget.map((e, index) => { const form = new FormData(); form.set("file", files[index]); return fetch(`/api/admin/enrollments/${e.id}/certificate`, { method: "POST", body: form }); }));
+      if (responses.some(response => !response.ok)) {
+        toast({ title: "No fue posible actualizar todas las inscripciones.", variant: "error" });
+        return;
+      }
+      setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => certificateTarget.some(target => target.id === e.id) ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
       toast({ title: `${certificateTarget.length} constancias cargadas.`, variant: "success" });
     } else if (certificateTarget[0]) {
-      if (persistedEnrollments) {
-        if (files.length !== 1) { toast({ title: "Selecciona un PDF.", variant: "error" }); return; }
-        const form = new FormData(); form.set("file", files[0]);
-        const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}/certificate`, { method: "POST", body: form });
-        if (!response.ok) { toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }); return; }
-        setPersistedEnrollments(prev => (prev ?? []).map(e => e.id === certificateTarget[0]?.id ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
-      } else completeEnrollment(certificateTarget[0].id, "constancia");
+      if (files.length !== 1) { toast({ title: "Selecciona un PDF.", variant: "error" }); return; }
+      const form = new FormData(); form.set("file", files[0]);
+      const response = await fetch(`/api/admin/enrollments/${certificateTarget[0].id}/certificate`, { method: "POST", body: form });
+      if (!response.ok) { toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }); return; }
+      setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => e.id === certificateTarget[0]?.id ? { ...e, status: "realizado", certificateStatus: "pendiente" } : e));
       toast({ title: isReplace ? "Constancia reemplazada." : "Constancia cargada.", variant: "success" });
     }
     setSelectedIds([]);
@@ -418,7 +413,7 @@ export default function AdminEnrollments() {
             { key: "course", header: "Curso", cell: (e) => <span className="admin-cell-truncate admin-cell-muted" title={e.courseName}>{e.courseName}</span> },
             { key: "source", header: "Origen", cell: (e) => <SourceBadge source={e.source} /> },
             { key: "status", header: "Estado", cell: (e) => <StatusCell enrollment={e} /> },
-            { key: "date", header: "Fecha", mobileLabel: "Inscrito el", cell: (e) => <span className="admin-cell-muted">{e.enrolledAt}</span> },
+            { key: "date", header: "Fecha", mobileLabel: "Inscrito el", cell: (e) => <span className="admin-cell-muted">{formatAdminDate(e.enrolledAt)}</span> },
           ]}
           actions={(e) => (
             <>
@@ -440,11 +435,11 @@ export default function AdminEnrollments() {
                 <>
                   {e.certificateStatus === "pendiente" && (
                     <Button type="button" variant="ghost" size="sm" onClick={async () => {
-                      if (persistedEnrollments && e.certificateId) {
+                      if (e.certificateId) {
                         const response = await fetch(`/api/admin/certificates/${e.certificateId}`, { method: "PATCH" });
                         if (!response.ok) { toast({ title: "Primero carga la constancia.", variant: "error" }); return; }
-                        setPersistedEnrollments(prev => (prev ?? []).map(item => item.id === e.id ? { ...item, certificateStatus: "disponible" } : item));
-                      } else markCertificateAvailable(e.id);
+                        setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(item => item.id === e.id ? { ...item, certificateStatus: "disponible" } : item));
+                      } else { toast({ title: "Primero carga la constancia.", variant: "error" }); return; }
                       toast({ title: "Constancia publicada.", variant: "success" });
                     }}>
                       <CheckCircle2 size={12} /> Marcar disponible
@@ -496,21 +491,17 @@ export default function AdminEnrollments() {
         confirmLabel="Marcar realizado"
         onClose={() => setManualTarget(null)}
         onConfirm={() => {
-          if (manualTarget) {
-            if (persistedEnrollments) {
-              fetch(`/api/admin/enrollments/${manualTarget.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })
+          const target = manualTarget;
+          setManualTarget(null);
+          if (target) {
+              fetch(`/api/admin/enrollments/${target.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "completed" }) })
                 .then(async response => {
                   if (!response.ok) throw new Error("No fue posible actualizar la inscripción");
-                  setPersistedEnrollments(prev => (prev ?? []).map(e => e.id === manualTarget.id ? { ...e, status: "realizado" } : e));
+                  setPersistedEnrollments((previous) => (previous ?? displayedEnrollments).map(e => e.id === target.id ? { ...e, status: "realizado" } : e));
                   toast({ title: "Curso marcado como realizado.", variant: "success" });
                 })
                 .catch(() => toast({ title: "No fue posible actualizar la inscripción.", variant: "error" }));
-            } else {
-              completeEnrollment(manualTarget.id, "manual");
-              toast({ title: "Curso marcado como realizado.", variant: "success" });
-            }
           }
-          setManualTarget(null);
         }}
       />
     </div>

@@ -20,9 +20,10 @@ type TestimonialForm = {
   quote: string;
   courseId: string;
   avatarUrl: string;
+  consentReference: string;
 };
 
-const emptyForm = (): TestimonialForm => ({ authorName: "", authorRole: "", quote: "", courseId: "", avatarUrl: "" });
+const emptyForm = (): TestimonialForm => ({ authorName: "", authorRole: "", quote: "", courseId: "", avatarUrl: "", consentReference: "" });
 
 const fieldGridStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "1rem" };
 const noteStyle: React.CSSProperties = { margin: "0 0 1.25rem", padding: "0.625rem 0.875rem", fontSize: "0.8125rem", lineHeight: 1.5, color: "var(--text-muted)", background: "var(--paper)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)" };
@@ -43,6 +44,7 @@ export default function AdminTestimonials() {
   const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [submitting, setSubmitting] = useState(false);
 
   const courseTitle = (id?: string) => (id ? courses.find((c) => c.id === id)?.title ?? "—" : "—");
 
@@ -68,7 +70,7 @@ export default function AdminTestimonials() {
     if (isDirty) { setShowForm(false); setDiscardOpen(true); } else { closeForm(); }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
       authorName: form.authorName.trim(),
@@ -76,25 +78,33 @@ export default function AdminTestimonials() {
       quote: form.quote.trim(),
       courseId: form.courseId || undefined,
       avatarUrl: form.avatarUrl.trim() || undefined,
+      consentReference: form.consentReference.trim() || undefined,
     };
-    if (!payload.authorName || !payload.authorRole || !payload.quote) {
-      toast({ title: "Completa autor, rol y testimonio.", variant: "error" });
+    if (!payload.authorName || !payload.authorRole || !payload.quote || !payload.consentReference) {
+      toast({ title: "Completa autor, rol, testimonio y consentimiento.", variant: "error" });
       return;
     }
-    if (editing) {
-      updateTestimonial(editing, payload);
-      toast({ title: "Cambios guardados.", variant: "success" });
-    } else {
-      addTestimonial({ ...payload, active: true });
-      toast({ title: "Testimonio creado.", variant: "success" });
+    setSubmitting(true);
+    try {
+      if (editing) {
+        await updateTestimonial(editing, payload);
+        toast({ title: "Cambios guardados.", variant: "success" });
+      } else {
+        await addTestimonial({ ...payload, active: true });
+        toast({ title: "Testimonio creado.", variant: "success" });
+      }
+      closeForm();
+    } catch (cause) {
+      toast({ title: cause instanceof Error ? cause.message : "No fue posible guardar el testimonio.", variant: "error" });
+    } finally {
+      setSubmitting(false);
     }
-    closeForm();
   };
 
   const startEdit = (t: Testimonial) => {
     const next: TestimonialForm = {
       authorName: t.authorName, authorRole: t.authorRole, quote: t.quote,
-      courseId: t.courseId ?? "", avatarUrl: t.avatarUrl ?? "",
+      courseId: t.courseId ?? "", avatarUrl: t.avatarUrl ?? "", consentReference: t.consentReference ?? "",
     };
     setEditing(t.id);
     setForm(next);
@@ -162,10 +172,11 @@ export default function AdminTestimonials() {
                 </select>
               )}</Field>
               <Field label="URL del avatar (opcional)">{(id) => <input id={id} value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} placeholder="https://..." className="admin-input" />}</Field>
+              <Field label="Referencia de consentimiento">{(id) => <input id={id} required value={form.consentReference} onChange={(e) => setForm({ ...form, consentReference: e.target.value })} placeholder="Folio, correo o documento autorizado" className="admin-input" />}</Field>
             </div>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
-              <Button type="button" onClick={requestClose}>Cancelar</Button>
-              <Button type="submit" variant="primary">{editing ? "Guardar cambios" : "Crear testimonio"}</Button>
+              <Button type="button" onClick={requestClose} disabled={submitting}>Cancelar</Button>
+              <Button type="submit" variant="primary" disabled={submitting}>{submitting ? "Guardando…" : editing ? "Guardar cambios" : "Crear testimonio"}</Button>
             </div>
           </form>
         </DialogContent>
@@ -193,7 +204,7 @@ export default function AdminTestimonials() {
             {
               key: "status", header: "Estado",
               cell: (t) => (
-                <button type="button" onClick={() => toggleTestimonial(t.id)}
+                <button type="button" onClick={() => void toggleTestimonial(t.id).catch((cause) => toast({ title: cause instanceof Error ? cause.message : "No fue posible cambiar el estado.", variant: "error" }))}
                   aria-label={`Cambiar estado de testimonio de ${t.authorName}; actualmente ${t.active ? "activo" : "inactivo"}`}
                   style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
                   <Badge variant={t.active ? "default" : "secondary"}>{t.active ? "Activo" : "Inactivo"}</Badge>
@@ -236,8 +247,11 @@ export default function AdminTestimonials() {
         destructive
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
-          if (deleteTarget) { deleteTestimonial(deleteTarget.id); toast({ title: "Testimonio eliminado.", variant: "success" }); }
+          const target = deleteTarget;
           setDeleteTarget(null);
+          if (target) void deleteTestimonial(target.id)
+            .then(() => toast({ title: "Testimonio eliminado.", variant: "success" }))
+            .catch((cause) => toast({ title: cause instanceof Error ? cause.message : "No fue posible eliminar el testimonio.", variant: "error" }));
         }}
       />
     </div>

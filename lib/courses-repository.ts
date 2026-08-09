@@ -85,3 +85,66 @@ export function mapCourseInput(input: ReturnType<typeof validateCourseInput>): D
     currency: input.currency ?? "MXN", content_status: input.contentStatus ?? "fixture", is_active: input.isActive ?? false,
   };
 }
+
+type SyllabusJson = Database["public"]["Tables"]["courses"]["Insert"]["syllabus"];
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+// Partial edit contract. Only the keys the admin actually sends are validated
+// and mapped, so an update never clobbers unsent columns (content_status,
+// is_active, description, the structured syllabus, etc.).
+export function validateCoursePatch(raw: unknown): Partial<CourseInput> {
+  const input = (isObject(raw) ? raw : {}) as Partial<CourseInput>;
+  const out: Partial<CourseInput> = {};
+  if (input.slug !== undefined) {
+    const slug = String(input.slug).trim().toLowerCase();
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error("Slug inválido");
+    out.slug = slug;
+  }
+  if (input.title !== undefined) {
+    if (!String(input.title).trim()) throw new Error("Título requerido");
+    out.title = String(input.title).trim();
+  }
+  if (input.shortDescription !== undefined) {
+    if (!String(input.shortDescription).trim()) throw new Error("Descripción requerida");
+    out.shortDescription = String(input.shortDescription).trim();
+  }
+  if (input.priceCents !== undefined) {
+    if (!Number.isInteger(input.priceCents) || input.priceCents < 0) throw new Error("Precio inválido");
+    out.priceCents = input.priceCents;
+  }
+  if (input.modality !== undefined) {
+    if (!["online", "presencial"].includes(input.modality)) throw new Error("Modalidad inválida");
+    out.modality = input.modality;
+  }
+  if (input.contentStatus !== undefined && !["fixture", "verified"].includes(input.contentStatus)) throw new Error("Estado editorial inválido");
+  if (input.isActive !== undefined && typeof input.isActive !== "boolean") throw new Error("Visibilidad inválida");
+  for (const key of ["description", "durationHours", "audience", "syllabus", "location", "startsAt", "enrollmentLink", "currency", "contentStatus", "isActive"] as const) {
+    if (input[key] !== undefined) Object.assign(out, { [key]: input[key] });
+  }
+  return out;
+}
+
+export function mapCoursePatch(input: Partial<CourseInput>, existingSyllabus: unknown): Database["public"]["Tables"]["courses"]["Update"] {
+  const update: Database["public"]["Tables"]["courses"]["Update"] = {};
+  if (input.slug !== undefined) update.slug = input.slug;
+  if (input.title !== undefined) update.title = input.title;
+  if (input.shortDescription !== undefined) update.short_description = input.shortDescription;
+  if (input.description !== undefined) update.description = input.description ?? null;
+  if (input.durationHours !== undefined) update.duration_hours = input.durationHours ?? null;
+  if (input.audience !== undefined) update.audience = input.audience ?? null;
+  if (input.modality !== undefined) update.modality = input.modality === "presencial" ? "in_person" : "online";
+  if (input.location !== undefined) update.location = input.location ?? null;
+  if (input.startsAt !== undefined) update.starts_at = input.startsAt ?? null;
+  if (input.enrollmentLink !== undefined) update.enrollment_link = input.enrollmentLink ?? null;
+  if (input.priceCents !== undefined) update.price_cents = input.priceCents;
+  if (input.currency !== undefined) update.currency = input.currency ?? "MXN";
+  if (input.contentStatus !== undefined) update.content_status = input.contentStatus;
+  if (input.isActive !== undefined) update.is_active = input.isActive;
+  if (input.syllabus !== undefined) {
+    update.syllabus = isObject(input.syllabus)
+      ? ({ ...(isObject(existingSyllabus) ? existingSyllabus : {}), ...input.syllabus } as SyllabusJson)
+      : (input.syllabus as SyllabusJson);
+  }
+  return update;
+}

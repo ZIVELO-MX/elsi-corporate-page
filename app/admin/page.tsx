@@ -5,6 +5,7 @@ import { BookOpen, Users, ClipboardList, Receipt } from "lucide-react";
 import { useAdminData } from "@/lib/admin-data";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatAdminDate, formatAdminMoney, newestFirst } from "@/lib/admin-format";
 
 const panelStyle: React.CSSProperties = { padding: "1.25rem", background: "var(--card)", borderRadius: "var(--radius)", border: "1px solid var(--border)" };
 
@@ -19,7 +20,7 @@ export default function AdminDashboard() {
     { label: "Cursos activos", value: activeCourses.length, sub: `${courses.length} totales`, href: "/admin/cursos", Icon: BookOpen },
     { label: "Usuarios registrados", value: users.length, sub: `${users.filter((u) => u.role === "admin").length} administradores`, href: "/admin/usuarios", Icon: Users },
     { label: "Inscripciones", value: enrollments.length, sub: `${users.filter((u) => u.enrolledCourses > 0).length} usuarios con cursos`, href: "/admin/inscripciones", Icon: ClipboardList },
-    { label: "Ventas registradas", value: sales.length, sub: totalRevenue > 0 ? `$${totalRevenue.toFixed(2)} total` : "Gratis por ahora", href: "/admin/ventas", Icon: Receipt },
+    { label: "Ventas registradas", value: sales.length, sub: `${formatAdminMoney(totalRevenue)} total`, href: "/admin/ventas", Icon: Receipt },
   ];
 
   // "Needs attention": real derived counts of work waiting on the admin.
@@ -32,8 +33,8 @@ export default function AdminDashboard() {
     { n: draftCourses, label: "Cursos en borrador", sub: "Inactivos o incompletos", href: "/admin/cursos" },
   ];
 
-  const recentCourses = courses.slice(0, 4);
-  const recentEnrollments = enrollments.slice(-4).reverse();
+  const recentCourses = newestFirst(courses, (course) => course.createdAt).slice(0, 4);
+  const recentEnrollments = newestFirst(enrollments, (enrollment) => enrollment.enrolledAt).slice(0, 4);
 
   return (
     <div>
@@ -108,9 +109,7 @@ export default function AdminDashboard() {
               ) : recentCourses.map((c) => (
                 <div key={c.id} className="admin-panel-row">
                   <span style={{ fontSize: "0.8125rem", fontWeight: 500 }}>{c.title}</span>
-                  <Badge variant={c.status === "active" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>
-                    {c.status === "active" ? "Activo" : "Inactivo"}
-                  </Badge>
+                  <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><small style={{ color: "var(--text-muted)" }}>{formatAdminDate(c.createdAt)}</small><Badge variant={c.status === "active" ? "default" : "secondary"} style={{ fontSize: "0.75rem" }}>{c.status === "active" ? "Activo" : "Inactivo"}</Badge></span>
                 </div>
               ))}
             </div>
@@ -122,6 +121,7 @@ export default function AdminDashboard() {
                 <div key={e.id} className="admin-panel-row" style={{ display: "block" }}>
                   <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500 }}>{e.userName}</p>
                   <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>{e.courseName}</p>
+                  <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: "var(--text-muted)" }}>{formatAdminDate(e.enrolledAt)}</p>
                 </div>
               ))}
             </div>

@@ -30,8 +30,8 @@ test("Cloudflare preview remains CI-gated and isolated from production", async (
     packageJson.scripts["cloudflare:build"],
     "opennextjs-cloudflare build",
   );
-  assert.equal(packageJson.dependencies["@opennextjs/cloudflare"], "1.20.1");
-  assert.equal(packageJson.devDependencies.wrangler, "4.114.0");
+  assert.equal(packageJson.dependencies["@opennextjs/cloudflare"], "1.20.2");
+  assert.equal(packageJson.devDependencies.wrangler, "4.120.0");
 });
 
 test("ELSI preview stays public, non-indexable, and smoke-testable", async () => {

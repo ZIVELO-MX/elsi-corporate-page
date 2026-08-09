@@ -56,11 +56,25 @@ test("course CRUD routes preserve validation, conflict handling, and revalidatio
   assert.match(collection, /mapCourseInput\(input\)/);
   assert.match(collection, /error\.code === "23505"/);
   assert.match(collection, /status: 201/);
-  assert.match(item, /validateCourseInput\(await request\.json\(\)\)/);
-  assert.match(item, /mapCourseInput\(input\)/);
+  // The item route is a partial update so editing never clobbers untouched
+  // metadata (content_status, is_active, structured syllabus).
+  assert.match(item, /validateCoursePatch\(await request\.json\(\)\)/);
+  assert.match(item, /mapCoursePatch\(input, previous\.syllabus\)/);
   assert.match(item, /status: error\.code === "23505" \? 409 : 400/);
   assert.match(item, /update\(\{ is_active: false \}\)/);
   assert.match(item, /revalidateCourseSurfaces\(previous\?\.slug\)/);
+});
+
+test("course patch mapper is partial and merges syllabus without clobbering metadata", async () => {
+  const repo = await read("lib/courses-repository.ts");
+  // Only provided keys are written; unsent columns are never defaulted.
+  assert.match(repo, /export function validateCoursePatch/);
+  assert.match(repo, /export function mapCoursePatch/);
+  assert.match(repo, /if \(input\.contentStatus !== undefined\) update\.content_status = input\.contentStatus;/);
+  assert.match(repo, /if \(input\.isActive !== undefined\) update\.is_active = input\.isActive;/);
+  assert.match(repo, /Estado editorial inválido/);
+  assert.match(repo, /Visibilidad inválida/);
+  assert.match(repo, /\.\.\.\(isObject\(existingSyllabus\) \? existingSyllabus : \{\}\), \.\.\.input\.syllabus/);
 });
 
 test("public course repository uses a request-independent client for build-time params", async () => {
