@@ -26,7 +26,7 @@ Todo clon limpio instala, valida y construye la aplicación con versiones fijada
 
 - [x] Auditar versiones soportadas por Next, React, OpenNext, Wrangler, TypeScript y Node.
 - [x] Sustituir `latest` por versiones exactas y declarar `packageManager`/`engines`.
-- [x] Actualizar Next a la versión estable más reciente publicada (`16.2.7`); `16.2.11` aún no está disponible en el registro configurado.
+- [x] Actualizar Next a `16.2.11`, versión corregida requerida por la auditoría de seguridad de ELS-0072.
 - [x] Regenerar el lockfile desde una instalación limpia y comprobar que no cambia en una segunda instalación.
 - [x] Alinear CI con versión de Node fijada, `pnpm install --frozen-lockfile` y caché segura.
 - [x] Ejecutar lint, tipos, unitarias, build Next y build Cloudflare.
