@@ -15,7 +15,7 @@ test("public wayfinding shares stable labels and active-page semantics", () => {
     assert.match(navigation, new RegExp(`label: "${label}"`));
   }
   assert.match(header, /aria-current=\{isNavigationItemActive/);
-  assert.match(footer, /primaryNavigation\.map/);
+  assert.match(footer, /navigation\.map/);
   assert.match(footer, /aria-current=\{isNavigationItemActive/);
   assert.match(breadcrumbs, /<nav className="breadcrumb" aria-label="Migas de pan">/);
   assert.match(breadcrumbs, /<ol>/);

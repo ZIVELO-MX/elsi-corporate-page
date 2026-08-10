@@ -9,9 +9,16 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, Shield, UserRound, X } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { useAuth } from "@/components/auth-context";
-import { isNavigationItemActive, primaryNavigation } from "@/lib/navigation";
+import {
+  isNavigationItemActive,
+  type PrimaryNavigationItem,
+} from "@/lib/navigation";
 
-export default function Header() {
+export default function Header({
+  navigation,
+}: {
+  navigation: readonly PrimaryNavigationItem[];
+}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -48,7 +55,7 @@ export default function Header() {
           <SafeImage src="/logos/elsi-wordmark.png" alt="ELSI" className="header-logo-img" width={123} height={70} />
         </Link>
         <nav className="header-nav" aria-label="Navegación principal">
-          {primaryNavigation.map(({ href, label }) => (
+          {navigation.map(({ href, label }) => (
             <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined}>{label}</Link>
           ))}
         </nav>
@@ -120,7 +127,7 @@ export default function Header() {
       <div className="mobile-nav-backdrop" data-open={menuOpen} aria-hidden="true" onClick={() => setMenuOpen(false)} />
       <div id="mobile-navigation" ref={menuRef} className="mobile-navigation" data-open={menuOpen} aria-label="Navegación móvil">
         <nav aria-label="Navegación principal móvil">
-          {primaryNavigation.map(({ href, label }) => (
+          {navigation.map(({ href, label }) => (
             <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{label}</Link>
           ))}
         </nav>

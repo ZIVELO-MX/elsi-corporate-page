@@ -3,9 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";
-import { isNavigationItemActive, primaryNavigation } from "@/lib/navigation";
+import {
+  isNavigationItemActive,
+  type PrimaryNavigationItem,
+} from "@/lib/navigation";
 
-export default function Footer() {
+export default function Footer({
+  navigation,
+}: {
+  navigation: readonly PrimaryNavigationItem[];
+}) {
   const pathname = usePathname();
 
   // The admin panel is a self-contained app shell without the marketing footer.
@@ -26,7 +33,7 @@ export default function Footer() {
           </div>
           <nav className="footer-col" aria-label="Navegación del pie">
             <strong>Navegación</strong>
-            {primaryNavigation.map(({ href, label }) => (
+            {navigation.map(({ href, label }) => (
               <Link href={href} key={href} aria-current={isNavigationItemActive(pathname, href) ? "page" : undefined}>{label}</Link>
             ))}
           </nav>

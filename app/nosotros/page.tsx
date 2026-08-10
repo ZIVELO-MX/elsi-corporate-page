@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
@@ -7,18 +8,29 @@ import {
   isAboutContentVerified,
 } from "@/lib/about";
 import { siteImages } from "@/lib/image-assets";
-import { buildMetadata, indexable } from "@/lib/seo";
+import { buildMetadata, buildPrivateMetadata, indexable } from "@/lib/seo";
 import { listPublicContent, sectionText } from "@/lib/content-repository";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 
-export const metadata = buildMetadata({
-  title: "Nosotros",
-  description:
-    "La historia de ELSI: de la iniciativa estudiantil Bee Blue a un instituto de educación y soluciones ambientales.",
-  path: "/nosotros",
-  allowIndexing: indexable && isAboutContentVerified(),
-});
+export async function generateMetadata() {
+  const { aboutEnabled } = await getPublicSectionVisibility();
+  if (!aboutEnabled) {
+    return buildPrivateMetadata({ title: "Nosotros", path: "/nosotros" });
+  }
+
+  return buildMetadata({
+    title: "Nosotros",
+    description:
+      "La historia de ELSI: de la iniciativa estudiantil Bee Blue a un instituto de educación y soluciones ambientales.",
+    path: "/nosotros",
+    allowIndexing: indexable && isAboutContentVerified(),
+  });
+}
 
 export default async function NosotrosPage() {
+  const { aboutEnabled } = await getPublicSectionVisibility();
+  if (!aboutEnabled) notFound();
+
   const persistedContent = await listPublicContent();
   const fixture = getPublicAboutContent();
   const content = fixture

@@ -17,6 +17,7 @@ import {
 } from "@/lib/seo";
 import { buildContactPath } from "@/lib/agentic-navigation";
 import { getPublicSolution, listPublicSolutions } from "@/lib/content-repository";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 
 type SolutionDetailPageProps = {
   params: Promise<{
@@ -25,6 +26,9 @@ type SolutionDetailPageProps = {
 };
 
 export async function generateStaticParams() {
+  const { servicesEnabled } = await getPublicSectionVisibility();
+  if (!servicesEnabled) return [];
+
   const publicSolutions = await listPublicSolutions();
   return publicSolutions.map((solution) => ({
     slug: solution.slug,
@@ -32,7 +36,17 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: SolutionDetailPageProps) {
-  const { slug } = await params;
+  const [{ slug }, { servicesEnabled }] = await Promise.all([
+    params,
+    getPublicSectionVisibility(),
+  ]);
+  if (!servicesEnabled) {
+    return buildPrivateMetadata({
+      title: "Solución no encontrada",
+      path: `/soluciones/${slug}`,
+    });
+  }
+
   const solution = await getPublicSolution(slug);
 
   if (!solution) {
@@ -51,7 +65,12 @@ export async function generateMetadata({ params }: SolutionDetailPageProps) {
 }
 
 export default async function SolutionDetailPage({ params }: SolutionDetailPageProps) {
-  const { slug } = await params;
+  const [{ slug }, { servicesEnabled }] = await Promise.all([
+    params,
+    getPublicSectionVisibility(),
+  ]);
+  if (!servicesEnabled) notFound();
+
   const solution = await getPublicSolution(slug);
 
   if (!solution) {

@@ -3,8 +3,10 @@ import { listPublicCourses } from "@/lib/courses-repository";
 import { listPublicSolutions } from "@/lib/content-repository";
 import { SITE, indexable } from "@/lib/seo";
 import { buildAgentNavigationManifest } from "@/lib/agentic-navigation";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 
 export async function getPublicDiscoveryManifest() {
+  const sectionVisibility = await getPublicSectionVisibility();
   if (!indexable) {
     return buildAgentNavigationManifest({
       siteUrl: SITE.url,
@@ -14,6 +16,7 @@ export async function getPublicDiscoveryManifest() {
       indexingReady: false,
       courses: [],
       solutions: [],
+      sectionVisibility,
     });
   }
 
@@ -42,5 +45,6 @@ export async function getPublicDiscoveryManifest() {
       description: solution.description,
       audience: solution.audience,
     })),
+    sectionVisibility,
   });
 }
