@@ -35,6 +35,18 @@ Este documento concentra decisiones y datos de negocio que no bloquean la implem
 - [ ] Priorizar temas, regiones, competidores y consultas objetivo. La implementación técnica evita canibalización, pero no inventa una estrategia de palabras clave sin evidencia del negocio.
 - [ ] Definir si los crawlers de entrenamiento de IA deben permitirse o bloquearse por separado. La configuración vigente permite rastreo público al pasar el gate, pero nunca expone rutas privadas ni autoriza compras o envíos automáticos.
 
+## Contenido provisional — Nosotros y Servicios/Soluciones
+
+El sitio usa por ahora información institucional y descripciones generales. El panel `Administración → Configuración` permite ocultar cada sección sin borrar su contenido. En la navegación actual, la solicitud de “Servicios” corresponde a `/soluciones` y a sus páginas de detalle.
+
+- [ ] Confirmar si el nombre público definitivo será **Servicios** o **Soluciones**. Si cambia, ajustar etiqueta de navegación, títulos, metadatos, manifiesto agéntico y, solo si el cliente lo aprueba, la URL canónica con su redirección permanente.
+- [ ] Validar para `/nosotros` el nombre legal, año y lugar de origen, relación entre Bee Blue y ELSI, hitos de la cronología, misión, visión y valores. Sustituir cualquier formulación general que no represente la historia oficial.
+- [ ] Entregar integrantes y cargos que puedan publicarse, semblanzas aprobadas, acreditaciones comprobables y fotografías con autorización. No se publican perfiles nominales mientras falten estos datos.
+- [ ] Confirmar para cada servicio el público objetivo, alcance, entregables, modalidad, cobertura geográfica, tiempos estimados, exclusiones, requisitos y responsable comercial.
+- [ ] Entregar evidencia aprobada para respaldar resultados: casos, métricas, certificaciones, alianzas, fotografías y testimonios con consentimiento. El contenido general no afirma resultados no comprobados.
+- [ ] Definir si se mostrarán precios orientativos o si todas las rutas conservarán “Solicitar información” como único siguiente paso.
+- [ ] Confirmar quién puede activar o desactivar estas secciones y el protocolo editorial previo a reactivarlas. El valor inicial es visible para conservar el comportamiento actual.
+
 ## Política de datos durante validaciones
 
 - Los smokes y recorridos Playwright solo pueden crear registros con prefijos temporales identificables de la misión.

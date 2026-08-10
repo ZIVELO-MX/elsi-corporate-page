@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowDown, ArrowRight, Building2, GraduationCap, Sprout, type LucideIcon } from "lucide-react";
 import {
   getPublicSolutions,
@@ -8,12 +9,18 @@ import { solutionImages } from "@/lib/image-assets";
 import { SafeImage } from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { StructuredData } from "@/components/structured-data";
-import { buildMetadata, buildServiceListJsonLd, indexable } from "@/lib/seo";
+import { buildMetadata, buildPrivateMetadata, buildServiceListJsonLd, indexable } from "@/lib/seo";
 import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 
 const solutionsDescription = "Capacitación, soluciones ambientales y educación universitaria: acompañamos a equipos, organizaciones y comunidades.";
 
 export async function generateMetadata() {
+  const { servicesEnabled } = await getPublicSectionVisibility();
+  if (!servicesEnabled) {
+    return buildPrivateMetadata({ title: "Soluciones", path: "/soluciones" });
+  }
+
   const persistedContent = await listPublicContent();
   const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
   return buildMetadata({
@@ -31,6 +38,9 @@ const solutionIcons: Record<Solution["slug"], LucideIcon> = {
 };
 
 export default async function SolucionesPage() {
+  const { servicesEnabled } = await getPublicSectionVisibility();
+  if (!servicesEnabled) notFound();
+
   const persistedContent = await listPublicContent();
   const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
   const introduction = sectionText(persistedContent, "solutions-intro", "Cada capítulo responde a un contexto distinto. Elige entre formación, acompañamiento técnico o experiencias para comunidades universitarias.");

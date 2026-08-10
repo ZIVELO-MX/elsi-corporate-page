@@ -120,6 +120,7 @@ export function buildAgentNavigationManifest({
   indexingReady,
   courses,
   solutions,
+  sectionVisibility = { aboutEnabled: true, servicesEnabled: true },
 }: {
   siteUrl: string;
   name: string;
@@ -128,9 +129,20 @@ export function buildAgentNavigationManifest({
   indexingReady: boolean;
   courses: readonly AgentCourse[];
   solutions: readonly AgentSolution[];
+  sectionVisibility?: {
+    aboutEnabled: boolean;
+    servicesEnabled: boolean;
+  };
 }) {
   const publishedCourses = indexingReady ? courses : [];
-  const publishedSolutions = indexingReady ? solutions : [];
+  const publishedSolutions = indexingReady && sectionVisibility.servicesEnabled ? solutions : [];
+  const routeIsVisible = (href: string) => {
+    if (href === "/nosotros") return sectionVisibility.aboutEnabled;
+    if (href === "/soluciones" || href.startsWith("/soluciones/")) {
+      return sectionVisibility.servicesEnabled;
+    }
+    return true;
+  };
 
   return {
     schemaVersion: AGENT_NAVIGATION_SCHEMA_VERSION,
@@ -150,14 +162,16 @@ export function buildAgentNavigationManifest({
       automaticPurchase: false,
       privateRoutesExcluded: true,
     },
-    navigation: agentPublicRoutes.map((route) => ({
-      ...route,
-      url: absoluteAgentUrl(siteUrl, route.href),
-    })),
-    intents: intentRoutes.map((intent) => ({
-      ...intent,
-      url: absoluteAgentUrl(siteUrl, intent.href),
-    })),
+    navigation: agentPublicRoutes.flatMap((route) =>
+      routeIsVisible(route.href)
+        ? [{ ...route, url: absoluteAgentUrl(siteUrl, route.href) }]
+        : [],
+    ),
+    intents: intentRoutes.flatMap((intent) =>
+      routeIsVisible(intent.href)
+        ? [{ ...intent, url: absoluteAgentUrl(siteUrl, intent.href) }]
+        : [],
+    ),
     actions: agentActions.map((action) => ({
       ...action,
       url: absoluteAgentUrl(siteUrl, action.href),

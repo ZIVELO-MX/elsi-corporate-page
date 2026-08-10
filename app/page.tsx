@@ -18,9 +18,10 @@ import {
   websiteJsonLd,
 } from "@/lib/seo";
 import { intentRoutes } from "@/lib/agentic-navigation";
-import { primaryNavigation } from "@/lib/navigation";
+import { getVisiblePrimaryNavigation } from "@/lib/navigation";
 import { listPublicContent, mapPublicSolutions, sectionText } from "@/lib/content-repository";
 import { listPublicCourses } from "@/lib/courses-repository";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 
 export const metadata = buildMetadata({
   description: "ELSI, Environmental Learning & Solutions Institute. Cursos, capacitación y consultoría ambiental para personas, empresas y universidades en Guanajuato.",
@@ -43,13 +44,17 @@ const homeFaqs = [
 ] as const;
 
 export default async function Home() {
-  const [persistedContent, persistedCourses] = await Promise.all([
+  const [persistedContent, persistedCourses, visibility] = await Promise.all([
     listPublicContent(),
     listPublicCourses(),
+    getPublicSectionVisibility(),
   ]);
   const featuredCourses = (persistedCourses ?? getPublicCourses()).slice(0, 3);
   const [primaryCourse, ...secondaryCourses] = featuredCourses;
-  const publicSolutions = mapPublicSolutions(persistedContent, getPublicSolutions());
+  const publicSolutions = visibility.servicesEnabled
+    ? mapPublicSolutions(persistedContent, getPublicSolutions())
+    : [];
+  const visibleNavigation = getVisiblePrimaryNavigation(visibility);
   const availableIntentRoutes = intentRoutes.filter((intent) => {
     if (intent.href === "/cursos") return featuredCourses.length > 0;
     return publicSolutions.some((solution) => intent.href === `/soluciones/${solution.slug}`);
@@ -64,7 +69,7 @@ export default async function Home() {
         <>
           <StructuredData value={organizationJsonLd} />
           <StructuredData value={websiteJsonLd} />
-          <StructuredData value={buildSiteNavigationJsonLd(primaryNavigation)} />
+          <StructuredData value={buildSiteNavigationJsonLd(visibleNavigation)} />
           <StructuredData value={buildFaqJsonLd(homeFaqs)} />
         </>
       ) : null}
@@ -180,32 +185,34 @@ export default async function Home() {
         </section>
       ) : null}
 
-      <section className="home-story" data-section-label="Home / Historia documental">
-        <div className="shell home-story-grid">
-          <figure className="home-story-media">
-            <SafeImage
-              src={siteImages.story.src}
-              alt={siteImages.story.alt}
-              width={siteImages.story.width}
-              height={siteImages.story.height}
-              sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 48vw, 607px"
-            />
-            <figcaption>Archivo ELSI · Bee Blue, origen estudiantil del instituto.</figcaption>
-          </figure>
+      {visibility.aboutEnabled ? (
+        <section className="home-story" data-section-label="Home / Historia documental">
+          <div className="shell home-story-grid">
+            <figure className="home-story-media">
+              <SafeImage
+                src={siteImages.story.src}
+                alt={siteImages.story.alt}
+                width={siteImages.story.width}
+                height={siteImages.story.height}
+                sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) 48vw, 607px"
+              />
+              <figcaption>Archivo ELSI · Bee Blue, origen estudiantil del instituto.</figcaption>
+            </figure>
 
-          <div className="home-story-copy">
-            <div className="home-story-mark" aria-hidden="true"><Leaf /></div>
-            <p className="home-kicker">Una historia que nace en comunidad</p>
-            <h2>De una iniciativa estudiantil a una práctica ambiental compartida.</h2>
-            <p>
-              {storyText}
-            </p>
-            <Button asChild variant="link" className="home-inline-action">
-              <Link href="/nosotros">Conocer la historia <ArrowRight data-icon="inline-end" /></Link>
-            </Button>
+            <div className="home-story-copy">
+              <div className="home-story-mark" aria-hidden="true"><Leaf /></div>
+              <p className="home-kicker">Una historia que nace en comunidad</p>
+              <h2>De una iniciativa estudiantil a una práctica ambiental compartida.</h2>
+              <p>
+                {storyText}
+              </p>
+              <Button asChild variant="link" className="home-inline-action">
+                <Link href="/nosotros">Conocer la historia <ArrowRight data-icon="inline-end" /></Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {primaryCourse ? (
         <section

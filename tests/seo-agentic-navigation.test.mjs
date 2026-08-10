@@ -69,6 +69,23 @@ test("agent discovery is stable, read-only, and excludes private routes", () => 
   assert.deepEqual(preview.resources, { courses: [], solutions: [] });
 });
 
+test("agent discovery excludes administratively hidden public sections", () => {
+  const manifest = buildAgentNavigationManifest({
+    siteUrl: "https://elsi.example.com",
+    name: "ELSI",
+    description: "Educación y soluciones ambientales.",
+    language: "es-MX",
+    indexingReady: true,
+    courses: [],
+    solutions: [{ slug: "capacitacion", title: "Capacitación", description: "Formación para equipos." }],
+    sectionVisibility: { aboutEnabled: false, servicesEnabled: false },
+  });
+
+  assert.ok(manifest.navigation.every((route) => route.href !== "/nosotros" && route.href !== "/soluciones"));
+  assert.ok(manifest.intents.every((intent) => !intent.href.startsWith("/soluciones/")));
+  assert.deepEqual(manifest.resources.solutions, []);
+});
+
 test("llms text follows the proposed format without claiming privileged actions", () => {
   const manifest = buildAgentNavigationManifest({
     siteUrl: "https://elsi.example.com",
@@ -186,7 +203,7 @@ test("structured data covers search, FAQs, services, and canonical resources", (
   assert.match(seo, /"text\/plain": "\/llms\.txt"/);
   assert.match(seo, /"application\/json": "\/api\/navigation"/);
   assert.match(home, /buildFaqJsonLd\(homeFaqs\)/);
-  assert.match(home, /buildSiteNavigationJsonLd\(primaryNavigation\)/);
+  assert.match(home, /buildSiteNavigationJsonLd\(visibleNavigation\)/);
   assert.match(solutions, /buildServiceListJsonLd\(publicSolutions\)/);
   assert.match(layout, /DISCOVERY_ALTERNATES/);
   assert.match(robots, /host: SITE\.url/);

@@ -6,6 +6,8 @@ import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth-context";
 import { siteConfig } from "@/lib/site-config";
+import { getVisiblePrimaryNavigation } from "@/lib/navigation";
+import { getPublicSectionVisibility } from "@/lib/public-section-settings";
 import {
   DISCOVERY_ALTERNATES,
   SITE,
@@ -71,16 +73,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const visibility = await getPublicSectionVisibility();
+  const navigation = getVisiblePrimaryNavigation(visibility);
+
   return (
     <html lang={SITE.language} className={`${manrope.variable} ${sora.variable}`}>
       <body data-section-labels={siteConfig.sectionLabels ? "true" : undefined}>
         <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
         <AuthProvider>
-          <Header />
+          <Header navigation={navigation} />
           <div id="main-content" className="site-content" tabIndex={-1}>{children}</div>
         </AuthProvider>
-        <Footer />
+        <Footer navigation={navigation} />
         <Toaster />
       </body>
     </html>
