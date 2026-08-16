@@ -20,7 +20,9 @@ test("Home follows one progressive editorial journey without a service carousel"
   }
 
   assert.doesNotMatch(home, /Carousel|servicios\.map|timeline-grid/);
-  assert.match(home, /Explorar soluciones/);
+  assert.match(home, /<Link href="\/cursos">\s*Ver cursos\{" "\}/);
+  assert.match(home, /<Link href="\/soluciones" className="home-text-link">\s*Ver soluciones/);
+  assert.doesNotMatch(home, /Explorar soluciones|Solicitar información/);
   assert.match(home, /Archivo ELSI · Bee Blue/);
 });
 
@@ -47,6 +49,7 @@ test("editorial interactions stay device-aware and preserve system preferences",
   assert.match(styles, /@media \(prefers-contrast: more\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(button, /pointer-fine:hover/);
+  assert.doesNotMatch(button, /pointer-fine:hover:-translate-y/);
   assert.doesNotMatch(styles, /transition:\s*all/);
 });
 

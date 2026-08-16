@@ -9,6 +9,7 @@ test("public wayfinding shares stable labels and active-page semantics", () => {
   const navigation = read("lib/navigation.ts");
   const header = read("components/header.tsx");
   const footer = read("components/footer.tsx");
+  const styles = read("app/globals.css");
   const breadcrumbs = read("components/breadcrumbs.tsx");
 
   for (const label of ["Inicio", "Soluciones", "Cursos", "Nosotros", "Contacto"]) {
@@ -17,9 +18,22 @@ test("public wayfinding shares stable labels and active-page semantics", () => {
   assert.match(header, /aria-current=\{isNavigationItemActive/);
   assert.match(footer, /navigation\.map/);
   assert.match(footer, /aria-current=\{isNavigationItemActive/);
+  assert.doesNotMatch(styles, /\.footer-col a(?:::after|\[aria-current="page"\]::after|:hover::after)/);
   assert.match(breadcrumbs, /<nav className="breadcrumb" aria-label="Migas de pan">/);
   assert.match(breadcrumbs, /<ol>/);
   assert.match(breadcrumbs, /aria-current=\{current \? "page"/);
+});
+
+test("home FAQ uses a native exclusive accordion with animated content", () => {
+  const home = read("app/page.tsx");
+  const styles = read("app/globals.css");
+
+  assert.match(home, /<details key=\{item\.question\} className="home-faq-item" name="home-faq">/);
+  assert.match(home, /<div className="home-faq-answer">/);
+  assert.match(styles, /\.home-faq-item\[open\] \.home-faq-answer \{ grid-template-rows: 1fr; opacity: 1; \}/);
+  assert.match(styles, /@supports selector\(details::details-content\) and \(interpolate-size: allow-keywords\)/);
+  assert.match(styles, /\.home-faq-item\[open\]::details-content \{ block-size: auto; opacity: 1; \}/);
+  assert.match(styles, /\.home-faq-item summary::after/);
 });
 
 test("public forms expose field-specific errors and focus the first invalid control", () => {
