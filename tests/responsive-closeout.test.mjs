@@ -31,6 +31,8 @@ test("home FAQ uses a native exclusive accordion with animated content", () => {
   assert.match(home, /<details key=\{item\.question\} className="home-faq-item" name="home-faq">/);
   assert.match(home, /<div className="home-faq-answer">/);
   assert.match(styles, /\.home-faq-item\[open\] \.home-faq-answer \{ grid-template-rows: 1fr; opacity: 1; \}/);
+  assert.match(styles, /@supports selector\(details::details-content\) and \(interpolate-size: allow-keywords\)/);
+  assert.match(styles, /\.home-faq-item\[open\]::details-content \{ block-size: auto; opacity: 1; \}/);
   assert.match(styles, /\.home-faq-item summary::after/);
 });
 

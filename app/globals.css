@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  interpolate-size: allow-keywords;
   --header-height: 78px;
   --primary: #5E979B;
   --primary-rgb: 94, 151, 155;
@@ -593,6 +594,10 @@ body[data-section-labels="true"] section[data-section-label]::before {
 .home-faq-answer { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows var(--motion-med) var(--ease-out), opacity var(--motion-fast) var(--ease-out); }
 .home-faq-item[open] .home-faq-answer { grid-template-rows: 1fr; opacity: 1; }
 .home-faq-answer > p { min-height: 0; overflow: hidden; margin: 0 0 1.5rem; padding-right: 2.25rem; color: var(--text-muted); font-size: .9rem; line-height: 1.7; }
+@supports selector(details::details-content) and (interpolate-size: allow-keywords) {
+  .home-faq-item::details-content { block-size: 0; overflow: clip; opacity: 0; transition: block-size var(--motion-med) var(--ease-out), content-visibility var(--motion-med) allow-discrete, opacity var(--motion-fast) var(--ease-out); }
+  .home-faq-item[open]::details-content { block-size: auto; opacity: 1; }
+}
 .home-contact { border-top: 1px solid rgba(255,255,255,.12); }
 
 @media (hover: hover) and (pointer: fine) {
