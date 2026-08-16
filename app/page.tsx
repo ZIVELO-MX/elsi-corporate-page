@@ -273,9 +273,11 @@ export default async function Home() {
           </header>
           <div className="home-faq-list">
             {homeFaqs.map((item) => (
-              <details key={item.question} className="home-faq-item">
+              <details key={item.question} className="home-faq-item" name="home-faq">
                 <summary>{item.question}</summary>
-                <p>{item.answer}</p>
+                <div className="home-faq-answer">
+                  <p>{item.answer}</p>
+                </div>
               </details>
             ))}
           </div>
