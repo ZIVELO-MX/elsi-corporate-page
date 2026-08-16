@@ -49,6 +49,7 @@ test("editorial interactions stay device-aware and preserve system preferences",
   assert.match(styles, /@media \(prefers-contrast: more\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(button, /pointer-fine:hover/);
+  assert.doesNotMatch(button, /pointer-fine:hover:-translate-y/);
   assert.doesNotMatch(styles, /transition:\s*all/);
 });
 
