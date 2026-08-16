@@ -94,20 +94,14 @@ export default async function Home() {
             </p>
             <div className="home-hero-actions">
               <Button asChild variant="inverse" size="lg">
-                <Link
-                  href={
-                    publicSolutions.length > 0 ? "/soluciones" : "/contacto"
-                  }
-                >
-                  {publicSolutions.length > 0
-                    ? "Explorar soluciones"
-                    : "Solicitar información"}{" "}
+                <Link href="/cursos">
+                  Ver cursos{" "}
                   <ArrowRight data-icon="inline-end" />
                 </Link>
               </Button>
-              {featuredCourses.length > 0 ? (
-                <Link href="/cursos" className="home-text-link">
-                  Ver cursos
+              {publicSolutions.length > 0 ? (
+                <Link href="/soluciones" className="home-text-link">
+                  Ver soluciones
                 </Link>
               ) : null}
             </div>
