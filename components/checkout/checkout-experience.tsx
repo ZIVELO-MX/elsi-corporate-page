@@ -542,7 +542,7 @@ function StripePaymentElement({
       paymentElement?.unmount?.();
       paymentElement?.destroy?.();
     };
-  }, [clientSecret, onConfirmReady, scriptReady]);
+  }, [buyerEmail, clientSecret, onConfirmReady, scriptReady]);
 
   return (
     <div className={styles.providerPlaceholder}>
