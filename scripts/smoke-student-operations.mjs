@@ -65,7 +65,7 @@ async function main() {
 
   try {
     const studentA = await createUser("student-a", emails.studentA);
-    const studentB = await createUser("student-b", emails.studentB);
+    await createUser("student-b", emails.studentB);
     const adminUser = await createUser("admin", emails.admin);
     await expectOk("asignar rol admin", await admin.from("profiles").update({ role: "admin" }).eq("id", adminUser.id));
 

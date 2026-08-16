@@ -23,14 +23,6 @@ type OutboxEvent = {
   attempts: number;
 };
 
-type Lead = {
-  id: string;
-  full_name: string;
-  email: string;
-  company: string | null;
-  message: string;
-};
-
 type EnrollmentContext = {
   recipientName: string;
   recipientEmail: string;
