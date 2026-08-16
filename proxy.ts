@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabasePublicConfig } from "@/lib/supabase/env";
 import { safeRedirectPath } from "@/lib/supabase/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const config = getSupabasePublicConfig();
   if (!config) return NextResponse.next();
 

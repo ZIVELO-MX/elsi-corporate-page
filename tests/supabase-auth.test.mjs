@@ -16,13 +16,13 @@ test("auth API uses Supabase Auth when configured and keeps prototype fallback",
   assert.match(session, /getUser/);
 });
 
-test("auth callback rejects open redirects and middleware protects server routes", async () => {
-  const [auth, middleware] = await Promise.all([read("lib/supabase/auth.ts"), read("middleware.ts")]);
+test("auth callback rejects open redirects and proxy protects server routes", async () => {
+  const [auth, proxy] = await Promise.all([read("lib/supabase/auth.ts"), read("proxy.ts")]);
   assert.match(auth, /startsWith\("\/\/"\)/);
   assert.match(auth, /safeRedirectPath/);
-  assert.match(middleware, /getUser/);
-  assert.match(middleware, /profiles/);
-  assert.match(middleware, /\/admin/);
+  assert.match(proxy, /getUser/);
+  assert.match(proxy, /profiles/);
+  assert.match(proxy, /\/admin/);
 });
 
 test("service-role key is never referenced by client auth context", async () => {
