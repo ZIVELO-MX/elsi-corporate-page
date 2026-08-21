@@ -17,15 +17,23 @@ test("auth API uses Supabase Auth when configured and keeps prototype fallback",
 });
 
 test("auth callback rejects open redirects and proxy protects server routes", async () => {
-  const [auth, proxy] = await Promise.all([read("lib/supabase/auth.ts"), read("proxy.ts")]);
+  const [auth, proxy, callback] = await Promise.all([read("lib/supabase/auth.ts"), read("proxy.ts"), read("app/auth/callback/route.ts")]);
   assert.match(auth, /startsWith\("\/\/"\)/);
   assert.match(auth, /safeRedirectPath/);
   assert.match(proxy, /getUser/);
   assert.match(proxy, /profiles/);
   assert.match(proxy, /\/admin/);
+  assert.match(callback, /exchangeCodeForSession\(code\)/);
+  assert.match(callback, /oauth_callback/);
 });
 
 test("service-role key is never referenced by client auth context", async () => {
   const source = await read("components/auth-context.tsx");
   assert.doesNotMatch(source, /SERVICE_ROLE|service.?role/i);
+});
+
+test("login gives a safe retry message when the OAuth callback cannot create a session", async () => {
+  const source = await read("app/login/page.tsx");
+  assert.match(source, /oauth_callback/);
+  assert.match(source, /No pudimos completar el inicio de sesión con Google/);
 });

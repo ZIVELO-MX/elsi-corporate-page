@@ -9,7 +9,11 @@ export async function GET(request: Request) {
   const next = safeRedirectPath(url.searchParams.get("next"), "/");
   if (hasSupabasePublicConfig() && code) {
     const supabase = await requireSupabaseServerClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) return NextResponse.redirect(new URL(next, url.origin));
   }
-  return NextResponse.redirect(new URL(next, url.origin));
+
+  // Do not send a failed or missing authorization code through protected routes.
+  // The detailed provider error stays server-side; the user gets a safe retry path.
+  return NextResponse.redirect(new URL("/login?error=oauth_callback", url.origin));
 }

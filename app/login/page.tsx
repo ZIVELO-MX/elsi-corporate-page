@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-context";
 import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,12 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<LoginErrors>({});
   const [formError, setFormError] = useState("");
   const [invalidCredentials, setInvalidCredentials] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "oauth_callback") {
+      setFormError("No pudimos completar el inicio de sesión con Google. Intenta de nuevo.");
+    }
+  }, []);
 
   const updateFieldError = (field: LoginField, value: string) => {
     setErrors((current) => ({ ...current, [field]: validateLoginField(field, value) }));

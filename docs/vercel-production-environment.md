@@ -41,15 +41,24 @@ debe comenzar con `NEXT_PUBLIC_`.
 
 Mientras el sitio viva en Vercel, `NEXT_PUBLIC_PROTOTYPE_MODE=1` mantiene robots,
 sitemap y metadatos fuera de buscadores. Cuando el cliente habilite
-`elsyacademy.me`, cambiar y volver a desplegar:
+`www.elsyacademy.me`, cambiar y volver a desplegar:
 
 ```dotenv
 NEXT_PUBLIC_PROTOTYPE_MODE=0
 NEXT_PUBLIC_CONTENT_STATUS=verified
-NEXT_PUBLIC_SITE_URL=https://elsyacademy.me
+NEXT_PUBLIC_SITE_URL=https://www.elsyacademy.me
 ```
 
-También deben actualizarse en Supabase Auth el Site URL y los redirect URLs.
+También deben actualizarse en Supabase Auth el Site URL y los redirect URLs:
+
+```text
+Site URL:      https://www.elsyacademy.me
+Redirect URL:  https://www.elsyacademy.me/auth/callback
+```
+
+En Google Auth Platform el origen autorizado es `https://www.elsyacademy.me`.
+El redirect URI autorizado debe ser el callback del proyecto Supabase, no el de
+la aplicación: `https://<project-ref>.supabase.co/auth/v1/callback`.
 
 ## Preview de branches
 
