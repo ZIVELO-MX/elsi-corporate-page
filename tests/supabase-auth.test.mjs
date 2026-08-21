@@ -24,7 +24,7 @@ test("auth callback rejects open redirects and proxy protects server routes", as
   assert.match(proxy, /profiles/);
   assert.match(proxy, /\/admin/);
   assert.match(callback, /exchangeCodeForSession\(code\)/);
-  assert.match(callback, /oauth_callback/);
+  assert.match(callback, /auth-code-error/);
 });
 
 test("service-role key is never referenced by client auth context", async () => {
@@ -32,8 +32,8 @@ test("service-role key is never referenced by client auth context", async () => 
   assert.doesNotMatch(source, /SERVICE_ROLE|service.?role/i);
 });
 
-test("login gives a safe retry message when the OAuth callback cannot create a session", async () => {
-  const source = await read("app/login/page.tsx");
-  assert.match(source, /oauth_callback/);
-  assert.match(source, /No pudimos completar el inicio de sesión con Google/);
+test("OAuth callback exposes a safe retry screen when it cannot create a session", async () => {
+  const source = await read("app/auth/auth-code-error/page.tsx");
+  assert.match(source, /No pudimos iniciar sesión/);
+  assert.match(source, /Volver a iniciar sesión/);
 });

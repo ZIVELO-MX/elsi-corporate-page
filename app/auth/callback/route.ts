@@ -15,5 +15,5 @@ export async function GET(request: Request) {
 
   // Do not send a failed or missing authorization code through protected routes.
   // The detailed provider error stays server-side; the user gets a safe retry path.
-  return NextResponse.redirect(new URL("/login?error=oauth_callback", url.origin));
+  return NextResponse.redirect(new URL("/auth/auth-code-error", url.origin));
 }
