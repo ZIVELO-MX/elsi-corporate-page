@@ -19,6 +19,19 @@ test("authenticated header exposes an accessible role-aware user menu", () => {
   assert.match(header, /onSelect=\{\(\) => void handleLogout\(\)\}/);
 });
 
+test("logout always replaces account history with the public home page", () => {
+  const auth = read("components/auth-context.tsx");
+  const header = read("components/header.tsx");
+  const profile = read("app/profile/page.tsx");
+  const admin = read("components/admin-shell.tsx");
+
+  assert.match(auth, /useRouter/);
+  assert.match(auth, /router\.replace\("\/"\)/);
+  assert.doesNotMatch(header, /router\.push\("\/login"\)/);
+  assert.match(profile, /onClick=\{logout\}/);
+  assert.match(admin, /onClick=\{logout\}/);
+});
+
 test("user menu motion stays anchored, symmetric, and reduced-motion safe", () => {
   const styles = read("app/globals.css");
 
