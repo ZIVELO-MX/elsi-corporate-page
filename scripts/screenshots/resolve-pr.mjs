@@ -6,7 +6,7 @@ const MISSION_LINE =
 const SCREENSHOTS_REQUIRED = /^\s*-\s*\[x\]\s+Requiere capturas\s*$/gimu;
 const SCREENSHOTS_NOT_REQUIRED = /^\s*-\s*\[x\]\s+No requiere capturas\s*$/gimu;
 const PROFILE_LINE =
-  /^\s*(?:Perfil(?:es)?|Perfil\(es\)) de capturas:\s*(.*?)\s*$/gimu;
+  /^[ \t]*(?:Perfil(?:es)?|Perfil\(es\)) de capturas:[ \t]*([^\r\n]*)[ \t]*$/gimu;
 const KNOWN_PROFILES = new Set(["public", "account", "admin"]);
 
 // HTML comments in the PR template (field hints, placeholders) are guidance, not

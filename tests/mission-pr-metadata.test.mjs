@@ -59,6 +59,15 @@ test("skips expected non-screenshot scenarios", () => {
       reason: "Screenshots explicitly marked as not required",
     },
   );
+  assert.deepEqual(
+    resolvePrMetadata(
+      "Misión ID: ELS-0027\n- [x] No requiere capturas\nPerfil(es) de capturas:\n\n## Validación",
+    ),
+    {
+      skip: true,
+      reason: "Screenshots explicitly marked as not required",
+    },
+  );
 });
 
 test("requires a mission, one decision, and at least one profile", () => {
