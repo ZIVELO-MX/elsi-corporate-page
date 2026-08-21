@@ -414,7 +414,7 @@ function AccountSection({ user }: { user: User }) {
 /* --- Page --- */
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, requestLogout } = useAuth();
   const [data, setData] = useState<ProfilePayload | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [paymentReturn, setPaymentReturn] = useState<PaymentReturnFeedback>({ status: "idle" });
@@ -546,7 +546,7 @@ export default function ProfilePage() {
           {user.role === "admin" && (
             <Link href="/admin" className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Panel admin</Link>
           )}
-          <button type="button" onClick={logout} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cerrar sesión</button>
+          <button type="button" onClick={requestLogout} className={`${styles.control} inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] px-3 text-[12px] font-bold text-[var(--text)] pointer-fine:hover:bg-[var(--paper-warm)]`}>Cerrar sesión</button>
         </div>
       </header>
 

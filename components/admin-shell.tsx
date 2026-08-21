@@ -23,7 +23,7 @@ const NAV_ITEMS = [
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, requestLogout } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -155,7 +155,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 <p className="admin-sidebar-user-email">{user.email}</p>
               </div>
             </div>
-            <button type="button" onClick={logout} className="admin-logout-btn">
+            <button type="button" onClick={requestLogout} className="admin-logout-btn">
               Cerrar sesión
             </button>
           </div>

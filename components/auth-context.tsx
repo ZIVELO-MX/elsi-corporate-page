@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export type User = {
   id: string;
@@ -17,7 +18,7 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, phone: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  requestLogout: () => void;
   updateUser: (updates: Partial<Pick<User, "name" | "phone">>) => void;
 };
 
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [, startLogoutTransition] = useTransition();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -77,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const logout = useCallback(async () => {
+  const confirmLogout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {
@@ -90,18 +92,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [router, startLogoutTransition]);
 
+  const requestLogout = useCallback(() => {
+    setLogoutConfirmationOpen(true);
+  }, []);
+
   const updateUser = useCallback((updates: Partial<Pick<User, "name" | "phone">>) => {
     setUser((current) => current ? { ...current, ...updates } : current);
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, updateUser }),
-    [user, loading, login, register, logout, updateUser],
+    () => ({ user, loading, login, register, requestLogout, updateUser }),
+    [user, loading, login, register, requestLogout, updateUser],
   );
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <ConfirmDialog
+        open={logoutConfirmationOpen}
+        title="¿Cerrar sesión?"
+        description="Tendrás que iniciar sesión de nuevo para acceder a tu perfil y cursos."
+        confirmLabel="Cerrar sesión"
+        onClose={() => setLogoutConfirmationOpen(false)}
+        onConfirm={() => {
+          setLogoutConfirmationOpen(false);
+          void confirmLogout();
+        }}
+      />
     </AuthContext.Provider>
   );
 }

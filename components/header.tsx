@@ -19,7 +19,7 @@ export default function Header({
 }: {
   navigation: readonly PrimaryNavigationItem[];
 }) {
-  const { user, logout } = useAuth();
+  const { user, requestLogout } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -36,10 +36,10 @@ export default function Header({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setMenuOpen(false);
     setAccountMenuOpen(false);
-    await logout();
+    requestLogout();
   };
 
   // The admin panel is its own full-height shell with its own navigation.
@@ -101,7 +101,7 @@ export default function Header({
                   <DropdownMenuPrimitive.Separator className="header-user-menu-separator" />
                   <DropdownMenuPrimitive.Item
                     className="header-user-menu-item header-user-menu-logout"
-                    onSelect={() => void handleLogout()}
+                    onSelect={handleLogout}
                   >
                     <LogOut aria-hidden="true" size={16} />
                     Cerrar sesión
@@ -134,7 +134,7 @@ export default function Header({
             <>
               <Link href="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
               {user.role === "admin" ? <Link href="/admin" onClick={() => setMenuOpen(false)}>Panel admin</Link> : null}
-              <button type="button" onClick={() => void handleLogout()}>Cerrar sesión</button>
+              <button type="button" onClick={handleLogout}>Cerrar sesión</button>
             </>
           ) : <Link href="/login" onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>}
           <Link href="/cursos" className="mobile-navigation-cta" onClick={() => setMenuOpen(false)}>Explorar cursos</Link>

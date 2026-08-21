@@ -16,10 +16,10 @@ test("authenticated header exposes an accessible role-aware user menu", () => {
   assert.match(header, /user\.role === "admin"/);
   assert.match(header, /href="\/admin"/);
   assert.match(header, /Cerrar sesión/);
-  assert.match(header, /onSelect=\{\(\) => void handleLogout\(\)\}/);
+  assert.match(header, /onSelect=\{handleLogout\}/);
 });
 
-test("logout always replaces account history with the public home page", () => {
+test("logout confirmation centralizes the account exit flow", () => {
   const auth = read("components/auth-context.tsx");
   const header = read("components/header.tsx");
   const profile = read("app/profile/page.tsx");
@@ -27,11 +27,16 @@ test("logout always replaces account history with the public home page", () => {
 
   assert.match(auth, /useRouter/);
   assert.match(auth, /useTransition/);
+  assert.match(auth, /ConfirmDialog/);
+  assert.match(auth, /¿Cerrar sesión\?/);
+  assert.match(auth, /Tendrás que iniciar sesión de nuevo para acceder a tu perfil y cursos\./);
+  assert.match(auth, /requestLogout/);
   assert.match(auth, /startLogoutTransition\(\(\) => \{/);
   assert.match(auth, /router\.replace\("\/"\)/);
   assert.doesNotMatch(header, /router\.push\("\/login"\)/);
-  assert.match(profile, /onClick=\{logout\}/);
-  assert.match(admin, /onClick=\{logout\}/);
+  assert.match(header, /requestLogout/);
+  assert.match(profile, /onClick=\{requestLogout\}/);
+  assert.match(admin, /onClick=\{requestLogout\}/);
 });
 
 test("user menu motion stays anchored, symmetric, and reduced-motion safe", () => {
