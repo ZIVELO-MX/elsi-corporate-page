@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 export type User = {
@@ -25,6 +25,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const [, startLogoutTransition] = useTransition();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -82,10 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // The local session must still be cleared if the network is unavailable.
     } finally {
-      setUser(null);
-      router.replace("/");
+      startLogoutTransition(() => {
+        setUser(null);
+        router.replace("/");
+      });
     }
-  }, [router]);
+  }, [router, startLogoutTransition]);
 
   const updateUser = useCallback((updates: Partial<Pick<User, "name" | "phone">>) => {
     setUser((current) => current ? { ...current, ...updates } : current);

@@ -26,6 +26,8 @@ test("logout always replaces account history with the public home page", () => {
   const admin = read("components/admin-shell.tsx");
 
   assert.match(auth, /useRouter/);
+  assert.match(auth, /useTransition/);
+  assert.match(auth, /startLogoutTransition\(\(\) => \{/);
   assert.match(auth, /router\.replace\("\/"\)/);
   assert.doesNotMatch(header, /router\.push\("\/login"\)/);
   assert.match(profile, /onClick=\{logout\}/);
